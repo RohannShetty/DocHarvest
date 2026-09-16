@@ -5,6 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.9] - 2026-09-16
+
+### 🧠 Universal MCP Skill: One Skill for Every MCP-Capable Agent Harness
+
+Documentation release. Confirms and documents that the bundled `docharvest`
+skill is a universal integration: the FastMCP v2 server speaks standard MCP
+over stdio, so a single harness-neutral `SKILL.md` serves every agent harness
+that supports MCP. No tool name, signature, or configuration key changed.
+
+### Changed
+
+- **The bundled skill is harness-neutral**
+  (`src/gitbook_downloader/skills/docharvest/SKILL.md`, mirrored at
+  `.omp/skills/docharvest/SKILL.md`): the MCP-fallback step no longer tells every
+  harness to run `/mcp reload` against `./.omp/mcp.json`. It now states that the
+  skill depends only on standard MCP over stdio — portable across Cursor,
+  Claude Code/Desktop, VS Code, Windsurf, OpenCode, Codex, and Oh My Pi — gives
+  the `docharvest skill install docharvest -o <harness-skills-dir>` command for
+  each documented layout, and defers the reload step to the user's own harness,
+  naming Oh My Pi's command as the example.
+- **README agent-skills section** states the universal MCP skill claim (one
+  `SKILL.md`, any MCP-capable harness), the install directories, the one-level
+  layout rule, and `--force`.
+- **Showcase release feed** (`docs/lib/github.ts` offline fixture) carries the
+  same summary, so the website "What's New" block matches the changelog.
+- **Version bump to 11.0.9** in `pyproject.toml`, `uv.lock`,
+  `src/gitbook_downloader/__init__.py`, `cli.py`, the frontend and showcase
+  version constants, both `package.json` manifests, and the prebuilt GUI bundle
+  (`cd frontend && npm run build`).
+
 ## [11.0.8] - 2026-09-16
 
 ### 📦 Packaging Hotfix: GUI and TUI Assets Were Missing From the Wheel

@@ -160,7 +160,7 @@ function getFallbackRelease(): ReleaseInfo {
   return {
     tag: `v${VERSION}`,
     name: `DocHarvest v${VERSION}`,
-    publishedAt: '2026-08-30',
+    publishedAt: '2026-09-16',
     body: `## Highlights
 
 - Native FastMCP v2 server: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more).
@@ -168,13 +168,12 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.0.7
+### What's New in v11.0.9
 
-- Bundled agent skill: a docharvest skill ships inside the package and installs into any harness layout (.agents/skills, .claude/skills, .cursor/skills, .gemini/skills, .github/skills, .omp/skills) with the docharvest skill install command.
-- Non-blocking MCP captures: download_docs runs off the event loop, so a crawl no longer stalls every other request — including the client's own startup tools/list.
-- Search hits now point at real pages (each page's source_url plus a section anchor) instead of a domain-root anchor that addressed no page.
-- Concept graph walks the whole nested page tree, so query_doc_graph matches documented topics across subdirectories.
-- host:port domains (local docs servers) now work on Windows, and unchanged re-captures stop minting empty versions.`,
+- Universal MCP skill: the bundled docharvest SKILL.md is harness-neutral — it drives the FastMCP v2 server over standard stdio, so one skill serves every MCP-capable agent harness (Cursor, Claude Code/Desktop, VS Code, Windsurf, OpenCode, Codex, Oh My Pi).
+- Install into any harness layout: docharvest skill install docharvest -o <harness-skills-dir> writes <dir>/docharvest/SKILL.md for .agents/skills, .claude/skills, .cursor/skills, .gemini/skills, .github/skills and .omp/skills.
+- Harness-neutral recovery wording: the skill no longer hardcodes one harness's reload command; it defers to the harness's own MCP reload or reconnect step, with Oh My Pi (/mcp reload after ./.omp/mcp.json) named as the example.
+- Documentation pass: README, changelog and this release feed carry the same universal-integration summary for the MCP skill.`,
     htmlUrl: `https://github.com/RohannShetty/gitbook-downloader/releases/tag/v${VERSION}`,
     assets: [
       {

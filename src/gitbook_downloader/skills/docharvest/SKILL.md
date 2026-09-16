@@ -1,6 +1,6 @@
 ---
 name: docharvest
-description: "Harvest documentation sites into local, searchable, LLM-ready markdown through the DocHarvest (gitbook-downloader) MCP server. Use when the user asks to download, crawl, or refresh a documentation site; to search, read, or quote docs that must come from the local library instead of the web; to diff or changelog doc versions; or to export docs to markdown, RAG JSONL, llms.txt, or PDF. Drives download_docs -> search_docs/read_doc -> export_docs, with the `docharvest` CLI as fallback when the MCP server is not connected."
+description: "Harvest documentation sites into local, searchable, LLM-ready markdown through the DocHarvest (gitbook-downloader) MCP server. Harness-neutral: the server speaks standard MCP over stdio, so any MCP-capable agent harness — Cursor, Claude Code/Desktop, VS Code, Windsurf, OpenCode, Codex, Oh My Pi — can load this skill, with the `docharvest` CLI as the fallback when the server is not connected. Use when the user asks to download, crawl, or refresh a documentation site; to search, read, or quote docs that must come from the local library instead of the web; to diff or changelog doc versions; or to export docs to markdown, RAG JSONL, llms.txt, or PDF."
 metadata:
   argument-hint: "[doc-url | search query]"
 ---
@@ -20,10 +20,19 @@ Local documentation harvester exposed over MCP as the `docharvest` server
    root: `~/.gitbook-downloader/docs/<domain>/`.
 3. Captures write to the local library. Pass `output_mode="library"` unless the
    user explicitly wants a project-local `<domain>-docs/` directory.
-4. If none of the tools above appear in your tool list, the MCP server is not
+4. Harness-neutral by design. This skill depends only on standard MCP over
+   stdio, so it loads in any MCP-capable agent harness (Cursor, Claude
+   Code/Desktop, VS Code, Windsurf, OpenCode, Codex, Oh My Pi). Install a copy
+   into the skills directory your harness reads — `docharvest skill install
+   docharvest -o <harness-skills-dir>` (`.agents/skills`, `.claude/skills`,
+   `.cursor/skills`, `.gemini/skills`, `.github/skills`, `.omp/skills`). The
+   written layout is `<dir>/docharvest/SKILL.md`, one level under a `skills/`
+   root.
+5. If none of the tools above appear in your tool list, the MCP server is not
    connected. Fall back to the CLI (`docharvest capture <url>`,
-   `gitbook-dl search "<query>"`, `gitbook-dl list`) and tell the user to run
-   `/mcp reload` after `./.omp/mcp.json` changes.
+   `gitbook-dl search "<query>"`, `gitbook-dl list`) and tell the user to
+   reload or reconnect the server in their own harness after its MCP config
+   file changes (on Oh My Pi that is `/mcp reload` after `./.omp/mcp.json`).
 
 ## Workflow
 

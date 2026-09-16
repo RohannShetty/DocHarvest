@@ -8,11 +8,11 @@
 
 **Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
 
-[![Version: 11.0.8](https://img.shields.io/badge/version-11.0.8-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 11.0.9](https://img.shields.io/badge/version-11.0.9-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
-[![Tests: 665 Passing](https://img.shields.io/badge/tests-665%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Tests: 765 Passing](https://img.shields.io/badge/tests-765%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)
 [![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/gitbook-downloader/)
 
@@ -237,21 +237,24 @@ docharvest --gui
 
 ---
 
-## 🧠 Agent Skills: Teaching Harnesses to Use DocHarvest
+## 🧠 Agent Skills: Universal MCP Skill for Every Agent Harness
 
-The MCP server gives an agent *tools*; a **skill** tells it *when and how* to
-use them. DocHarvest ships one skill, `docharvest`, describing the
-`download_docs` → `search_docs`/`read_doc` → `export_docs` workflow, the
-library layout, and the CLI fallback for harnesses without MCP.
+The FastMCP server gives an agent *tools*; the bundled **docharvest** skill tells it *when and how* to call them. One skill, one `SKILL.md`, a universal integration: the server speaks standard MCP over stdio and the skill text is harness-neutral, so any MCP-capable agent harness — Cursor, Claude Code/Desktop, VS Code, Windsurf, OpenCode, Codex, Oh My Pi — can load it.
 
-The skill is bundled **inside the installed package**, so it is versioned with
-the code and available to any harness without committing a copy per tool:
+What the skill encodes:
+
+- The `download_docs` → `search_docs`/`read_doc` → `export_docs` workflow, in the order that avoids redundant network crawls.
+- Library layout (`~/.gitbook-downloader/docs/<domain>/`) and the `output_mode="library"` default.
+- Version commands: `list_versions`, `diff_versions`, `get_changelog`.
+- The `docharvest` CLI fallback for harnesses where the MCP server is not connected.
+
+The skill is bundled **inside the installed package**, so it is versioned with the code and needs no per-harness copy in the repository:
 
 ```bash
 # See what is bundled and where the canonical file lives
 docharvest skill list
 
-# Install into the directory a harness actually reads
+# Install into the skills directory your agent harness reads
 docharvest skill install docharvest -o .agents/skills     # default
 docharvest skill install docharvest -o .claude/skills
 docharvest skill install docharvest -o .cursor/skills
@@ -260,14 +263,9 @@ docharvest skill install docharvest -o .github/skills
 docharvest skill install docharvest -o .omp/skills
 ```
 
-Layout written is `<target>/docharvest/SKILL.md` — skills are discovered one
-level under a `skills/` root, so nested paths are not picked up. Existing files
-are left untouched unless you pass `--force`.
+Layout written is `<target>/docharvest/SKILL.md` — harness loaders discover skills one level under a `skills/` root, so nested paths are ignored. Existing files are preserved unless you pass `--force`.
 
-Out of the box: this repository also commits the skill at
-`.omp/skills/docharvest/SKILL.md` together with `.omp/mcp.json`, so opening the
-checkout in OMP registers both the server and the skill with no setup.
-Invoke it explicitly with `/skill:docharvest <doc-url | search query>`.
+Out of the box: this repository also commits the skill at `.omp/skills/docharvest/SKILL.md` next to `.omp/mcp.json`, so opening the checkout in Oh My Pi registers both the server and the skill with no setup. Invoke it explicitly with `/skill:docharvest <doc-url | search query>`.
 
 ---
 
