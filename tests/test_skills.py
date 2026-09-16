@@ -126,3 +126,43 @@ class TestSkillCli:
 
         assert result.returncode == 0, result.stderr
         assert (tmp_path / "docharvest" / "SKILL.md").is_file()
+
+class TestPackagedSkillShipsInGit:
+    """The bare `skills/` .gitignore rule matches at any depth, so it also hid
+    `src/gitbook_downloader/skills/`. The canonical skill was absent from git —
+    and therefore from every wheel built from a clone — while every local test
+    still passed, because the files simply existed on disk. CI caught it; these
+    guards keep it caught.
+    """
+
+    @staticmethod
+    def _shipped_files() -> list[Path]:
+        return [SKILLS_DIR / "__init__.py", skill_file("docharvest")]
+
+    def _skip_without_git(self):
+        if not (REPO_ROOT / ".git").exists():
+            pytest.skip("not a git checkout")
+
+    def test_shipped_files_are_not_gitignored(self):
+        self._skip_without_git()
+        for path in self._shipped_files():
+            rel = path.relative_to(REPO_ROOT).as_posix()
+            ignored = subprocess.run(
+                ["git", "check-ignore", "-q", rel], cwd=REPO_ROOT
+            ).returncode == 0
+            assert not ignored, (
+                f"{rel} is gitignored, so it cannot ship; add a negation in .gitignore"
+            )
+
+    def test_shipped_files_are_tracked(self):
+        self._skip_without_git()
+        for path in self._shipped_files():
+            rel = path.relative_to(REPO_ROOT).as_posix()
+            result = subprocess.run(
+                ["git", "ls-files", "--error-unmatch", rel],
+                cwd=REPO_ROOT, capture_output=True, text=True,
+            )
+            assert result.returncode == 0, (
+                f"{rel} is not tracked by git; `git add` it (check .gitignore first)"
+            )
+
