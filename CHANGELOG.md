@@ -5,6 +5,36 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.8] - 2026-09-16
+
+### 📦 Packaging Hotfix: GUI and TUI Assets Were Missing From the Wheel
+
+Fixes a ship blocker: `docharvest gui` and `docharvest tui` did not work for
+anyone who installed from PyPI. Backwards compatible with 11.0.x.
+
+### Fixed
+
+- **The desktop GUI and terminal UI now ship their assets**
+  (`pyproject.toml`): `tool.setuptools.package-data` declared only `py.typed`
+  and `skills/*/SKILL.md`, so setuptools left every other non-Python file out of
+  **both** the wheel and the sdist. Installed from PyPI, the GUI exited 1 with
+  `GUI web assets not found at …/gui/web/index.html` and the TUI could not load
+  its `CSS_PATH` stylesheet. Affected every release up to and including 11.0.7 —
+  only the standalone PyInstaller executable worked, because `build_exe.py` adds
+  those directories explicitly. Now declared:
+  - `gui/web/*.html` and `gui/web/assets/*` — the prebuilt desktop UI (62 files)
+  - `tui/*.tcss` — the Textual stylesheet
+  - `py.typed` — declared since an earlier release but **absent from the source
+    tree**, so the declaration was inert; the file now exists and ships.
+
+  Wheel contents went from 58 to 122 entries; the sdist from 127 to 193.
+
+- **`tests/test_packaging.py`** guards the gap in both directions: every
+  non-Python file under `src/gitbook_downloader` must be matched by a declared
+  `package-data` pattern, and every declared pattern must match a real file. A
+  new runtime asset that nobody declares now fails the suite instead of shipping
+  broken. Both guards were verified to fail when the declarations are removed.
+
 ## [11.0.7] - 2026-09-16
 
 ### 🧠 Agent Skills, Non-Blocking Captures & Correct Retrieval

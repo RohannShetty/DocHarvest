@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gitbook-downloader"
-version = "11.0.7"
+version = "11.0.8"
 description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}
@@ -68,8 +68,21 @@ Changelog = "https://github.com/RohannShetty/gitbook-downloader/blob/main/CHANGE
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# Non-Python files that must ship for the installed app to work. Declared
+# explicitly per directory because setuptools does not include data files by
+# default, and a missing entry fails only at runtime for pip/uvx users:
+#   - gui/web/**    the prebuilt desktop UI (`docharvest gui`)
+#   - tui/*.tcss    the Textual stylesheet (`docharvest tui`, CSS_PATH)
+#   - skills/**     bundled agent skills (`docharvest skill install`)
+# tests/test_packaging.py asserts every data file in the source tree is covered.
 [tool.setuptools.package-data]
-gitbook_downloader = ["py.typed", "skills/*/SKILL.md"]
+gitbook_downloader = [
+    "py.typed",
+    "skills/*/SKILL.md",
+    "gui/web/*.html",
+    "gui/web/assets/*",
+    "tui/*.tcss",
+]
 
 [dependency-groups]
 dev = [

@@ -1,7 +1,7 @@
 // Centralized version and download URLs for DocHarvest.
 // Single source of truth — components import from here instead of hardcoding.
 
-export const VERSION = '11.0.7';
+export const VERSION = '11.0.8';
 
 const RELEASE_BASE =
   `https://github.com/RohannShetty/gitbook-downloader/releases/download/v${VERSION}`;
