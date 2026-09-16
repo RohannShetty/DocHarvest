@@ -211,6 +211,9 @@ docharvest capture https://omp.sh/docs --render
 # Restrict Crawl to Specific Path Prefix & Limit Depth
 docharvest capture https://docs.example.com/ --scope /api/ --max-pages 50
 
+# Capture a Local Dev Docs Server (host:port domains are fully supported)
+docharvest capture http://localhost:3000/docs --output library
+
 # Full-Text BM25 Search across Harvested Docs
 docharvest search "OAuth 2.0 authentication token"
 
@@ -224,9 +227,47 @@ docharvest diff docs.example.com v1.0.0 v1.0.1
 # Start FastMCP Server over Stdio for AI IDEs
 docharvest --mcp
 
+# List / Install the Bundled Agent Skill
+docharvest skill list
+docharvest skill install docharvest -o .claude/skills
+
 # Launch Desktop GUI Application
 docharvest --gui
 ```
+
+---
+
+## 🧠 Agent Skills: Teaching Harnesses to Use DocHarvest
+
+The MCP server gives an agent *tools*; a **skill** tells it *when and how* to
+use them. DocHarvest ships one skill, `docharvest`, describing the
+`download_docs` → `search_docs`/`read_doc` → `export_docs` workflow, the
+library layout, and the CLI fallback for harnesses without MCP.
+
+The skill is bundled **inside the installed package**, so it is versioned with
+the code and available to any harness without committing a copy per tool:
+
+```bash
+# See what is bundled and where the canonical file lives
+docharvest skill list
+
+# Install into the directory a harness actually reads
+docharvest skill install docharvest -o .agents/skills     # default
+docharvest skill install docharvest -o .claude/skills
+docharvest skill install docharvest -o .cursor/skills
+docharvest skill install docharvest -o .gemini/skills
+docharvest skill install docharvest -o .github/skills
+docharvest skill install docharvest -o .omp/skills
+```
+
+Layout written is `<target>/docharvest/SKILL.md` — skills are discovered one
+level under a `skills/` root, so nested paths are not picked up. Existing files
+are left untouched unless you pass `--force`.
+
+Out of the box: this repository also commits the skill at
+`.omp/skills/docharvest/SKILL.md` together with `.omp/mcp.json`, so opening the
+checkout in OMP registers both the server and the skill with no setup.
+Invoke it explicitly with `/skill:docharvest <doc-url | search query>`.
 
 ---
 
@@ -314,7 +355,7 @@ Or in `~/.claude.json`:
 ```
 
 <details>
-<summary><strong>11 more client configs — Windsurf · VS Code · JetBrains · Zed · Cline · Continue · Kiro · OpenCode · Pi/Oh My Pi · Gemini CLI · Codex CLI</strong></summary>
+<summary><strong>11 more client configs — Windsurf · VS Code · JetBrains · Zed · Cline · Continue · Kiro · OpenCode · Oh My Pi · Gemini CLI · Codex CLI</strong></summary>
 
 #### 4. Windsurf (`~/.codeium/windsurf/mcp_config.json`)
 ```json
@@ -416,17 +457,29 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
 }
 ```
 
-#### 12. Pi (`pi.dev`) / Oh My Pi (`omp.sh`) (`~/.omp/config.json`)
+#### 12. Oh My Pi (`omp.sh`) (`.omp/mcp.json` project · `~/.omp/agent/mcp.json` user)
 ```json
 {
-  "mcp_servers": {
+  "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
+  "mcpServers": {
     "docharvest": {
-      "command": "docharvest",
-      "args": ["mcp"]
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"],
+      "timeout": 0
     }
   }
 }
 ```
+
+`timeout: 0` disables the client-side request timeout. DocHarvest crawls a
+documented site at roughly 0.075 s/page, so a full-site capture can exceed a
+client's default timeout (OMP defaults to 30 s) and be aborted mid-crawl; set a
+positive millisecond value instead if you prefer a hard ceiling, and use
+`max_pages` to bound very large sites.
+
+> **Not for Pi (`pi.dev`)**: Pi keeps its MCP configuration elsewhere, which is
+> outside OMP's discovery list — use Pi's own configuration file.
 
 #### 13. Antigravity / Gemini CLI (`mcp/docharvest.json`)
 ```json

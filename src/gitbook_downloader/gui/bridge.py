@@ -27,7 +27,7 @@ from ..api import (
 )
 from ..providers import detect_provider
 from ..search.index import SearchIndex
-from ..storage import StorageManager
+from ..storage import StorageManager, domain_to_path_name
 
 
 
@@ -667,7 +667,7 @@ class ApiBridge:
             out_base.mkdir(parents=True, exist_ok=True)
 
             if fmt == "md":
-                dest = out_base / f"{domain}-book.md"
+                dest = out_base / f"{domain_to_path_name(domain)}-book.md"
                 if book_path.exists():
                     shutil.copy2(book_path, dest)
                     return {"success": True, "path": str(dest), "format": "md"}
@@ -677,12 +677,12 @@ class ApiBridge:
                 from gitbook_downloader.utils.export import export_to_pdf
                 if not book_path.exists():
                     return {"success": False, "error": "No markdown content found to convert to PDF"}
-                dest = out_base / f"{domain}-docs.pdf"
+                dest = out_base / f"{domain_to_path_name(domain)}-docs.pdf"
                 actual_path = export_to_pdf(book_path, dest)
                 return {"success": True, "path": str(actual_path), "format": "pdf"}
 
             elif fmt == "jsonl":
-                dest = out_base / f"{domain}-rag.jsonl"
+                dest = out_base / f"{domain_to_path_name(domain)}-rag.jsonl"
                 pages_dir = doc_dir / "pages"
                 records = []
                 if pages_dir.exists():

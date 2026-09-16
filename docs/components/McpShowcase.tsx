@@ -41,6 +41,20 @@ const MCP_CONFIGS = {
   }
 }`
   },
+  omp: {
+    title: "Oh My Pi",
+    filename: ".omp/mcp.json",
+    snippet: `{
+  "mcpServers": {
+    "docharvest": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["gitbook-downloader", "mcp"],
+      "timeout": 0
+    }
+  }
+}`
+  },
   vscode: {
     title: "VS Code (Copilot)",
     filename: ".vscode/mcp.json",

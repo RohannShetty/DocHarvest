@@ -608,3 +608,151 @@ class TestStorageManagerRename:
             res = sm.rename_domain("same.com", "same.com")
             assert res is True
 
+class TestSnapshotIgnoresGeneratedCaptureStamp:
+    """The book header embeds `> Captured: <timestamp>`, which changes on
+    every run even when every harvested page is byte-identical. Comparing raw
+    bytes therefore minted a version per re-capture and left the newest
+    version file holding content that no longer matched docs.md."""
+
+    def test_timestamp_only_change_reuses_existing_version(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            vm = VersionManager(sm)
+            book = (
+                "# Docs\n\n"
+                "> Markdown capture of https://docs.example.com/\n"
+                "> Captured: 2026-01-01T00:00:00Z · Pages: 2\n\n"
+                "## Guide\n\nBody text."
+            )
+            sm.save_doc(domain="stamp.com", content=book, url="u", title="T",
+                        pages=2, provider="gitbook", new_pages=2, size_kb=0.1)
+            first = vm.snapshot("stamp.com")
+            assert first == "v1.0.1"
+
+            # Same pages, new capture timestamp.
+            sm.latest_path("stamp.com").write_text(
+                book.replace("2026-01-01T00:00:00Z", "2026-06-06T12:00:00Z"),
+                encoding="utf-8",
+            )
+            same = vm.snapshot("stamp.com")
+
+            assert same == first, "a new capture stamp alone must not mint a version"
+            assert sorted(p.name for p in sm.versions_dir("stamp.com").iterdir()) == ["v1.0.1.md"]
+
+    def test_real_content_change_still_creates_version(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            vm = VersionManager(sm)
+            book = "> Captured: 2026-01-01T00:00:00Z\n\n## Guide\n\nBody text."
+            sm.save_doc(domain="stamp.com", content=book, url="u", title="T",
+                        pages=1, provider="gitbook", new_pages=1, size_kb=0.1)
+            assert vm.snapshot("stamp.com") == "v1.0.1"
+
+            sm.latest_path("stamp.com").write_text(
+                book + "\n\n## New Section\n\nAdded later.", encoding="utf-8"
+            )
+            bumped = vm.snapshot("stamp.com")
+
+            assert bumped == "v1.0.2", "real content changes must still snapshot"
+
+class TestDomainPathName:
+    """A bare ``host:port`` domain (what a local docs server looks like) could
+    not be stored on Windows: ``mkdir`` raised NotADirectoryError and the lock
+    file silently landed in an NTFS alternate data stream. Hostnames must pass
+    through untouched so existing libraries do not move."""
+
+    def test_plain_hostnames_are_unchanged(self):
+        from gitbook_downloader.storage.manager import domain_to_path_name
+
+        for host in ("docs.example.com", "docs.openalgo.in", "readthedocs.io", "localhost"):
+            assert domain_to_path_name(host) == host
+
+    def test_host_with_port_is_sanitized(self):
+        from gitbook_downloader.storage.manager import domain_to_path_name
+
+        assert domain_to_path_name("localhost:3000") == "localhost_3000"
+        assert domain_to_path_name("127.0.0.1:8080") == "127.0.0.1_8080"
+
+    def test_sanitizing_is_idempotent(self):
+        """list_domains re-derives the domain from the directory name and feeds
+        it back through the storage layer, so a second pass must be a no-op."""
+        from gitbook_downloader.storage.manager import domain_to_path_name
+
+        for host in ("docs.example.com", "localhost:3000", "a:b/c", "CON", "weird."):
+            once = domain_to_path_name(host)
+            assert domain_to_path_name(once) == once
+
+    def test_reserved_and_degenerate_names(self):
+        from gitbook_downloader.storage.manager import domain_to_path_name
+
+        assert domain_to_path_name("CON") == "_CON"
+        assert domain_to_path_name("nul") == "_nul"
+        assert domain_to_path_name("com1") == "_com1"
+        assert domain_to_path_name("trailing.") == "trailing"
+        assert domain_to_path_name("") == "_"
+
+    def test_host_port_domain_is_usable_on_this_platform(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            sm = StorageManager(base_dir=tmp)
+            sm.ensure_domain_dir("localhost:3000")
+            sm.save_doc(domain="localhost:3000", content="# Local", url="u", title="T",
+                        pages=1, provider="generic", new_pages=1, size_kb=0.1)
+
+            assert sm.load_doc("localhost:3000") == "# Local"
+            assert sm.list_domains(), "the sanitized domain must still list"
+            # The stored domain key is the real one, not the folder name.
+            assert sm.get_metadata("localhost:3000")["domain"] == "localhost:3000"
+
+    def test_lock_does_not_use_illegal_characters(self):
+        import tempfile
+
+        from gitbook_downloader.storage.manager import DomainLock
+
+        with tempfile.TemporaryDirectory() as tmp:
+            lock = DomainLock(tmp, "localhost:3000")
+            assert ":" not in lock.path.name
+            lock.acquire()
+            try:
+                assert lock.path.is_file()
+            finally:
+                lock.release()
+
+
+class TestCaptureStampIsHeaderScoped:
+    """The timestamp rewrite must touch the generated header only. A captured
+    page can legitimately contain ``> Captured:`` in its body (any doc set
+    describing this tool does), and rewriting body text would corrupt both the
+    snapshot comparison and the stored content."""
+
+    def test_body_line_is_not_rewritten(self):
+        from gitbook_downloader.storage.versioning import _strip_capture_stamp
+
+        body_line = b"> Captured: this is documented example text"
+        doc = (
+            b"# Site\n\n> Source: https://x/\n> Captured: 2026-01-01T00:00:00Z\n\n"
+            b"## Page\n\n" + body_line + b"\n"
+        )
+
+        out = _strip_capture_stamp(doc)
+
+        assert body_line in out, "a body line that looks like the stamp must survive"
+        assert b"> Captured: 2026-01-01T00:00:00Z" not in out
+
+    def test_header_only_change_counts_as_unchanged(self):
+        from gitbook_downloader.storage.versioning import _same_ignoring_capture_stamp
+
+        a = b"# S\n\n> Source: u\n> Captured: 2026-01-01T00:00:00Z\n\n## P\n\nbody"
+        b = a.replace(b"2026-01-01", b"2026-07-07")
+
+        assert _same_ignoring_capture_stamp(a, b)
+
+    def test_body_difference_still_counts_as_changed(self):
+        from gitbook_downloader.storage.versioning import _same_ignoring_capture_stamp
+
+        a = b"# S\n\n> Source: u\n> Captured: 2026-01-01T00:00:00Z\n\n## P\n\nbody"
+        b = a.replace(b"body", b"different body")
+
+        assert not _same_ignoring_capture_stamp(a, b)
+

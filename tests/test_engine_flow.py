@@ -7,11 +7,13 @@ fixes + BFS exclude enforcement (#10), and the Lane-B facade kwargs
 """
 
 import time
+from pathlib import Path
 
 import pytest
 
 import gitbook_downloader.engine as engine
 from gitbook_downloader.providers import GitBookProvider
+from gitbook_downloader.storage import StorageManager
 from gitbook_downloader.utils import create_session
 
 
@@ -30,13 +32,6 @@ def fake_storage(monkeypatch):
         def save_doc(self, **kw):
             self.saved.append(kw)
 
-    class FakeVersioning:
-        def __init__(self, storage):
-            pass
-
-        def snapshot(self, domain):
-            return None
-
     class FakeSearch:
         def __init__(self):
             pass
@@ -46,7 +41,6 @@ def fake_storage(monkeypatch):
 
     store = FakeStorage()
     monkeypatch.setattr(engine, "StorageManager", lambda: store)
-    monkeypatch.setattr(engine, "VersionManager", FakeVersioning)
     monkeypatch.setattr(engine, "SearchIndex", FakeSearch)
     return store
 
@@ -310,3 +304,52 @@ class TestLanguageFilterAndBfs:
         assert "/docs/intro" in combined
         assert "/docs/guide" in combined
         assert "/blog/post-1" not in combined
+
+# ── Snapshot ownership: api.capture snapshots, the engine must not ──
+
+
+class _NullSearch:
+    """Swallow the engine's post-capture indexing so tests stay hermetic."""
+
+    def index_domain(self, *a, **k):
+        pass
+
+
+class TestEngineDoesNotSnapshot:
+    """``api.capture`` records the pre-capture state exactly once. The engine
+    used to snapshot again after saving ``docs.md``, so a single crawl minted
+    two version files — the second identical to the first apart from the
+    generated capture timestamp — and the newest version file never matched the
+    live ``docs.md``."""
+
+    def test_stream_download_creates_no_version_file(
+        self, fixture_server, session, tmp_path, monkeypatch
+    ):
+        from urllib.parse import urlparse
+
+        store = StorageManager(base_dir=tmp_path)
+        monkeypatch.setattr(engine, "StorageManager", lambda: store)
+        monkeypatch.setattr(engine, "SearchIndex", _NullSearch)
+
+        start_url = fixture_server.url("/")
+        domain = urlparse(start_url).netloc
+        # Seed a previous capture so an engine-side snapshot would have
+        # something to copy — this is what the old code keyed on.
+        store.save_doc(
+            domain=domain, content="> Captured: 2026-01-01T00:00:00Z\n\n# Old\n\nOld body.",
+            url=start_url, title="Old", pages=1, provider="gitbook",
+            new_pages=1, size_kb=0.1,
+        )
+        assert store.domain_exists(domain)
+
+        engine.stream_download(
+            start_url, max_pages=None, workers=4, session=session
+        )
+
+        version_files = sorted(
+            p.name for p in store.versions_dir(domain).glob("*.md")
+        )
+        assert version_files == [], (
+            "the engine must not snapshot; api.capture owns snapshotting "
+            f"(found {version_files})"
+        )

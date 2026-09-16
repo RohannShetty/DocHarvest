@@ -44,22 +44,23 @@ MCP (mcp/)    ──┘           │
                              │
                     output_contract.py (page tree + book.md + llms.txt + frontmatter)
                              │
-                    storage/ (library, snapshots) · search/ (FTS5 index)
+                    storage/ (library, snapshots) · search/ (FTS5 index + concept graph)
 ```
 
 | Package | What it does |
 |---|---|
-| `api.py` | The facade: validates options, snapshots, runs the engine, writes output, updates library + search index |
+| `api.py` | The facade: validates options, takes the single snapshot, runs the engine, writes output, updates library + search index |
 | `output_contract.py` | Turns captured pages into the four artifacts (page tree, `book.md`, `llms.txt`, frontmatter) |
 | `engine.py` | Discovery (BFS + sitemaps) and parallel fetching |
 | `providers/` | Per-platform extractors — GitBook, Mintlify, Docusaurus, ReadTheDocs, generic. HTML in, Markdown out |
-| `storage/` | Per-domain library at `~/.gitbook-downloader/`, snapshots, diffs |
-| `search/` | SQLite FTS5 index over the library |
+| `storage/` | Per-domain library at `~/.gitbook-downloader/`, snapshots, diffs. Owns snapshotting — the engine must not snapshot |
+| `search/` | SQLite FTS5 index (per-page `source_url` anchors when a page tree exists) + the concept graph |
 | `tui/` | Textual app with five screens; supports a fake engine for tests |
-| `mcp/` | MCP server wrapping the facade for AI agents |
+| `mcp/` | MCP server wrapping the facade for AI agents (capture runs via `asyncio.to_thread`, so it never blocks the loop) |
 | `utils/` | TOML config/presets, retry helpers, export helpers |
 | `cli.py` | argparse surface (`gitbook-dl …`) |
 | `splitter.py` | Splits large Markdown files into size-bounded chunks |
+| `skills/` | Bundled agent skills + installer (`docharvest skill install`) |
 
 ## Ground rules
 

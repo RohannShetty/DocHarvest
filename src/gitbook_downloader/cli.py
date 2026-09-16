@@ -209,16 +209,18 @@ def cmd_capture(args) -> int:
         try:
             from urllib.parse import urlparse
 
+            from .storage import domain_to_path_name
             from .utils.export import StoragePageSource, export_to_jsonl
 
             storage = _default_storage()
             domain = urlparse(target).netloc.replace("www.", "")
+            path_name = domain_to_path_name(domain)
             base_out = _export_root(result)
             exports_dir = base_out / "exports"
             if exports_dir.exists():
-                rag_dest = exports_dir / f"{domain}_rag.jsonl"
+                rag_dest = exports_dir / f"{path_name}_rag.jsonl"
             else:
-                rag_dest = base_out / f"{domain}_rag.jsonl"
+                rag_dest = base_out / f"{path_name}_rag.jsonl"
             rag_dest.parent.mkdir(parents=True, exist_ok=True)
             export_to_jsonl(domain, StoragePageSource(storage, domain), str(rag_dest))
             if rag_dest.exists():
@@ -232,15 +234,17 @@ def cmd_capture(args) -> int:
         try:
             from urllib.parse import urlparse
 
+            from .storage import domain_to_path_name
             from .utils.export import export_to_pdf
 
             domain = urlparse(target).netloc.replace("www.", "")
+            path_name = domain_to_path_name(domain)
             base_out = _export_root(result)
             exports_dir = base_out / "exports"
             if exports_dir.exists():
-                pdf_dest = exports_dir / f"{domain}_handbook.pdf"
+                pdf_dest = exports_dir / f"{path_name}_handbook.pdf"
             else:
-                pdf_dest = base_out / f"{domain}_handbook.pdf"
+                pdf_dest = base_out / f"{path_name}_handbook.pdf"
             pdf_dest.parent.mkdir(parents=True, exist_ok=True)
             export_to_pdf(result.book_file, pdf_dest)
             if pdf_dest.exists():
@@ -475,6 +479,59 @@ def cmd_config(args) -> int:
     return 0
 
 
+def cmd_skill(args) -> int:
+    """Bundled agent skills: list | install.
+
+    Skills are shipped inside the package, so ``install`` works for any
+    harness directory layout (`--output`) without the repo having to commit
+    a copy per harness.
+    """
+    from .skills import SKILLS_DIR, available_skills, install_skill, skill_file
+
+    action = getattr(args, "skill_command", None) or "list"
+
+    if action == "install":
+        names = available_skills()
+        if not names:
+            print("No bundled skills found; the installation looks incomplete.", file=sys.stderr)
+            return 1
+        name = getattr(args, "name", None) or (names[0] if len(names) == 1 else None)
+        if name is None:
+            print(
+                f"Multiple skills bundled ({', '.join(names)}); name one: "
+                f"gitbook-dl skill install <name>",
+                file=sys.stderr,
+            )
+            return 1
+        target = Path(getattr(args, "output", None) or ".agents/skills")
+        force = bool(getattr(args, "force", False))
+        destination = target.expanduser() / name / "SKILL.md"
+        existed = destination.exists()
+        try:
+            written = install_skill(name, target, force=force)
+        except FileNotFoundError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        if existed and not force:
+            print(f"Already installed (left unchanged): {written}")
+            print("Pass --force to overwrite it.")
+        else:
+            print(f"Installed: {written}")
+        return 0
+
+    # list (default)
+    names = available_skills()
+    if not names:
+        print("No bundled skills found; the installation looks incomplete.", file=sys.stderr)
+        return 1
+    print(f"Bundled skills ({SKILLS_DIR}):")
+    for skill_name in names:
+        print(f"  • {skill_name}  →  {skill_file(skill_name)}")
+    print("\nInstall into a harness directory:")
+    print("  gitbook-dl skill install docharvest -o .claude/skills")
+    return 0
+
+
 def cmd_mcp(args) -> int:
     """Start the MCP server for AI assistant integration."""
     try:
@@ -603,6 +660,20 @@ def build_parser() -> argparse.ArgumentParser:
     # mcp
     mp = sub.add_parser("mcp", help="Start MCP server for AI assistants")
     mp.set_defaults(func=cmd_mcp)
+
+    sk = sub.add_parser("skill", help="List or install bundled agent skills")
+    sk_sub = sk.add_subparsers(dest="skill_command", help="Skill actions")
+    sk_list = sk_sub.add_parser("list", help="List bundled skills (default)")
+    sk_list.set_defaults(func=cmd_skill)
+    sk_inst = sk_sub.add_parser("install", help="Install a bundled skill into a harness directory")
+    sk_inst.add_argument("name", nargs="?", help="Skill name (defaults to the only bundled skill)")
+    sk_inst.add_argument(
+        "-o", "--output", metavar="DIR",
+        help="Harness skills root to install into (default: .agents/skills)",
+    )
+    sk_inst.add_argument("--force", action="store_true", help="Overwrite an existing skill file")
+    sk_inst.set_defaults(func=cmd_skill)
+    sk.set_defaults(func=cmd_skill)
 
     # gui
     gp = sub.add_parser("gui", help="Launch the Desktop GUI application")

@@ -80,22 +80,25 @@ export const AI_AGENTS: AgentHarness[] = [
     highlights: ["Autonomous background doc harvesting", "Instant SQLite FTS5 querying", "Local-first private operation"]
   },
   {
-    id: "pi",
-    name: "Pi Coding Agent & Oh My Pi (omp.sh)",
+    id: "omp",
+    name: "Oh My Pi (omp.sh)",
     category: "Terminal Agent",
-    badge: "Playwright SPA Ready",
-    configPath: "~/.pi/mcp.json",
+    badge: "MCP + Bundled Skill",
+    configPath: ".omp/mcp.json (project) · ~/.omp/agent/mcp.json (user)",
     configSnippet: `{
+  "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
   "mcpServers": {
     "docharvest": {
+      "type": "stdio",
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["gitbook-downloader", "mcp"],
+      "timeout": 0
     }
   }
 }`,
-    cliCommand: "uv run docharvest crawl https://omp.sh/docs --render",
-    description: "First-class integration with Pi agents and Oh My Pi. Crawls dynamic JavaScript SPAs (like omp.sh) using Playwright headless rendering.",
-    highlights: ["Headless SPA rendering (--render)", "Topic-aware session recall", "Zero token overflow on deep doc trees"]
+    cliCommand: "docharvest skill install docharvest -o .omp/skills",
+    description: "Oh My Pi reads .omp/mcp.json and discovers the bundled docharvest skill, so this repository works with no manual setup. timeout: 0 stops the client's default from cutting off a multi-minute full-site crawl.",
+    highlights: ["Ships .omp/mcp.json + skill in-repo", "timeout: 0 for full-site crawls", "Headless SPA rendering (--render)"]
   },
   {
     id: "windsurf",
@@ -679,7 +682,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Which AI coding agents and IDEs support DocHarvest FastMCP?",
-    a: "DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and ships ready-made configs for 14 documented clients: Cursor, Claude Code, Claude Desktop, OpenCode, Pi Coding Agent & Oh My Pi (omp.sh), Windsurf (Codeium), VS Code (Copilot, Cline, Roo Code, Continue), JetBrains, Zed, Kiro, Gemini CLI, and OpenAI Codex CLI."
+    a: "DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and ships ready-made configs for 14 documented clients: Cursor, Claude Code, Claude Desktop, OpenCode, Oh My Pi (omp.sh), Windsurf (Codeium), VS Code (Copilot, Cline, Roo Code, Continue), JetBrains, Zed, Kiro, Gemini CLI, and OpenAI Codex CLI."
   },
   {
     q: "Does it work with client-rendered JavaScript Single-Page Applications (SPAs)?",

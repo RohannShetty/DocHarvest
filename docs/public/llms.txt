@@ -14,7 +14,9 @@ Measured on the canonical full-suite capture: **673 pages in 18.2 seconds at ~83
 
 ## Use With AI Coding Agents
 
-DocHarvest ships a FastMCP v2 server (`docharvest mcp`) exposing 12 tools — including `download_docs`, `search_docs`, `find_docs`, and `read_doc` with AST-safe token bounding — for Cursor, Claude Code/Desktop, Windsurf, VS Code, OpenCode, and other MCP clients. Ready-made configs for 14 clients are in the README.
+DocHarvest ships a FastMCP v2 server (`docharvest mcp`) exposing 12 tools — including `download_docs`, `search_docs`, `find_docs`, and `read_doc` with AST-safe token bounding — for Cursor, Claude Code/Desktop, Windsurf, VS Code, OpenCode, Oh My Pi, and other MCP clients. Ready-made configs for 14 clients are in the README.
+
+A bundled agent skill (`docharvest`) ships inside the package and installs into any harness layout — `.agents/skills`, `.claude/skills`, `.cursor/skills`, `.gemini/skills`, `.github/skills`, `.omp/skills` — with `docharvest skill install docharvest -o <dir>`. The skill teaches an agent the `download_docs` → `search_docs`/`read_doc` → `export_docs` workflow and the CLI fallback when MCP is unavailable.
 
 ## Optional
 

@@ -7,6 +7,7 @@ to discover conceptual relationships with minimal token overhead.
 
 from __future__ import annotations
 
+import posixpath
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -145,14 +146,30 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
     if not pages_dir.exists() or not pages_dir.is_dir():
         return graph
 
-    md_files = sorted(pages_dir.glob("*.md"))
+    # The page tree is nested (one directory per URL segment), so the walk MUST
+    # be recursive: a top-level glob sees only the pages that sit at the site
+    # root (18 of 388 for docs.openalgo.in), which made query_doc_graph report
+    # zero matches for topics that the corpus covers many times over.
+    md_files = sorted(pages_dir.rglob("*.md"))
+
+    # Node ids are directory-relative paths, not bare file stems: stems repeat
+    # across directories (index.md, release.md, shared.md …) and colliding ids
+    # silently merge otherwise unrelated pages into a single node. These maps
+    # also let markdown links resolve to those ids without a second file read.
+    rel_by_path = {f: f.relative_to(pages_dir).with_suffix("").as_posix() for f in md_files}
+    id_by_rel = {rel: f"page::{rel}" for rel in rel_by_path.values()}
+    id_by_stem: Dict[str, str] = {}
+    for rel, page_id in id_by_rel.items():
+        id_by_stem.setdefault(Path(rel).stem, page_id)
+
     for md_file in md_files:
         try:
             content = md_file.read_text(encoding="utf-8", errors="replace")
         except Exception:
             continue
 
-        page_id = f"page::{md_file.stem}"
+        rel = rel_by_path[md_file]
+        page_id = id_by_rel[rel]
         page_title = md_file.stem.replace("_", " ").title()
 
         # Extract title from frontmatter or first heading if present
@@ -164,7 +181,7 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
             id=page_id,
             label=page_title,
             node_type="page",
-            file_path=str(md_file.name),
+            file_path=f"{rel}.md",
             snippet=content[:300].strip(),
         ))
 
@@ -172,12 +189,12 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
         heading_matches = re.finditer(r"^(#{2,3})\s+(.+)$", content, re.MULTILINE)
         for h_match in heading_matches:
             h_text = h_match.group(2).strip()
-            h_id = f"heading::{md_file.stem}::{h_text.lower().replace(' ', '-')}"
+            h_id = f"heading::{rel}::{h_text.lower().replace(' ', '-')}"
             graph.add_node(GraphNode(
                 id=h_id,
                 label=h_text,
                 node_type="heading",
-                file_path=str(md_file.name),
+                file_path=f"{rel}.md",
             ))
             graph.add_edge(GraphEdge(
                 source_id=page_id,
@@ -195,7 +212,7 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
                 id=ep_id,
                 label=ep_label,
                 node_type="endpoint",
-                file_path=str(md_file.name),
+                file_path=f"{rel}.md",
             ))
             graph.add_edge(GraphEdge(
                 source_id=page_id,
@@ -206,9 +223,18 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
         # Extract markdown internal links [text](other.md)
         link_matches = re.finditer(r"\[([^\]]+)\]\(([^)]+\.md)\)", content)
         for link_match in link_matches:
-            link_text, link_target = link_match.group(1), link_match.group(2)
-            target_stem = Path(link_target).stem
-            target_page_id = f"page::{target_stem}"
+            link_target = link_match.group(2)
+            if "://" in link_target:
+                continue
+            # Resolve relative to the linking page's own directory, then fall
+            # back to a stem match for site-root-relative links.
+            joined = posixpath.join(posixpath.dirname(rel), link_target)
+            key = posixpath.normpath(joined)
+            if key.endswith(".md"):
+                key = key[:-3]
+            target_page_id = id_by_rel.get(key) or id_by_stem.get(Path(link_target).stem)
+            if target_page_id is None:
+                continue
             graph.add_edge(GraphEdge(
                 source_id=page_id,
                 target_id=target_page_id,

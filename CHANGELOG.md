@@ -5,6 +5,82 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🧠 Agent Skills, Non-Blocking Captures & Correct Retrieval
+
+Makes DocHarvest a first-class citizen of agent harnesses and fixes the tool
+call and retrieval defects reported against the MCP surface. Backwards
+compatible with 11.0.x: no public function signature, tool name, or configuration
+key was removed.
+
+### Added
+
+- **Bundled agent skill + installer** (`src/gitbook_downloader/skills/`): the
+  `docharvest` skill now ships *inside the package* and is exposed through a new
+  `docharvest skill list` / `docharvest skill install <name> -o <harness-skills-dir>`
+  command, so any harness directory layout can be served from one canonical,
+  versioned copy. The skill is also committed at `.omp/skills/docharvest/SKILL.md`
+  next to `.omp/mcp.json`, making the OMP setup zero-config.
+
+### Fixed
+
+- **`download_docs` no longer blocks the MCP server** (`src/gitbook_downloader/mcp/server.py`):
+  the synchronous capture facade is now dispatched with `asyncio.to_thread`, so a
+  crawl no longer stalls every other request — including the client's own startup
+  `tools/list`.
+- **Search hits point at real pages** (`src/gitbook_downloader/search/index.py`):
+  when a granular page tree exists it is indexed per page using each page's
+  `source_url` frontmatter, instead of anchoring every section to the domain root.
+  Hits such as `https://docs.example.com/#installation` — which addressed no page
+  and made equal headings from different pages silently replace each other on the
+  `(url, section_heading)` constraint — become
+  `https://docs.example.com/guides/install#installation`. Libraries without a page
+  tree keep the previous book-anchored behaviour.
+- **Concept graph covers the whole corpus** (`src/gitbook_downloader/search/graph.py`):
+  the page walk is recursive (18 of 388 files were being read on a real corpus, so
+  `query_doc_graph` reported no matches for documented topics) and node ids are
+  directory-relative, so pages sharing a file stem no longer merge into one node.
+- **Re-captures no longer mint empty versions** (`src/gitbook_downloader/storage/versioning.py`):
+  snapshot comparison ignores the generated `> Captured: …` header line, so a
+  byte-identical re-crawl of an unchanged site reuses the existing version id
+  instead of adding a new version file whose content differed only by a timestamp.
+- **Single snapshot per capture** (`src/gitbook_downloader/engine.py`): the engine
+  no longer snapshots again after saving. Two snapshot sites per capture meant one
+  crawl minted two version files — the second holding content identical to the
+  first apart from the generated capture timestamp — while the `version_id`
+  reported by `download_docs` still named the pre-capture state, so the newest
+  version file and the live `docs.md` never agreed.
+
+  > Known remaining overlap (not addressed here, and unchanged by this release):
+  > `engine.stream_download` still persists via its own `save_doc` and then
+  > `api.capture` publishes and saves again, so a single library-mode capture
+  > records **two** `update_history` rows. Both writes are intentional today
+  > (the engine is a self-contained downloader and the facade re-saves the
+  > output-contract book), so deduplicating them is a storage-ownership change
+  > rather than a patch.
+- **`read_doc(topic=…)` prefers a named section** (`src/gitbook_downloader/mcp/server.py`):
+  selection is ranked heading-exact → heading-contains → body-mention, with the
+  most focused heading first inside that tier, so asking for `OAuth` returns the
+  `## OAuth Model` section rather than an earlier changelog bullet that mentions it.
+- **Search re-index failures reach the caller** (`src/gitbook_downloader/mcp/server.py`):
+  an indexing failure is appended to the `download_docs` `warnings` list instead of
+  being logged only, so stale search results are visible rather than silent.
+- **`serverInfo.version` reports the release** (`src/gitbook_downloader/mcp/server.py`):
+  the server advertises `__version__`, applied only when the resolved MCP class
+  accepts the parameter so both `mcp` 1.x and 2.x keep working.
+- **Documented Oh My Pi configuration corrected** (`README.md`): the client block
+  advertised `~/.omp/config.json` with the key `mcp_servers`; OMP reads
+  `.omp/mcp.json` (project) or `~/.omp/agent/mcp.json` (user) with the key
+  `mcpServers`, and the block now includes the `timeout: 0` needed for full-site crawls.
+
+### Changed
+
+- **`.gitignore`** now re-includes the shipped skill directory under `.omp/skills/`.
+  A bare `skills/` rule (and the `.agents/` directory rule) previously hid every
+  skill file from `git`, so a clone contained no skill at all. The negation is
+  scoped to the one shipped skill so unrelated local skills stay private.
+
 ## [11.0.6] - 2026-09-05
 
 ### 🔍 Search Robustness, Topic Ranking & Export Correctness Patch

@@ -580,3 +580,106 @@ class TestSearchSpecialTokens:
             results = si.search("docu*")
             assert results, "prefix wildcard must still match the stemmed token"
             assert all(r["domain"] == "docs.example.com" for r in results)
+
+class TestPageTreeIndexing:
+    """Hits must point at the page that holds the text.
+
+    Anchoring every section to the domain root produced URLs such as
+    ``https://docs.example.com/#installation``, which address no page at all,
+    and made equal headings from different pages collide on the
+    ``(url, section_heading)`` uniqueness constraint — silently replacing
+    rows. The page tree carries a real ``source_url`` per page, so it is the
+    preferred index source whenever it exists.
+    """
+
+    @staticmethod
+    def _write_page(pages_dir: Path, relpath: str, source_url: str, title: str, body: str) -> None:
+        page = pages_dir / relpath
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(
+            f'---\nsource_url: "{source_url}"\ntitle: "{title}"\n---\n\n{body}',
+            encoding="utf-8",
+        )
+
+    def test_hit_url_is_the_page_source_url(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            pages = Path(tmp) / "pages"
+            self._write_page(
+                pages,
+                "guides/install.md",
+                "https://docs.example.com/guides/install",
+                "Install",
+                "## Installation\n\nRun the installer for production use.",
+            )
+            si.index_domain("docs.example.com", "", "https://docs.example.com/", pages_dir=pages)
+
+            hits = si.search("installer", domain="docs.example.com")
+
+            assert hits, "the page tree must be searchable"
+            assert hits[0]["url"] == "https://docs.example.com/guides/install#installation"
+            assert hits[0]["section_heading"] == "Installation"
+
+    def test_equal_headings_on_different_pages_do_not_collide(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            pages = Path(tmp) / "pages"
+            self._write_page(
+                pages, "guides/alpha.md", "https://docs.example.com/guides/alpha",
+                "Alpha", "## Related\n\nAlpha specific related links.",
+            )
+            self._write_page(
+                pages, "guides/beta.md", "https://docs.example.com/guides/beta",
+                "Beta", "## Related\n\nBeta specific related links.",
+            )
+            si.index_domain("docs.example.com", "", "https://docs.example.com/", pages_dir=pages)
+
+            conn = sqlite3.connect(str(Path(tmp) / "search.db"))
+            try:
+                urls = sorted(
+                    row[0]
+                    for row in conn.execute(
+                        "SELECT url FROM pages_meta WHERE domain = ?", ("docs.example.com",)
+                    ).fetchall()
+                )
+            finally:
+                conn.close()
+
+            assert urls == [
+                "https://docs.example.com/guides/alpha#related",
+                "https://docs.example.com/guides/beta#related",
+            ], "both pages must survive; a shared heading previously replaced one"
+
+    def test_page_without_source_url_gets_a_page_unique_url(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            pages = Path(tmp) / "pages"
+            (pages / "notes").mkdir(parents=True)
+            (pages / "notes" / "faq.md").write_text(
+                "## Troubleshooting\n\nRestart the daemon.", encoding="utf-8"
+            )
+            si.index_domain("docs.example.com", "", "https://docs.example.com/", pages_dir=pages)
+
+            hits = si.search("daemon", domain="docs.example.com")
+
+            assert hits
+            assert hits[0]["url"] == "https://docs.example.com/notes/faq#troubleshooting"
+
+    def test_empty_page_tree_falls_back_to_the_book(self):
+        """Libraries captured before granular page storage hold only docs.md,
+        so the book path must stay intact when pages/ is absent or empty."""
+        with tempfile.TemporaryDirectory() as tmp:
+            si = SearchIndex(base_dir=Path(tmp))
+            empty_pages = Path(tmp) / "pages"
+            empty_pages.mkdir()
+            si.index_domain(
+                "legacy.example.com",
+                "# Intro\n\nLegacy content about widgets.",
+                "https://legacy.example.com",
+                pages_dir=empty_pages,
+            )
+
+            hits = si.search("widgets", domain="legacy.example.com")
+
+            assert hits
+            assert hits[0]["url"] == "https://legacy.example.com#intro"

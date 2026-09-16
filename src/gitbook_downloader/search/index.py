@@ -68,6 +68,29 @@ def _strip_unprintable(text: str) -> str:
     return "".join(ch for ch in text if ch.isprintable())
 
 
+# Page files start with a YAML-ish frontmatter block written by the output
+# contract; ``source_url`` in that block is the page's real location on the
+# documented site and is what search hits should point at.
+_FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
+
+
+def _frontmatter_value(frontmatter: str, key: str) -> str:
+    """Return a frontmatter scalar, or ``""`` when absent.
+
+    Values are written double-quoted by the output contract, so surrounding
+    quotes are stripped to leave a usable URL/title.
+    """
+    match = re.search(rf"^{re.escape(key)}:\s*(.*)$", frontmatter, re.MULTILINE)
+    if not match:
+        return ""
+    return match.group(1).strip().strip('"').strip("'")
+
+
+def _section_slug(heading: str) -> str:
+    """Slug for a heading, matching the historical book-anchor scheme."""
+    return heading.lower().replace(" ", "-") if heading else "home"
+
+
 def _get_db_path(base_dir: Optional[Path] = None) -> Path:
     """Return path to the SQLite search database."""
     base = Path(base_dir).expanduser().resolve() if base_dir else Path.home() / ".gitbook-downloader"
@@ -160,42 +183,53 @@ class SearchIndex:
     # Indexing
     # ------------------------------------------------------------------
 
-    def index_domain(self, domain: str, docs_content: str, domain_url: str = ""):
-        """Index all sections of a domain's documentation.
+    def index_domain(
+        self,
+        domain: str,
+        docs_content: str,
+        domain_url: str = "",
+        pages_dir: Optional[Path] = None,
+    ):
+        """Index a domain's documentation into the FTS5 index.
 
-        Reads the full *docs_content* markdown, splits it into logical
-        sections by heading, and inserts each section into the FTS5 index.
+        Two sources, in preference order:
+
+        * **Page tree** — when *pages_dir* holds harvested page files, each
+          page is indexed against its own ``source_url`` frontmatter plus a
+          heading anchor. This is what makes a hit URL usable: anchoring every
+          section to the domain root produced URLs such as
+          ``https://docs.example.com/#installation`` that address no page at
+          all, and made equal headings from different pages collide on the
+          ``(url, section_heading)`` uniqueness constraint.
+        * **Combined book** — otherwise *docs_content* is split into sections
+          anchored to *domain_url*. Kept for callers that hold only the book,
+          and for libraries captured before granular page storage.
 
         Args:
             domain: Domain name (directory key used by StorageManager).
             docs_content: Full markdown content of docs.md.
             domain_url: Source URL for the domain (used for section anchors).
+            pages_dir: Optional directory holding the harvested page tree.
+                When it contains at least one page file it is used instead of
+                *docs_content*.
         """
+        rows = self._page_tree_rows(domain, pages_dir, domain_url) if pages_dir else []
+        if not rows:
+            rows = self._book_rows(domain, docs_content, domain_url)
+
         conn = _get_connection(self.base_dir)
         try:
-            sections = self._parse_sections(docs_content)
-
             # Clear existing entries for this domain so a re-index is clean.
             conn.execute("DELETE FROM pages_meta WHERE domain = ?", (domain,))
             conn.execute("DELETE FROM domains WHERE name = ?", (domain,))
 
-            for heading, content in sections:
-                # Normalize first so headings that differ only by invisible
-                # characters collapse onto one URL / section_heading.
-                heading = _strip_unprintable(heading)
-                # Derive a stable URL for each section.
-                if domain_url:
-                    slug = heading.lower().replace(" ", "-") if heading else "home"
-                    section_url = f"{domain_url}#{slug}"
-                else:
-                    section_url = f"{domain}/{heading or 'home'}"
-
+            for section_url, title, heading, content in rows:
                 try:
                     conn.execute(
                         """INSERT OR REPLACE INTO pages_meta
                            (url, title, content, domain, section_heading)
                            VALUES (?, ?, ?, ?, ?)""",
-                        (section_url, heading or domain, content[:100000], domain, heading or ""),
+                        (section_url, title, content, domain, heading),
                     )
                 except Exception as exc:
                     # One bad section must not abort the whole indexing pass,
@@ -228,7 +262,7 @@ class SearchIndex:
             conn.close()
 
     def index_domain_from_storage(self, domain: str, storage_manager, domain_url: str = ""):
-        """Convenience: load docs.md from a StorageManager and index it.
+        """Convenience: index a stored domain, preferring its page tree.
 
         Args:
             domain: Domain name.
@@ -236,9 +270,96 @@ class SearchIndex:
             domain_url: Source URL for the domain.
         """
         docs_content = storage_manager.load_doc(domain)
-        if not docs_content:
+        pages_dir = None
+        try:
+            pages_dir = storage_manager.pages_dir(domain)
+        except Exception:  # noqa: BLE001 — a storage without a page tree is fine
+            pages_dir = None
+        if not docs_content and not (pages_dir and pages_dir.is_dir()):
             raise FileNotFoundError(f"No docs.md found for domain '{domain}'")
-        self.index_domain(domain, docs_content, domain_url)
+        self.index_domain(
+            domain,
+            docs_content or "",
+            domain_url,
+            pages_dir=pages_dir,
+        )
+
+    # ------------------------------------------------------------------
+    # Index rows
+    # ------------------------------------------------------------------
+
+    def _book_rows(self, domain: str, docs_content: str, domain_url: str) -> list:
+        """Build ``(url, title, section_heading, content)`` rows from the book.
+
+        Sections are anchored to the domain root, which is the historical
+        behaviour and the only option when no page tree exists.
+        """
+        rows = []
+        for heading, content in self._parse_sections(docs_content):
+            # Normalize first so headings that differ only by invisible
+            # characters collapse onto one URL / section_heading.
+            heading = _strip_unprintable(heading)
+            if domain_url:
+                section_url = f"{domain_url}#{_section_slug(heading)}"
+            else:
+                section_url = f"{domain}/{heading or 'home'}"
+            rows.append(
+                (
+                    section_url,
+                    heading or domain,
+                    heading or "",
+                    content[:100000],
+                )
+            )
+        return rows
+
+    def _page_tree_rows(self, domain: str, pages_dir, domain_url: str) -> list:
+        """Build index rows from a harvested page tree.
+
+        Each page contributes its own ``source_url`` (falling back to its path
+        within the tree, then to the domain root) so every row addresses the
+        page that actually contains the text. Returns an empty list when the
+        tree holds no page files, letting the caller fall back to the book.
+        """
+        pages_path = Path(pages_dir)
+        if not pages_path.is_dir():
+            return []
+
+        rows = []
+        for page_file in sorted(pages_path.rglob("*.md")):
+            if not page_file.is_file():
+                continue
+            try:
+                raw = page_file.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                logger.warning("Failed to read page %s of domain %s", page_file, domain)
+                continue
+
+            fm_match = _FRONTMATTER_RE.match(raw)
+            frontmatter = fm_match.group(1) if fm_match else ""
+            body = raw[fm_match.end():] if fm_match else raw
+
+            page_url = _frontmatter_value(frontmatter, "source_url")
+            page_title = _frontmatter_value(frontmatter, "title")
+            if not page_url:
+                # No provenance recorded: a page-unique URL still beats the
+                # domain root, which would collapse every page onto one anchor.
+                rel = page_file.relative_to(pages_path).with_suffix("").as_posix()
+                page_url = (
+                    f"{domain_url.rstrip('/')}/{rel}" if domain_url else f"{domain}/{rel}"
+                )
+
+            for heading, content in self._parse_sections(body):
+                heading = _strip_unprintable(heading)
+                rows.append(
+                    (
+                        f"{page_url}#{_section_slug(heading)}",
+                        heading or page_title or page_url,
+                        heading or "",
+                        content[:100000],
+                    )
+                )
+        return rows
 
     # ------------------------------------------------------------------
     # Section parsing

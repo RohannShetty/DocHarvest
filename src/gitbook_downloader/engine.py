@@ -21,7 +21,7 @@ from gitbook_downloader.providers.base import (
     normalize_url,
     same_domain,
 )
-from gitbook_downloader.storage import StorageManager, VersionManager
+from gitbook_downloader.storage import StorageManager
 from gitbook_downloader.utils import create_session
 from gitbook_downloader.utils.discovery import discover_from_llms_txt, discover_from_sitemap
 from gitbook_downloader.search import SearchIndex
@@ -587,22 +587,11 @@ def stream_download(
         return ""
 
     # ── Save to storage ──────────────────────────────────────────
+    # Snapshotting is owned solely by api.capture(), which records the
+    # pre-capture state exactly once before the crawl starts. The engine used
+    # to snapshot here as well, which wrote metadata.json twice per capture
+    # and raced the facade's version id.
     storage = StorageManager()
-    versioning = None
-
-    # Snapshot previous version if it exists
-    if storage.domain_exists(domain):
-        try:
-            versioning = VersionManager(storage)
-            version = versioning.snapshot(domain)
-            if progress_callback:
-                progress_callback({
-                    "phase": "snapshot",
-                    "domain": domain,
-                    "version": version,
-                })
-        except Exception as e:
-            logger.warning("Snapshot failed: %s", e)
 
     storage.save_doc(
         domain=domain,
@@ -618,7 +607,13 @@ def stream_download(
     # ── Index for search ─────────────────────────────────────────
     try:
         search = SearchIndex()
-        search.index_domain(domain, combined, domain_url=url)
+        # Index the granular page tree when it exists so hit URLs point at the
+        # page that holds the text instead of a domain-root anchor.
+        try:
+            pages_dir = storage.pages_dir(domain)
+        except Exception:  # noqa: BLE001 — a storage without a page tree is fine
+            pages_dir = None
+        search.index_domain(domain, combined, domain_url=url, pages_dir=pages_dir)
     except Exception as e:
         logger.warning("Search indexing failed: %s", e)
 

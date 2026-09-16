@@ -36,7 +36,7 @@ from typing import Callable, Literal
 from urllib.parse import urlparse
 
 from .output_contract import CapturedPage, PublishOutcome, utc_now_iso, publish
-from .storage.manager import LockHeldError, StorageManager, parse_semver
+from .storage.manager import LockHeldError, StorageManager, domain_to_path_name, parse_semver
 from .storage.versioning import VersionManager
 
 __all__ = [
@@ -374,6 +374,10 @@ def capture(
 
     parsed = urlparse(url)
     domain = parsed.netloc.removeprefix("www.") or "unknown"
+    # Domain as it may safely appear in a file or directory name: identical for
+    # ordinary hostnames, rewritten only for names Windows cannot store
+    # (e.g. a bare "host:port" dev server).
+    path_name = domain_to_path_name(domain)
 
     warnings: list[str] = []
     storage = _default_storage()
@@ -562,12 +566,12 @@ def capture(
                         f"Current working directory ({cwd}) is a system directory; local dump skipped, saved to Library."
                     )
                 else:
-                    local_dir = Path.home() / "Downloads" / f"{domain}-docs"
+                    local_dir = Path.home() / "Downloads" / f"{path_name}-docs"
                     warnings.append(
                         f"Current working directory ({cwd}) is a system directory; local dump redirected to {local_dir}."
                     )
             elif not is_system_dir:
-                local_dir = cwd / f"{domain}-docs"
+                local_dir = cwd / f"{path_name}-docs"
 
         library_dir = storage._domain_dir(domain)
 
@@ -603,8 +607,14 @@ def capture(
             try:
                 from .search import SearchIndex
 
+                # A missing page tree must not cost the whole index pass: fall
+                # back to the book content rather than skipping indexing.
+                try:
+                    pages_dir = storage.pages_dir(domain)
+                except Exception:  # noqa: BLE001 — book-only libraries are valid
+                    pages_dir = None
                 SearchIndex(base_dir=storage.base).index_domain(
-                    domain, book_text, url
+                    domain, book_text, url, pages_dir=pages_dir
                 )
             except Exception as exc:  # noqa: BLE001 — indexing is best-effort
                 warnings.append(f"Search indexing failed: {exc}")

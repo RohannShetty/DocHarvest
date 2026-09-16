@@ -2,6 +2,14 @@
 
 This document serves as the canonical handoff and knowledge-transfer record for **GitBook Downloader v9.0.1**. It outlines all architectural improvements, engine hardening mechanisms, UI overhaul decisions, known edge-cases, and instructions for continuing development.
 
+> **Status note (2026-09-16).** This is a historical v9.0.1 record, kept for its architecture rationale — the paths and numbers in it describe that release, not the current tree. Verified current state:
+>
+> * **Latest released version:** `v11.0.6` (`pyproject.toml`, `src/gitbook_downloader/__init__.py`). Unreleased work is listed under `[Unreleased]` in [`CHANGELOG.md`](../CHANGELOG.md) — that file, not this one, is the source of truth for what shipped.
+> * **Test suite:** **740 passing**, no skipped tests — `uv run pytest`.
+> * **Standalone executable:** `dist/docharvest.exe` (~79 MB), produced by `python build_exe.py`. The release workflow attaches it as `docharvest-windows-latest.exe`.
+> * **GUI assets:** built from `frontend/` into `src/gitbook_downloader/gui/web/` (the `frontend/src/views/*.tsx` files named in §3 no longer exist; the shipped GUI is the `gui/web` bundle driven by `gui/bridge.py`).
+> * **New since this handoff:** bundled agent skill + `docharvest skill install`, non-blocking MCP capture, per-page search anchors, recursive concept graph, single snapshot per capture, and Windows-safe `host:port` domains.
+
 ---
 
 ## 1. Executive Summary & Release Metadata
@@ -81,7 +89,7 @@ This document serves as the canonical handoff and knowledge-transfer record for 
 ```powershell
 pytest
 ```
-*Expected output: 484 passed, 2 skipped (MCP optional tests)*
+*Expected output: 740 passed (MCP ships as a base dependency, so nothing is skipped for it)*
 
 ### Building the Frontend Assets
 ```powershell
@@ -94,11 +102,11 @@ npm run build
 ```powershell
 python build_exe.py
 ```
-*Outputs `dist/gitbook-dl.exe` (32.9 MB)*
+*Outputs `dist/docharvest.exe` (~79 MB)*
 
 ### Launching the Desktop GUI
 ```powershell
-.\dist\gitbook-dl.exe --gui
+.\dist\docharvest.exe --gui
 # Or in development:
 python -m gitbook_downloader.cli --gui
 ```

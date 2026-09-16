@@ -24,11 +24,15 @@ tool parameters onto ``CaptureOptions`` and reports ``CaptureResult`` fields.
 
 from __future__ import annotations
 
+import asyncio
+import inspect
 import logging
 import re
 from pathlib import Path
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
+
+from gitbook_downloader import __version__
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -68,18 +72,28 @@ logger = logging.getLogger("gitbook_downloader.mcp")
 
 # ── MCP server instance ─────────────────────────────────────────────
 
-mcp = FastMCP(
-    "gitbook-downloader",
-    instructions=(
-        "Download documentation sites (GitBook, Docusaurus, ReadTheDocs, "
-        "Mintlify, or generic), search across downloaded docs, manage "
-        "versions, and export in multiple formats."
-    ),
+_INSTRUCTIONS = (
+    "Download documentation sites (GitBook, Docusaurus, ReadTheDocs, "
+    "Mintlify, or generic), search across downloaded docs, manage "
+    "versions, and export in multiple formats."
 )
+
+# ``version`` is a keyword parameter on the mcp 2.x MCPServer and the second
+# positional parameter on the FastMCP 1.x fallback. Sending it only when the
+# resolved class accepts it keeps both generations working and stops the
+# server advertising an empty ``serverInfo.version``.
+_FASTMCP_PARAMS = (
+    inspect.signature(FastMCP.__init__).parameters if FastMCP is not None else {}
+)
+_MCP_KWARGS: dict = {"instructions": _INSTRUCTIONS}
+if "version" in _FASTMCP_PARAMS:
+    _MCP_KWARGS["version"] = __version__
+
+mcp = FastMCP("gitbook-downloader", **_MCP_KWARGS)
 
 # ── Shared singletons ───────────────────────────────────────────────
 
-from gitbook_downloader.storage import StorageManager, VersionManager  # noqa: E402
+from gitbook_downloader.storage import StorageManager, VersionManager, domain_to_path_name  # noqa: E402
 
 _storage = StorageManager()
 _versioning = VersionManager(_storage)
@@ -137,15 +151,21 @@ def _normalize_topic_text(text: str) -> str:
 
 
 def _extract_topic_bounded(content: str, topic: Optional[str], max_tokens: int = 4000) -> str:
-    """Extract a topic's context from *content*, exact-heading match first.
+    """Extract a topic's context from *content*, best heading match first.
 
-    Wraps :func:`gitbook_downloader.splitter.extract_topic_context` with one
-    ranking rule: when *topic* is given, sections whose normalized heading
-    equals the normalized topic are selected before any section that merely
-    contains the phrase in its heading or body (containment remains the
-    fallback, in the same relative document order as before). Without this,
-    a Table-of-Contents section whose body lists the topic crowds out the
-    actual release-notes section it names.
+    Wraps :func:`gitbook_downloader.splitter.extract_topic_context` with a
+    three-tier ranking. Sections are selected in this order:
+
+    1. normalized heading **equals** the normalized topic,
+    2. normalized heading **contains** the normalized topic,
+    3. section **body** merely contains the phrase.
+
+    Tiers 1–2 are what keep a specific section ahead of an incidental
+    mention: asking for ``OAuth`` used to return a changelog bullet ("* OAuth
+    broker redirect improvements") that appears earlier in the book than the
+    ``## OAuth Model`` section itself, because body-containment ranked by
+    document order alone. Without the ranking, a section whose body lists the
+    topic crowds out the section that actually documents it.
 
     The section split, token budgeting, and no-match fallback (return the
     whole bounded document) are identical to the splitter's behaviour.
@@ -176,28 +196,44 @@ def _extract_topic_bounded(content: str, topic: Optional[str], max_tokens: int =
 
     topic_norm = _normalize_topic_text(topic)
     # Containment keeps the splitter's raw-substring semantics; only the
-    # exact-heading comparison is normalized.
+    # heading comparisons are normalized.
     topic_lower = topic.strip().lower()
 
     exact: list[str] = []
+    heading: list[str] = []
     contains: list[str] = []
     for sec in sections:
         first_line = sec.split("\n", 1)[0]
-        if _normalize_topic_text(first_line) == topic_norm:
+        heading_norm = _normalize_topic_text(first_line)
+        if heading_norm == topic_norm:
             exact.append(sec)
+        elif topic_norm and topic_norm in heading_norm:
+            heading.append(sec)
         elif topic_lower in sec.lower():
             contains.append(sec)
 
-    if not exact and not contains:
+    if not exact and not heading and not contains:
         # No match at all: preserve the splitter's fallback of returning the
         # whole (bounded) document.
         return extract_topic_context(content, topic=None, max_tokens=max_tokens)
 
-    # Exact-heading matches rank first; containment matches keep their
-    # document order after them. Sections start with '#' and contain no
-    # interior '\n#' (the split consumed those), so re-joining with '\n'
-    # restores the exact boundaries the splitter re-splits on.
-    ranked = exact + contains
+    # Inside the heading tier, a heading that names the topic as a whole word
+    # and little else ("## OAuth Model") is a better answer than a long
+    # sentence that happens to embed it ("# update.sh runs … for the OAuth +
+    # 2FA columns"). Sort is stable, so equally-ranked sections keep document
+    # order and the previous behaviour for short quotes/titles.
+    def _focus(sec: str) -> tuple[int, int]:
+        first_line = sec.split("\n", 1)[0]
+        heading_norm = _normalize_topic_text(first_line)
+        whole_word = re.search(rf"(?<![0-9a-z]){re.escape(topic_norm)}(?![0-9a-z])", heading_norm)
+        return (0 if whole_word else 1, len(heading_norm))
+
+    heading.sort(key=_focus)
+
+    # Ranked by tier; sections start with '#' and contain no interior '\n#'
+    # (the split consumed those), so re-joining with '\n' restores the exact
+    # boundaries the splitter re-splits on.
+    ranked = exact + heading + contains
     return extract_topic_context("\n".join(ranked), topic=None, max_tokens=max_tokens)
 
 
@@ -246,16 +282,24 @@ async def download_docs(
             "output_mode": output_mode,
         }
 
-        result = _run_capture(url, options_kwargs)
+        # The capture facade is synchronous (requests + ThreadPoolExecutor).
+        # Running it inline would block this server's event loop for the whole
+        # crawl, stalling every other MCP request — including the client's own
+        # startup tools/list — until the download finished.
+        result = await asyncio.to_thread(_run_capture, url, options_kwargs)
 
         domain = _domain_from_url(url)
+        capture_warnings = list(result.warnings)
 
-        # Best-effort re-index from storage for full-text search.
+        # Best-effort re-index from storage for full-text search. A silent
+        # failure here leaves search returning stale hits, so the reason is
+        # surfaced alongside the capture warnings.
         if _search is not None:
             try:
                 _search.index_domain_from_storage(domain, _storage, domain_url=url)
             except Exception as exc:
                 logger.warning("Search indexing failed for %s: %s", domain, exc)
+                capture_warnings.append(f"Search indexing failed: {exc}")
 
         return {
             "url": result.source_url,
@@ -264,7 +308,7 @@ async def download_docs(
             "site_versions_found": list(result.site_versions_found),
             "pages_captured": result.pages_captured,
             "skipped": result.skipped,
-            "warnings": list(result.warnings),
+            "warnings": capture_warnings,
             "output_mode": output_mode,
             "library_path": _path_or_none(result.library_path),
             "local_path": _path_or_none(result.local_path),
@@ -553,7 +597,7 @@ async def export_docs(
             return {"error": f"No content found for {domain}"}
 
         if format == "jsonl":
-            export_path = _storage._domain_dir(domain) / f"{domain}_export.jsonl"
+            export_path = _storage._domain_dir(domain) / f"{domain_to_path_name(domain)}_export.jsonl"
             from gitbook_downloader.utils.export import StoragePageSource, export_to_jsonl
 
             # export_to_jsonl needs a get_pages() provider; wrap the raw

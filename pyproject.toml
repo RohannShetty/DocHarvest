@@ -69,7 +69,7 @@ Changelog = "https://github.com/RohannShetty/gitbook-downloader/blob/main/CHANGE
 where = ["src"]
 
 [tool.setuptools.package-data]
-gitbook_downloader = ["py.typed"]
+gitbook_downloader = ["py.typed", "skills/*/SKILL.md"]
 
 [dependency-groups]
 dev = [

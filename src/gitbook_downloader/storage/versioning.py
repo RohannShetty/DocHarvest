@@ -17,6 +17,7 @@ v7 hardening (plan §5):
 
 import difflib
 import logging
+import re
 import time
 
 from .manager import (
@@ -27,6 +28,50 @@ from .manager import (
 )
 
 logger = logging.getLogger(__name__)
+
+# The combined book opens with a generated header carrying the capture
+# timestamp. That one line changes on every run even when every harvested
+# page is byte-identical, so comparing raw bytes made "unchanged" captures
+# mint a new version every time (and left the newest version file holding
+# content that no longer matched the live docs.md).
+_CAPTURE_STAMP_RE = re.compile(rb"^(> Captured:).*$")
+
+# The generated header is ``# title`` / blank / ``> Source: …`` /
+# ``> Captured: …`` / blank, i.e. the stamp is the 4th line. Only that
+# region is normalized: a documented page may legitimately contain a line
+# beginning with ``> Captured:`` further down, and rewriting body text would
+# corrupt the very comparison this exists to make.
+_CAPTURE_STAMP_HEADER_LINES = 6
+
+
+def _same_ignoring_capture_stamp(left: bytes, right: bytes) -> bool:
+    """Compare two book documents, ignoring the generated capture timestamp.
+
+    Args:
+        left: Existing version file contents.
+        right: Current ``docs.md`` contents.
+
+    Returns:
+        bool: ``True`` when the documents are identical apart from the
+        ``> Captured: …`` line in the generated header.
+    """
+    if left == right:
+        return True
+    return _strip_capture_stamp(left) == _strip_capture_stamp(right)
+
+
+def _strip_capture_stamp(data: bytes) -> bytes:
+    """Blank the generated capture timestamp in the document header.
+
+    Only the first :data:`_CAPTURE_STAMP_HEADER_LINES` lines are inspected, so
+    identical page bodies stay untouched.
+    """
+    lines = data.split(b"\n", _CAPTURE_STAMP_HEADER_LINES)
+    for i in range(min(_CAPTURE_STAMP_HEADER_LINES, len(lines))):
+        if lines[i].startswith(b"> Captured:"):
+            lines[i] = _CAPTURE_STAMP_RE.sub(rb"\1", lines[i])
+            break
+    return b"\n".join(lines)
 
 
 class VersioningError(Exception):
@@ -171,7 +216,9 @@ class VersionManager:
         latest_file = vdir / f"v{str(newest).lstrip('v')}.md"
         if latest_file.is_file():
             try:
-                unchanged = latest_file.read_bytes() == content.encode("utf-8")
+                unchanged = _same_ignoring_capture_stamp(
+                    latest_file.read_bytes(), content.encode("utf-8")
+                )
             except OSError:
                 unchanged = False
             if unchanged:

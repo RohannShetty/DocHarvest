@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import dataclasses
 import json
+import time
 from pathlib import Path
 from typing import Any, Optional
 from unittest.mock import MagicMock
@@ -699,3 +700,92 @@ def test_export_to_jsonl_zero_records_returns_zero_without_creating_file(tmp_pat
 
     assert count == 0
     assert not output_path.exists()
+
+# ── download_docs must not block the server's event loop ─────────────
+
+
+@pytest.mark.asyncio
+async def test_download_docs_does_not_block_other_requests(monkeypatch, no_search):
+    """A capture is synchronous (requests + thread pool). Running it inline
+    stalled every other MCP request — including the client's startup
+    ``tools/list`` — until the crawl finished, because the handler never
+    yielded to the event loop."""
+
+    capture_seconds = 0.6
+    capture_finished: list[float] = []
+
+    def slow_capture(url, options_kwargs):
+        # Sync seam, as in production; must run off the loop thread.
+        time.sleep(capture_seconds)
+        capture_finished.append(time.monotonic())
+        return FakeCaptureResult(source_url=url, pages_captured=1)
+
+    monkeypatch.setattr(server, "_run_capture", slow_capture)
+
+    download = asyncio.create_task(server.download_docs("https://docs.example.com"))
+    await asyncio.sleep(0.05)  # let the capture task enter the sync seam
+
+    await server.list_domains()
+    served_at = time.monotonic()
+
+    await download
+
+    assert capture_finished, "the fake capture must have run"
+    assert served_at < capture_finished[0], (
+        "a concurrent request was served only after the crawl finished; the "
+        "blocking facade must run off the event loop"
+    )
+
+
+@pytest.mark.asyncio
+async def test_download_docs_reports_search_index_failure_in_warnings(monkeypatch):
+    """A silent re-index failure leaves search serving stale hits, so the
+    reason must travel back with the capture result."""
+
+    class FailingSearch:
+        def index_domain_from_storage(self, *a, **k):
+            raise RuntimeError("database is locked")
+
+    monkeypatch.setattr(server, "_run_capture", FakeCapture())
+    monkeypatch.setattr(server, "_search", FailingSearch())
+
+    out = await server.download_docs("https://docs.example.com")
+
+    assert "error" not in out
+    assert any("database is locked" in w for w in out["warnings"])
+
+
+# ── read_doc topic ranking: a named section beats a body mention ─────
+
+
+def test_read_doc_topic_prefers_heading_over_earlier_body_mention():
+    """Asking for a topic that names a heading must return that section, not
+    an earlier changelog bullet that merely mentions the word (live: topic
+    'OAuth' returned a release note about OAuth broker redirects, 70 tokens,
+    while the corpus holds a '## OAuth Model' section)."""
+    content = (
+        "# Changelog\n\n"
+        "* OAuth broker redirect improvements\n"
+        "* Unrelated entry\n\n"
+        "## OAuth Model\n\n"
+        "blueprints/mcp_oauth.py implements discovery and token refresh.\n"
+    )
+
+    out = server._extract_topic_bounded(content, "OAuth", max_tokens=4000)
+
+    assert out.startswith("## OAuth Model")
+    assert "implements discovery and token refresh" in out
+
+
+def test_extract_topic_bounded_keeps_whole_word_heading_first():
+    """Two headings can both contain the topic; the one that names it as a
+    whole word and little else is the better answer than a long sentence."""
+    content = (
+        "# update.sh runs migrate_all.py - schema changes for the OAuth + 2FA columns\n\n"
+        "long heading body\n\n"
+        "## OAuth Model\n\nthe actual auth section\n"
+    )
+
+    out = server._extract_topic_bounded(content, "OAuth", max_tokens=4000)
+
+    assert out.index("the actual auth section") < out.index("long heading body")

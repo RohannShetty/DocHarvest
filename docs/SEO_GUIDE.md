@@ -4,7 +4,7 @@
 **Target Repository:** `RohannShetty/gitbook-downloader` (Brand: **DocHarvest**)
 **Last Updated:** 2026-09-05
 
-> **v2.0 changelog:** Resolved the "scraper keywords vs compiler positioning" tension with a two-layer keyword strategy (§2). Added the implemented on-site technical SEO layer — sitemap, robots, canonical URL, JSON-LD `SoftwareApplication` + `FAQPage` structured data, OG image, `llms.txt` (§5). Added the canonical metrics table (§3) so no SEO surface ever quotes a stale number again. Added the engagement/time-on-site playbook (§7). Refreshed all badge/version references (v11.0.4, 665 tests, 12 MCP tools, 14 client configs). Recorded the startupbar.co widget decision (§7.4).
+> **v2.0 changelog:** Resolved the "scraper keywords vs compiler positioning" tension with a two-layer keyword strategy (§2). Added the implemented on-site technical SEO layer — sitemap, robots, canonical URL, JSON-LD `SoftwareApplication` + `FAQPage` structured data, OG image, `llms.txt` (§5). Added the canonical metrics table (§3) so no SEO surface ever quotes a stale number again. Added the engagement/time-on-site playbook (§7). Refreshed all badge/version references (see §3 for the live numbers — never quote them from prose). Recorded the startupbar.co widget decision (§7.4).
 
 ---
 
@@ -55,8 +55,8 @@ Goals, in priority order: (1) more qualified traffic from high-intent documentat
 | MCP tools | **12** (+2 resources, 2 prompts) | `mcp/server.py` |
 | Documented AI clients | **14** | README config matrix |
 | Doc platforms | **8 dedicated + generic** | `providers/` |
-| Test suite | **665 passing** | `uv run pytest` (2026-09-04) |
-| Version | **v11.0.4** | `pyproject.toml` |
+| Test suite | **740 passing** | `uv run pytest` (2026-09-16) |
+| Version | **v11.0.6** | `pyproject.toml` |
 | License / price | **MIT / $0** | LICENSE |
 
 ---

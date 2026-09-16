@@ -46,6 +46,53 @@ LOCK_STALE_SECONDS = 15 * 60
 
 _VERSION_FILE_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)\.md$")
 
+# Characters Windows rejects in file/directory names. They are legal on POSIX,
+# so without this the same domain produced a different on-disk layout per
+# platform — and on Windows a bare ``host:port`` domain (``localhost:3000``,
+# what a local docs server looks like) could not be written at all:
+# ``mkdir("…/docs/localhost:3000")`` raises NotADirectoryError, and a lock file
+# named ``localhost:3000.lock`` silently becomes an NTFS alternate-data-stream
+# write on a file called ``localhost`` instead of its own lock.
+_WINDOWS_ILLEGAL_PATH_CHARS = frozenset('<>:"/\\|?*')
+_WINDOWS_RESERVED_NAMES = frozenset(
+    ["CON", "PRN", "AUX", "NUL"]
+    + [f"COM{i}" for i in range(1, 10)]
+    + [f"LPT{i}" for i in range(1, 10)]
+)
+
+
+def domain_to_path_name(domain: str) -> str:
+    """Map a domain to a filesystem-safe directory or file stem.
+
+    Ordinary hostnames (``docs.example.com``) pass through **unchanged**, so
+    existing libraries keep the paths they already have. Only names Windows
+    cannot store are rewritten: illegal characters become ``_``, trailing dots
+    and spaces are dropped, and reserved device names (``CON``, ``NUL``,
+    ``COM1`` …) get a ``_`` prefix.
+
+    The mapping is deliberately idempotent. :meth:`StorageManager.list_domains`
+    re-derives the domain key from the directory name and feeds it back into
+    :meth:`StorageManager._domain_dir`, so a second pass must be a no-op for an
+    already-sanitized name — which is also why the real domain always lives in
+    ``metadata.json`` rather than being inferred from the folder name.
+
+    Args:
+        domain: Domain as reported by :func:`urlparse(...).netloc`.
+
+    Returns:
+        str: A name safe to use as a single path segment.
+    """
+    safe = "".join(
+        "_" if ch in _WINDOWS_ILLEGAL_PATH_CHARS or ord(ch) < 32 else ch
+        for ch in str(domain)
+    )
+    safe = safe.rstrip(" .")
+    if not safe:
+        return "_"
+    if safe.split(".")[0].upper() in _WINDOWS_RESERVED_NAMES:
+        safe = f"_{safe}"
+    return safe
+
 
 def atomic_write_text(path: str | Path, text: str) -> Path:
     """Write *text* to *path* atomically (temp file + ``os.replace``).
@@ -149,7 +196,7 @@ class DomainLock:
         self.base = Path(base_dir)
         self.domain = domain
         self.stale_seconds = stale_seconds
-        self.path = self.base / "locks" / f"{domain}.lock"
+        self.path = self.base / "locks" / f"{domain_to_path_name(domain)}.lock"
         self._acquired = False
 
     def acquire(self) -> "DomainLock":
@@ -269,8 +316,13 @@ class StorageManager:
     # ------------------------------------------------------------------
 
     def _domain_dir(self, domain: str) -> Path:
-        """Return ``~/.gitbook-downloader/docs/<domain>/``."""
-        return self.base / "docs" / domain
+        """Return ``~/.gitbook-downloader/docs/<domain>/``.
+
+        The directory segment is sanitized via :func:`domain_to_path_name` so a
+        ``host:port`` domain (or any name Windows cannot store) still works;
+        hostnames are unaffected.
+        """
+        return self.base / "docs" / domain_to_path_name(domain)
 
     def metadata_path(self, domain: str) -> Path:
         """Return ``~/.gitbook-downloader/docs/<domain>/metadata.json``."""

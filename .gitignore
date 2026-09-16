@@ -153,3 +153,15 @@ docs/archive/
 
 # Internal AI-assistant guide (kept locally, not published)
 AGENTS.md
+
+# ── Bundled agent skills (product content, not local scratch) ──
+# Harness directories hold per-machine state and the bare `skills/` rule above
+# hides every skills tree, so the skill DocHarvest ships is re-included
+# explicitly. Scoped to one directory on purpose: an open `skills/` negation
+# would also publish unrelated local skills. Git cannot re-include a file
+# whose parent directory is excluded, hence the directory negation first.
+!.omp/skills/
+# Re-ignore the siblings so only the shipped skill escapes the `skills/` rule.
+.omp/skills/*
+!.omp/skills/docharvest/
+!.omp/skills/docharvest/**
