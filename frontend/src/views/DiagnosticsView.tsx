@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { APP_VERSION } from "@/lib/version"
 import { 
   Activity, 
   Cpu, 
@@ -106,7 +107,7 @@ export const DiagnosticsView: React.FC = () => {
           <CardContent className="p-5 pt-0 space-y-2.5 text-xs">
             <div className="flex items-center justify-between py-1.5 border-b border-border/40">
               <span className="text-muted-foreground">App Version</span>
-              <span className="font-mono font-semibold text-foreground">{sysInfo?.version || "11.0.6"}</span>
+              <span className="font-mono font-semibold text-foreground">{sysInfo?.version || APP_VERSION}</span>
             </div>
             <div className="flex items-center justify-between py-1.5 border-b border-border/40">
               <span className="text-muted-foreground">Python Runtime</span>

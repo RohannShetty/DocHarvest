@@ -1,6 +1,6 @@
 """Version drift regression.
 
-Single source of truth for DocHarvest version: ``11.0.6``.
+Single source of truth for DocHarvest version: ``11.0.7``.
 
 This test fails if any of the canonical reference files drift from that value.
 The list below is curated (not a grep over the whole tree) so that:
@@ -9,11 +9,11 @@ The list below is curated (not a grep over the whole tree) so that:
 - ``package-lock.json`` lockfile entries like ``@octokit/endpoint@11.0.4`` are
   not DocHarvest version literals (out of scope).
 - ``docs/lib/version.ts`` and ``src/gitbook_downloader/__init__.py`` are the
-  canonical sources and MUST equal ``11.0.6`` (we assert equality, not just
+  canonical sources and MUST equal ``11.0.7`` (we assert equality, not just
   presence).
-- ``frontend/index.html`` <title> must read ``DocHarvest v11.0.6``.
+- ``frontend/index.html`` <title> must read ``DocHarvest v11.0.7``.
 
-Drift signals (these MUST all read ``11.0.6`` after Phase 1 step 1):
+Drift signals (these MUST all read ``11.0.7`` after Phase 1 step 1):
 - README.md version badge.
 - src/gitbook_downloader/cli.py direct-script fallback.
 - src/gitbook_downloader/gui/bridge.py User-Agent (it must use
@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_VERSION = "11.0.6"
+CANONICAL_VERSION = "11.0.7"
 
 
 # Files where the value MUST literally equal CANONICAL_VERSION (not just
@@ -39,16 +39,27 @@ CANONICAL_VERSION = "11.0.6"
 CANONICAL_SOURCE_FILES = [
     REPO_ROOT / "src" / "gitbook_downloader" / "__init__.py",
     REPO_ROOT / "docs" / "lib" / "version.ts",
+    REPO_ROOT / "frontend" / "src" / "lib" / "version.ts",
 ]
 
 
-# Files where the file MUST contain the literal ``11.0.6`` somewhere.
+# Files where the file MUST contain the literal ``11.0.7`` somewhere.
 # (We grep, not assert exact match, because each file embeds it in different
 # surrounding text — a badge URL, a JS string, a User-Agent f-string, etc.)
 MUST_CONTAIN = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "frontend" / "src" / "lib" / "bridge.ts",
     REPO_ROOT / "frontend" / "index.html",
+    REPO_ROOT / "pyproject.toml",
+    REPO_ROOT / "uv.lock",
+    REPO_ROOT / "src" / "gitbook_downloader" / "cli.py",
+    REPO_ROOT / "tests" / "test_imports.py",
+    REPO_ROOT / "tests" / "test_gui_bridge.py",
+    REPO_ROOT / "docs" / "components" / "__tests__" / "version.test.ts",
+    REPO_ROOT / "docs" / "SEO_GUIDE.md",
+    REPO_ROOT / "docs" / "HANDOFF.md",
+    REPO_ROOT / "frontend" / "package.json",
+    REPO_ROOT / "docs" / "package.json",
 ]
 
 
@@ -111,11 +122,11 @@ def test_no_stale_version_literal(path: Path) -> None:
 
 
 def test_cli_version_fallback_uses_canonical_value() -> None:
-    """The direct-script fallback in cli.py MUST equal 11.0.6 (not 9.0.0b1)."""
+    """The direct-script fallback in cli.py MUST equal 11.0.7 (not 9.0.0b1)."""
     cli_text = _read_text(REPO_ROOT / "src" / "gitbook_downloader" / "cli.py")
     # The fallback literal is the value in the `except ImportError` branch.
-    assert "__version__ = \"11.0.6\"" in cli_text, (
-        "cli.py direct-script fallback should be 11.0.6, not 9.0.0b1"
+    assert "__version__ = \"11.0.7\"" in cli_text, (
+        "cli.py direct-script fallback should be 11.0.7, not 9.0.0b1"
     )
     assert "9.0.0b1" not in cli_text, (
         "cli.py still contains stale 9.0.0b1 fallback"
@@ -137,6 +148,85 @@ def test_bridge_user_agent_uses_version_constant() -> None:
 
 
 def test_python_version_importable() -> None:
-    """Smoke: the Python package exposes __version__ == 11.0.6."""
+    """Smoke: the Python package exposes __version__ == 11.0.7."""
     from gitbook_downloader import __version__
     assert __version__ == CANONICAL_VERSION
+
+
+# ── Drift guards for surfaces a release must not forget ──────────────
+#
+# A release touches the version in a dozen places. Two of them were missed by
+# hand on the 11.0.7 bump: five `11.0.6` literals hardcoded in frontend
+# components (which silently kept the GUI/About/Diagnostics panes showing the
+# old release), and the prebuilt `gui/web` bundle, which bakes the version into
+# the shipped desktop app. Both are now guarded.
+
+#: Directories whose source must NOT hardcode a DocHarvest version literal.
+_NO_HARDCODED_VERSION_DIRS = [
+    REPO_ROOT / "frontend" / "src" / "components",
+    REPO_ROOT / "frontend" / "src" / "views",
+    REPO_ROOT / "docs" / "components",
+    REPO_ROOT / "docs" / "data",
+]
+
+#: Files legitimately allowed to contain the literal in those directories:
+#: the single-source constants, the test that pins them, and the release-notes
+#: fixture in ``github.ts`` (which quotes a past release on purpose).
+_HARDCODED_VERSION_ALLOWLIST = {
+    REPO_ROOT / "docs" / "components" / "__tests__" / "version.test.ts",
+    REPO_ROOT / "docs" / "lib" / "github.ts",
+    REPO_ROOT / "docs" / "lib" / "version.ts",
+    REPO_ROOT / "frontend" / "src" / "lib" / "version.ts",
+}
+
+_HARDCODED_VERSION_RE = re.compile(r"""(?<!\d)11\.0\.\d+(?!\d)""")
+
+
+@pytest.mark.parametrize(
+    "directory",
+    _NO_HARDCODED_VERSION_DIRS,
+    ids=lambda p: str(p.relative_to(REPO_ROOT)),
+)
+def test_no_hardcoded_version_literal_in_ui_sources(directory: Path) -> None:
+    """Version strings must come from the constant, not be typed in.
+
+    A hardcoded literal is invisible to the bump, so the UI keeps reporting the
+    previous release — the user-visible half of a version bump silently drifting.
+    """
+    offenders = []
+    for suffix in ("*.ts", "*.tsx"):
+        for path in sorted(directory.rglob(suffix)):
+            if any(part in {"node_modules", "__tests__"} for part in path.parts):
+                continue
+            if path in _HARDCODED_VERSION_ALLOWLIST:
+                continue
+            text = _read_text(path)
+            if _HARDCODED_VERSION_RE.search(text):
+                offenders.append(str(path.relative_to(REPO_ROOT)))
+
+    assert not offenders, (
+        "hardcoded DocHarvest version literal(s) found; import the version "
+        f"constant instead: {offenders}"
+    )
+
+
+def test_prebuilt_gui_bundle_matches_canonical_version() -> None:
+    """The desktop GUI ships a prebuilt bundle with the version baked in.
+
+    Forgetting `npm run build` after a bump leaves the shipped app advertising
+    the previous release even though every Python-side file is correct.
+    """
+    bundle = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "web" / "index.html"
+    assert bundle.exists(), f"prebuilt GUI bundle missing: {bundle}"
+
+    text = _read_text(bundle)
+    assert f"DocHarvest v{CANONICAL_VERSION}" in text, (
+        "prebuilt GUI bundle is stale; run `cd frontend && npm run build` "
+        "after bumping the version"
+    )
+
+    for pattern in (re.compile(r"v11\.0\.\d+"),):
+        found = {m for m in pattern.findall(text) if m != f"v{CANONICAL_VERSION}"}
+        assert not found, (
+            f"GUI bundle carries a non-canonical version reference: {sorted(found)}"
+        )

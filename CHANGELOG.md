@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [11.0.7] - 2026-09-16
 
 ### 🧠 Agent Skills, Non-Blocking Captures & Correct Retrieval
 
@@ -42,9 +42,12 @@ key was removed.
   `query_doc_graph` reported no matches for documented topics) and node ids are
   directory-relative, so pages sharing a file stem no longer merge into one node.
 - **Re-captures no longer mint empty versions** (`src/gitbook_downloader/storage/versioning.py`):
-  snapshot comparison ignores the generated `> Captured: …` header line, so a
+  snapshot comparison ignores the generated `> Captured: …` line, so a
   byte-identical re-crawl of an unchanged site reuses the existing version id
   instead of adding a new version file whose content differed only by a timestamp.
+  The comparison is scoped to the generated header (its first lines) on purpose:
+  a captured page may legitimately quote `> Captured:`, and rewriting body text
+  would corrupt both the comparison and the stored content.
 - **Single snapshot per capture** (`src/gitbook_downloader/engine.py`): the engine
   no longer snapshots again after saving. Two snapshot sites per capture meant one
   crawl minted two version files — the second holding content identical to the
@@ -59,6 +62,19 @@ key was removed.
   > (the engine is a self-contained downloader and the facade re-saves the
   > output-contract book), so deduplicating them is a storage-ownership change
   > rather than a patch.
+- **`host:port` domains work on Windows** (`src/gitbook_downloader/storage/manager.py`):
+  a local docs server (`http://localhost:3000/docs`) could not be stored at all —
+  `mkdir("…/docs/localhost:3000")` raised `NotADirectoryError`, and the lock file
+  silently became an NTFS alternate-data-stream write on a file named `localhost`.
+  New `domain_to_path_name()` maps illegal characters, trailing dots/spaces and
+  reserved device names to a safe path segment, and is idempotent so
+  `list_domains` (which re-derives the key from the directory name) round-trips;
+  ordinary hostnames are byte-for-byte unchanged, so existing libraries do not
+  move. The same sanitisation now covers exported file names in the CLI, GUI and
+  MCP surfaces.
+- **Book-only libraries still index** (`src/gitbook_downloader/api.py`): a failure
+  to resolve `pages/` no longer aborts the whole indexing pass — the pass falls
+  back to the book content instead of skipping the domain.
 - **`read_doc(topic=…)` prefers a named section** (`src/gitbook_downloader/mcp/server.py`):
   selection is ranked heading-exact → heading-contains → body-mention, with the
   most focused heading first inside that tier, so asking for `OAuth` returns the
@@ -76,10 +92,15 @@ key was removed.
 
 ### Changed
 
-- **`.gitignore`** now re-includes the shipped skill directory under `.omp/skills/`.
-  A bare `skills/` rule (and the `.agents/` directory rule) previously hid every
-  skill file from `git`, so a clone contained no skill at all. The negation is
-  scoped to the one shipped skill so unrelated local skills stay private.
+- **`.gitignore`** now re-includes both places the skill ships. A bare `skills/`
+  rule matches at **any** depth, so as well as hiding `.omp/skills/` it also hid
+  `src/gitbook_downloader/skills/` — the canonical, packaged copy. That second
+  hit meant the skill would have shipped in no wheel and no clone while every
+  local test still passed, because the files simply existed on disk; CI caught it.
+  Both trees are re-included and scoped so build byproducts (`__pycache__`) and
+  unrelated local skills stay private.
+- **`tests/test_skills.py`** gains shipping guards: a shipped skill file that is
+  gitignored, or present on disk but untracked by git, now fails the suite.
 
 ## [11.0.6] - 2026-09-05
 

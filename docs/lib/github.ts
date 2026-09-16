@@ -168,11 +168,13 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.0.6
+### What's New in v11.0.7
 
-- FTS5-escaped search queries: dotted/special tokens (e.g. 2.0.0.9) match as quoted phrases instead of raising fts5 syntax errors.
-- read_doc topic extraction: exact heading matches now rank above sections that merely contain the phrase.
-- Zero-record JSONL exports fail explicitly with a re-capture hint instead of writing 0-byte files.`,
+- Bundled agent skill: a docharvest skill ships inside the package and installs into any harness layout (.agents/skills, .claude/skills, .cursor/skills, .gemini/skills, .github/skills, .omp/skills) with the docharvest skill install command.
+- Non-blocking MCP captures: download_docs runs off the event loop, so a crawl no longer stalls every other request — including the client's own startup tools/list.
+- Search hits now point at real pages (each page's source_url plus a section anchor) instead of a domain-root anchor that addressed no page.
+- Concept graph walks the whole nested page tree, so query_doc_graph matches documented topics across subdirectories.
+- host:port domains (local docs servers) now work on Windows, and unchanged re-captures stop minting empty versions.`,
     htmlUrl: `https://github.com/RohannShetty/gitbook-downloader/releases/tag/v${VERSION}`,
     assets: [
       {

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Database, FileCode, Search, Copy, Check, Sparkles } from 'lucide-react';
 import { STATS } from '../lib/stats';
+import { VERSION } from '../lib/version';
 
 const PREVIEWS = {
   markdown: {
@@ -13,7 +14,7 @@ const PREVIEWS = {
 title: "OpenAlgo v2.0 Complete Developer Handbook"
 harvest_timestamp: "2026-08-30T00:00:00Z"
 total_pages: ${STATS.pagesCaptured}
-generator: "DocHarvest v11.0.6"
+generator: "DocHarvest v${VERSION}"
 ---
 
 # Table of Contents

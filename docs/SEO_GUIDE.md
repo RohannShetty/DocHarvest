@@ -56,7 +56,7 @@ Goals, in priority order: (1) more qualified traffic from high-intent documentat
 | Documented AI clients | **14** | README config matrix |
 | Doc platforms | **8 dedicated + generic** | `providers/` |
 | Test suite | **740 passing** | `uv run pytest` (2026-09-16) |
-| Version | **v11.0.6** | `pyproject.toml` |
+| Version | **v11.0.7** | `pyproject.toml` |
 | License / price | **MIT / $0** | LICENSE |
 
 ---

@@ -1,4 +1,5 @@
 import React from "react"
+import { APP_VERSION } from "@/lib/version"
 import { 
   Sparkles, 
   Heart, 
@@ -39,7 +40,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
 }) => {
   if (!open) return null
 
-  const appVersion = systemInfo?.version || "11.0.6"
+  const appVersion = systemInfo?.version || APP_VERSION
   const engineVersion = systemInfo?.engine || `DocHarvest Engine v${appVersion} (AST + FastMCP v2 + fpdf2)`
   const authorName = systemInfo?.author || "Rohan Shetty"
 
