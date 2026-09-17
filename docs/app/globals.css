@@ -6,180 +6,158 @@
    Key the `dark:` variant to that toggle instead of prefers-color-scheme. */
 @custom-variant dark (&:not(.light *));
 
+/* The Index Sheet — one world, one accent.
+   Near-black bond, 1px hairlines, zero radii, zinc text ramp, amber for the
+   matched term and the active line only. Depth comes from section cuts. */
 :root {
-  --background: #09090B;
-  --foreground: #FAFAFA;
-  
-  --card: #111115;
-  --card-foreground: #FAFAFA;
-  
-  --popover: #09090B;
-  --popover-foreground: #FAFAFA;
-  
-  --primary: #6366F1;
-  --primary-foreground: #FFFFFF;
-  
-  --secondary: #18181F;
-  --secondary-foreground: #FAFAFA;
-  
-  --muted: #16161B;
-  --muted-foreground: #A1A1AA;
-  
-  --accent: #F59E0B;
-  --accent-foreground: #09090B;
-
-  --cyan: #06B6D4;
-  --emerald: #10B981;
-  
-  --destructive: #EF4444;
-  --destructive-foreground: #FAFAFA;
-  
-  --border: #22222A;
-  --input: #22222A;
-  --ring: #6366F1;
-  --radius: 0.5rem;
-
-  /* Code island tokens — the themed `pre` stays dark in BOTH themes
-     (matches the terminal aesthetic and guarantees ≥ 4.5:1 code contrast). */
-  --code-bg: #0d0d12;
-  --code-fg: #f1f5f9;
-  --code-border: #27272a;
+  --bond: #09090B;
+  --bond-2: #0F0F12;
+  --rule: #1F1F23;
+  --rule-strong: #2E2E34;
+  --ink: #F4F4F5;
+  --ink-2: #A1A1AA;
+  /* Marginalia grey is lifted off the documented #71717A: at 11–13px it has to
+     clear WCAG AA 4.5:1 on the bond (#71717A reads 4.12:1). */
+  --ink-3: #8A8A93;
+  --match: #F59E0B;
+  --match-deep: #D97706;
+  --alert: #EF4444;
+  --radius: 0px;
 }
 
 .light {
-  --background: #F8FAFC;
-  --foreground: #09090B;
-  
-  --card: #FFFFFF;
-  --card-foreground: #09090B;
-  
-  --popover: #FFFFFF;
-  --popover-foreground: #09090B;
-  
-  --primary: #4F46E5;
-  --primary-foreground: #FFFFFF;
-  
-  --secondary: #F1F5F9;
-  --secondary-foreground: #0F172A;
-  
-  --muted: #F1F5F9;
-  --muted-foreground: #475569;
-  
-  --accent: #D97706;
-  --accent-foreground: #FFFFFF;
-
-  --cyan: #0891B2;
-  --emerald: #059669;
-  
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #4F46E5;
-
-  /* Same values as :root — the code island intentionally stays dark in light
-     mode (see DocTypeSelector.tsx precedent); #f1f5f9 on #0d0d12 ≈ 15.9:1. */
-  --code-bg: #0d0d12;
-  --code-fg: #f1f5f9;
-  --code-border: #27272a;
+  --bond: #FBFBFA;
+  --bond-2: #F4F4F5;
+  --rule: #E4E4E7;
+  --rule-strong: #D4D4D8;
+  --ink: #18181B;
+  --ink-2: #52525B;
+  /* Same lift on the light bond, where #71717A reads 4.40:1 on plate fills. */
+  --ink-3: #6B6B74;
+  --match: #B45309;
+  --match-deep: #92400E;
+  --alert: #B91C1C;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-cyan: var(--cyan);
-  --color-emerald: var(--emerald);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
-  
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Consolas, monospace;
+  --color-bond: var(--bond);
+  --color-bond-2: var(--bond-2);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-match: var(--match);
+  --color-match-deep: var(--match-deep);
+  --color-alert: var(--alert);
+
+  /* Zero radii: no rounded corners anywhere in this world. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Roboto Mono,
+    Menlo, Monaco, Consolas, monospace;
+}
+
+@layer components {
+  /* Display type — Archivo at its normal width, tight tracking. */
+  .sheet-display {
+    font-family: var(--font-sans);
+    font-stretch: 100%;
+    font-weight: 700;
+    font-size: clamp(2.25rem, 4.6vw, 3.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .sheet-head {
+    font-family: var(--font-sans);
+    font-stretch: 100%;
+    font-weight: 600;
+    font-size: clamp(1.5rem, 2.6vw, 2.125rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  /* The line head: "03 — THE PROVIDERS". */
+  .sheet-label {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .sheet-body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+
+  /* Every number, path and command lines up in a column. */
+  .sheet-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Narrowed Archivo for the matched term and other inline emphasis. */
+  .sheet-term {
+    font-family: var(--font-sans);
+    font-stretch: 87.5%;
+  }
+
+  .sheet-term-tight {
+    font-family: var(--font-sans);
+    font-stretch: 75%;
+  }
 }
 
 * {
-  border-color: var(--border);
-  outline-color: var(--ring);
+  border-color: var(--rule);
+  outline-color: var(--match);
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  background-color: var(--bond);
+  color: var(--ink);
 }
 
-/* Custom premium scrollbar */
+::selection {
+  background-color: color-mix(in srgb, var(--match) 25%, transparent);
+  color: var(--ink);
+}
+
+/* Custom scrollbar — hairline track, amber on hover. */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: var(--bond);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  background: var(--rule);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: var(--match);
 }
 
-/* Custom selection utility */
-::selection {
-  background-color: rgba(99, 102, 241, 0.25);
-  color: var(--foreground);
-}
-/* Glass depth system for polished glassmorphism */
-.glass-1 {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(12px) saturate(120%);
-  border: 1px solid rgba(255,255,255,0.06);
-}
-.glass-2 {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(16px) saturate(130%);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.glass-3 {
-  background: rgba(255,255,255,0.07);
-  backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid rgba(255,255,255,0.10);
-}
-/* Light mode glass */
-.light .glass-1 {
-  background: rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.05);
-}
-.light .glass-2 {
-  background: rgba(0,0,0,0.03);
-  border: 1px solid rgba(0,0,0,0.07);
-}
-.light .glass-3 {
-  background: rgba(0,0,0,0.04);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-/* Focus-visible ring polish */
+/* Focus-visible ring polish — square, amber, never decorative elsewhere. */
 *:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid var(--match);
   outline-offset: 2px;
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: 0;
 }
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
@@ -187,6 +165,7 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
 /* Typography scale — refined hierarchy */
 h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.02em;
@@ -196,37 +175,23 @@ h1 { font-weight: 700; }
 h2 { font-weight: 600; }
 h3 { font-weight: 600; }
 
-/* Code block formatting with high contrast in both themes.
+/* Code wells follow the theme — same bond, hairline, tabular numerals.
    Unlayered rule on purpose: it must outrank Tailwind utility classes so a
    stray low-opacity text color or bg-transparent override on a <pre> can
-   never regress the island back to unreadable (near-white text on white
-   cards in light mode). */
+   never regress the well back to unreadable. */
 pre {
-  background-color: var(--code-bg);
-  color: var(--code-fg);
-  border: 1px solid var(--code-border);
-  border-radius: var(--radius);
+  background-color: var(--bond-2);
+  color: var(--ink);
+  border: 1px solid var(--rule);
   padding: 1rem;
   overflow-x: auto;
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-}
-
-.terminal-glass {
-  background: rgba(14, 14, 18, 0.92);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f8fafc;
-}
-
-.light .terminal-glass {
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  color: #f8fafc;
 }
 
 /* fadeIn keyframe — referenced by animate-fadeIn utility in Tailwind v4.
@@ -238,4 +203,17 @@ code {
 
 .animate-fadeIn {
   animation: fadeIn 0.4s ease-out both;
+}
+
+/* One authored moment: the index specimen unrolls from its top rule on first
+   paint — a clip-path reveal, not a fade, so the sheet reads as paper coming
+   down. The content is in the DOM throughout: a dropped animation still shows
+   the sheet, and prefers-reduced-motion collapses it above. */
+@keyframes sheet-unfurl {
+  from { clip-path: inset(0 0 92% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+.sheet-unfurl {
+  animation: sheet-unfurl 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }

@@ -1,0 +1,2060 @@
+{
+  "provenance": {
+    "generated": "2026-09-17T08:07:44.792Z",
+    "generator": "docs/scripts/build-index-data.mjs",
+    "captures": [
+      {
+        "id": "pi.dev",
+        "sourceUrl": "https://pi.dev/docs/latest",
+        "provider": "generic",
+        "captured": "2026-09-02T18:27:35Z",
+        "pages": 14,
+        "rows": 172
+      },
+      {
+        "id": "omp.sh",
+        "sourceUrl": "https://omp.sh/docs",
+        "provider": "generic",
+        "captured": "2026-08-28T15:03:55Z",
+        "pages": 3,
+        "rows": 25
+      },
+      {
+        "id": "docs.readthedocs.io",
+        "sourceUrl": "https://docs.readthedocs.io/en/stable/",
+        "provider": "readthedocs",
+        "captured": "2026-08-30T18:23:03Z",
+        "pages": 4,
+        "rows": 53
+      },
+      {
+        "id": "docs.openviking.ai",
+        "sourceUrl": "https://docs.openviking.ai/en/getting-started/01-introduction",
+        "provider": "vitepress",
+        "captured": "2026-09-05T14:21:28Z",
+        "pages": 2,
+        "rows": 1
+      }
+    ],
+    "terms": [
+      "provider",
+      "index",
+      "OAuth",
+      "config",
+      "search",
+      "MCP"
+    ],
+    "totalRows": 251,
+    "note": "contexts are verbatim lines from emitted Markdown; `line` is the 1-based line number in that file"
+  },
+  "rows": [
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 10,
+      "title": "pi.dev book",
+      "context": "3. [Providers](pages/docs/latest/providers.md)"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 20,
+      "title": "pi.dev book",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 28,
+      "title": "pi.dev book",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 72,
+      "title": "pi.dev book",
+      "context": "Authenticate with `/login` for subscription providers, or set an API key such as `ANTHROPIC_API_KEY` before starting pi."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 82,
+      "title": "pi.dev book",
+      "context": "* [Providers](latest/providers) - subscription and API-key setup for built-in providers."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 100,
+      "title": "pi.dev book",
+      "context": "* [Custom models](latest/models) - add model entries for supported provider APIs."
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 101,
+      "title": "pi.dev book",
+      "context": "* [Custom providers](latest/custom-provider) - implement custom APIs and OAuth flows."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 116,
+      "title": "pi.dev book",
+      "context": "* [Environment variables](latest/environment-variables) - Pi process configuration and session metadata available to bash tools."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 141,
+      "title": "pi.dev book",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 149,
+      "title": "pi.dev book",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 184,
+      "title": "pi.dev book",
+      "context": "Configure via `package.json`:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 195,
+      "title": "pi.dev book",
+      "context": "Change `name`, `configDir`, and `bin` field for your fork. Affects CLI banner, config paths, and environment variable names."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 203,
+      "title": "pi.dev book",
+      "context": "**Always use `src/config.ts`** for package assets:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 248,
+      "title": "pi.dev book",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 256,
+      "title": "pi.dev book",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 284,
+      "title": "pi.dev book",
+      "context": "Use `/login` in interactive mode, then select a provider:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 290,
+      "title": "pi.dev book",
+      "context": "* OpenRouter (OAuth-minted API key billed from OpenRouter credits)"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 345,
+      "title": "pi.dev book",
+      "context": "Use `/login` in interactive mode and select a provider to store an API key in `auth.json`, or set credentials via environment variable:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 421,
+      "title": "pi.dev book",
+      "context": "provider keeps its broader catalog for backward compatibility. When using `auth.json`, store the"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 422,
+      "title": "pi.dev book",
+      "context": "credential under the provider you select; an environment variable is shared by both international providers."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 442,
+      "title": "pi.dev book",
+      "context": "Use this when pi should use different provider settings than the project shell environment."
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 477,
+      "title": "pi.dev book",
+      "context": "OAuth credentials are also stored here after `/login` and managed automatically."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 505,
+      "title": "pi.dev book",
+      "context": "Use `/login amazon-bedrock` to store a Bedrock API key, or configure one of the ambient AWS credential sources below:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 606,
+      "title": "pi.dev book",
+      "context": "Pi supports the llama.cpp router server. Configure it with `/login llama.cpp`, manage loaded models with `/llama`, and select a loaded model with `/model`."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 622,
+      "title": "pi.dev book",
+      "context": "When resolving credentials for a provider:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 625,
+      "title": "pi.dev book",
+      "context": "2. `auth.json` entry (API key or OAuth token)"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 627,
+      "title": "pi.dev book",
+      "context": "4. Custom provider keys from `models.json`"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 635,
+      "title": "pi.dev book",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 643,
+      "title": "pi.dev book",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 667,
+      "title": "pi.dev book",
+      "context": "* `--provider <name>`: Set the LLM provider (anthropic, openai, google, etc.)"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 668,
+      "title": "pi.dev book",
+      "context": "* `--model <pattern>`: Model pattern or ID (supports `provider/id` and optional `:<thinking>`)"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 987,
+      "title": "pi.dev book",
+      "context": "List all configured models."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 1795,
+      "title": "pi.dev book",
+      "context": "The top-level `usage` field contains the latest cumulative provider-reported usage. It may remain"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 1796,
+      "title": "pi.dev book",
+      "context": "zero until completion when a provider does not report usage during streaming."
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 1806,
+      "title": "pi.dev book",
+      "context": "from `message_start` and subsequent events using `contentIndex`. Treat `message_end.message`"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 2506,
+      "title": "pi.dev book",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 2514,
+      "title": "pi.dev book",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "book.md",
+      "line": 2633,
+      "title": "pi.dev book",
+      "context": "Filter modes are: default, no-tools, user-only, labeled-only, and all. Configure the default with `treeFilterMode` in [Settings](settings)."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "llms.txt",
+      "line": 4,
+      "title": "pi.dev manifest",
+      "context": "> Provider: generic · Captured: 2026-09-02T18:27:35Z · Pages: 5"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "llms.txt",
+      "line": 16,
+      "title": "pi.dev manifest",
+      "context": "- [Providers](pages/docs/latest/providers.md): https://pi.dev/docs/latest/providers"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 11,
+      "title": "Pi Documentation",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 19,
+      "title": "Pi Documentation",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 63,
+      "title": "Pi Documentation",
+      "context": "Authenticate with `/login` for subscription providers, or set an API key such as `ANTHROPIC_API_KEY` before starting pi."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 73,
+      "title": "Pi Documentation",
+      "context": "* [Providers](latest/providers) - subscription and API-key setup for built-in providers."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 91,
+      "title": "Pi Documentation",
+      "context": "* [Custom models](latest/models) - add model entries for supported provider APIs."
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 92,
+      "title": "Pi Documentation",
+      "context": "* [Custom providers](latest/custom-provider) - implement custom APIs and OAuth flows."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest.md",
+      "line": 107,
+      "title": "Pi Documentation",
+      "context": "* [Environment variables](latest/environment-variables) - Pi process configuration and session metadata available to bash tools."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/compaction.md",
+      "line": 11,
+      "title": "Compaction & Branch Summarization",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/compaction.md",
+      "line": 19,
+      "title": "Compaction & Branch Summarization",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/compaction.md",
+      "line": 470,
+      "title": "Compaction & Branch Summarization",
+      "context": "Configure compaction in `~/.pi/agent/settings.json` or `<project-dir>/.pi/settings.json`:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 11,
+      "title": "Custom Providers",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 19,
+      "title": "Custom Providers",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 29,
+      "title": "Custom Providers",
+      "context": "Extensions can register custom model providers via `pi.registerProvider()`. This enables:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 33,
+      "title": "Custom Providers",
+      "context": "* **OAuth/SSO** - Add authentication flows for enterprise providers"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 40,
+      "title": "Custom Providers",
+      "context": "See these complete provider examples:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 51,
+      "title": "Custom Providers",
+      "context": "* Override Existing Provider"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 52,
+      "title": "Custom Providers",
+      "context": "* Register New Provider"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 53,
+      "title": "Custom Providers",
+      "context": "* Unregister Provider"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 125,
+      "title": "Custom Providers",
+      "context": "## Override Existing Provider"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 129,
+      "title": "Custom Providers",
+      "context": "The simplest use case: redirect an existing provider through a proxy."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 153,
+      "title": "Custom Providers",
+      "context": "When only `baseUrl` and/or `headers` are provided (no `models`), all existing models for that provider are preserved with the new endpoint."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 155,
+      "title": "Custom Providers",
+      "context": "## Register New Provider"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 159,
+      "title": "Custom Providers",
+      "context": "To add a completely new provider, specify `models` along with the required configuration."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 220,
+      "title": "Custom Providers",
+      "context": "When `models` is provided, it **replaces** all existing models for that provider."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 224,
+      "title": "Custom Providers",
+      "context": "## Unregister Provider"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 228,
+      "title": "Custom Providers",
+      "context": "Use `pi.unregisterProvider(name)` to remove a provider that was previously registered via `pi.registerProvider(name, ...)`:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 314,
+      "title": "Custom Providers",
+      "context": "If your provider expects `Authorization: Bearer <key>` but doesn't use a standard API, set `authHeader: true`:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 332,
+      "title": "Custom Providers",
+      "context": "Add OAuth/SSO authentication that integrates with `/login`:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 396,
+      "title": "Custom Providers",
+      "context": "### OAuthLoginCallbacks"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 400,
+      "title": "Custom Providers",
+      "context": "The `callbacks` object provides UI-neutral interactions for the provider-owned flow:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 429,
+      "title": "Custom Providers",
+      "context": "### OAuthCredentials"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 447,
+      "title": "Custom Providers",
+      "context": "For providers with non-standard APIs, implement `streamSimple`. Study the existing API implementations before writing your own:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 462,
+      "title": "Custom Providers",
+      "context": "All providers follow the same pattern:"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 541,
+      "title": "Custom Providers",
+      "context": "2. Content events (repeatable, track `contentIndex` for each block):"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 543,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"text_start\", contentIndex, partial }` - Text block started"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 544,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"text_delta\", contentIndex, delta, partial }` - Text chunk"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 545,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"text_end\", contentIndex, content, partial }` - Text block ended"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 546,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"thinking_start\", contentIndex, partial }` - Thinking started"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 547,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"thinking_delta\", contentIndex, delta, partial }` - Thinking chunk"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 548,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"thinking_end\", contentIndex, content, partial }` - Thinking ended"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 549,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"toolcall_start\", contentIndex, partial }` - Tool call started"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 550,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"toolcall_delta\", contentIndex, delta, partial }` - Tool call JSON chunk"
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 551,
+      "title": "Custom Providers",
+      "context": "* `{ type: \"toolcall_end\", contentIndex, toolCall, partial }` - Tool call ended"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 679,
+      "title": "Custom Providers",
+      "context": "* Scope it to your provider (`message.provider` and `ctx.model?.provider`) so unrelated errors from other providers are untouched."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/custom-provider.md",
+      "line": 719,
+      "title": "Custom Providers",
+      "context": "Run tests with your provider/model pairs to verify compatibility."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/development.md",
+      "line": 11,
+      "title": "Development",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/development.md",
+      "line": 19,
+      "title": "Development",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/development.md",
+      "line": 54,
+      "title": "Development",
+      "context": "Configure via `package.json`:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/development.md",
+      "line": 65,
+      "title": "Development",
+      "context": "Change `name`, `configDir`, and `bin` field for your fork. Affects CLI banner, config paths, and environment variable names."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/development.md",
+      "line": 73,
+      "title": "Development",
+      "context": "**Always use `src/config.ts`** for package assets:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/environment-variables.md",
+      "line": 11,
+      "title": "Environment Variables",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/environment-variables.md",
+      "line": 19,
+      "title": "Environment Variables",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/environment-variables.md",
+      "line": 31,
+      "title": "Environment Variables",
+      "context": "* Variables such as `PI_OFFLINE` configure the Pi process."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/environment-variables.md",
+      "line": 35,
+      "title": "Environment Variables",
+      "context": "Provider API-key variables are documented separately in [Providers](providers#environment-variables-or-auth-file)."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/environment-variables.md",
+      "line": 64,
+      "title": "Environment Variables",
+      "context": "When asked which model or provider is running, inspect these variables instead of inferring the answer from the system prompt:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/environment-variables.md",
+      "line": 107,
+      "title": "Environment Variables",
+      "context": "## Pi Process Configuration"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/llama-cpp.md",
+      "line": 11,
+      "title": "llama.cpp",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/llama-cpp.md",
+      "line": 19,
+      "title": "llama.cpp",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/llama-cpp.md",
+      "line": 78,
+      "title": "llama.cpp",
+      "context": "Start Pi and configure the provider:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/llama-cpp.md",
+      "line": 88,
+      "title": "llama.cpp",
+      "context": "Environment variables can configure the same values without `/login`:"
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/llama-cpp.md",
+      "line": 110,
+      "title": "llama.cpp",
+      "context": "* Select **Download model…**, search Hugging Face, then choose a repository and quantization. Exact `owner/repository[:quant]` values also work."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 11,
+      "title": "Custom Models",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 19,
+      "title": "Custom Models",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 29,
+      "title": "Custom Models",
+      "context": "Add custom providers and models (Ollama, vLLM, LM Studio, proxies) via `~/.pi/agent/models.json`."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 38,
+      "title": "Custom Models",
+      "context": "* Provider Configuration"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 39,
+      "title": "Custom Models",
+      "context": "* Model Configuration"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 40,
+      "title": "Custom Models",
+      "context": "* Overriding Built-in Providers"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 166,
+      "title": "Custom Models",
+      "context": "Set `api` at provider level (default for all models) or model level (override per model)."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 168,
+      "title": "Custom Models",
+      "context": "## Provider Configuration"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 221,
+      "title": "Custom Models",
+      "context": "`/model` availability checks use configured auth presence and do not execute shell commands."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 244,
+      "title": "Custom Models",
+      "context": "## Model Configuration"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 287,
+      "title": "Custom Models",
+      "context": "* The configured `name` is used for model matching and secondary model detail text. It does not replace the footer/status-bar model id."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 356,
+      "title": "Custom Models",
+      "context": "## Overriding Built-in Providers"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 360,
+      "title": "Custom Models",
+      "context": "Route a built-in provider through a proxy without redefining models:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 372,
+      "title": "Custom Models",
+      "context": "All built-in Anthropic models remain available. Existing OAuth or API key auth continues to work."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 374,
+      "title": "Custom Models",
+      "context": "To merge custom models into a built-in provider, include the `models` array:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 392,
+      "title": "Custom Models",
+      "context": "* Custom models are upserted by `id` within the provider."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 400,
+      "title": "Custom Models",
+      "context": "Use `modelOverrides` to customize built-in models and matching extension-registered models without replacing the provider's full model list."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 443,
+      "title": "Custom Models",
+      "context": "* `modelOverrides` are applied to built-in provider models and matching extension-registered provider models."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 445,
+      "title": "Custom Models",
+      "context": "* You can combine provider-level `baseUrl`/`headers` with `modelOverrides`."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 453,
+      "title": "Custom Models",
+      "context": "For providers or proxies using `api: \"anthropic-messages\"`, use `compat` to control Anthropic-specific request compatibility."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 502,
+      "title": "Custom Models",
+      "context": "For providers with partial OpenAI compatibility, use the `compat` field."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 504,
+      "title": "Custom Models",
+      "context": "* Provider-level `compat` applies defaults to all models under that provider."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/models.md",
+      "line": 505,
+      "title": "Custom Models",
+      "context": "* Model-level `compat` overrides provider-level values for that model."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 11,
+      "title": "Providers",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 19,
+      "title": "Providers",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 47,
+      "title": "Providers",
+      "context": "Use `/login` in interactive mode, then select a provider:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 53,
+      "title": "Providers",
+      "context": "* OpenRouter (OAuth-minted API key billed from OpenRouter credits)"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 108,
+      "title": "Providers",
+      "context": "Use `/login` in interactive mode and select a provider to store an API key in `auth.json`, or set credentials via environment variable:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 184,
+      "title": "Providers",
+      "context": "provider keeps its broader catalog for backward compatibility. When using `auth.json`, store the"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 185,
+      "title": "Providers",
+      "context": "credential under the provider you select; an environment variable is shared by both international providers."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 205,
+      "title": "Providers",
+      "context": "Use this when pi should use different provider settings than the project shell environment."
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 240,
+      "title": "Providers",
+      "context": "OAuth credentials are also stored here after `/login` and managed automatically."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 268,
+      "title": "Providers",
+      "context": "Use `/login amazon-bedrock` to store a Bedrock API key, or configure one of the ambient AWS credential sources below:"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 369,
+      "title": "Providers",
+      "context": "Pi supports the llama.cpp router server. Configure it with `/login llama.cpp`, manage loaded models with `/llama`, and select a loaded model with `/model`."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 385,
+      "title": "Providers",
+      "context": "When resolving credentials for a provider:"
+    },
+    {
+      "term": "OAuth",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 388,
+      "title": "Providers",
+      "context": "2. `auth.json` entry (API key or OAuth token)"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/providers.md",
+      "line": 390,
+      "title": "Providers",
+      "context": "4. Custom provider keys from `models.json`"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 11,
+      "title": "Quickstart",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 19,
+      "title": "Quickstart",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 76,
+      "title": "Quickstart",
+      "context": "Pi can use subscription providers through `/login`, or API-key providers through environment variables or the auth file."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 88,
+      "title": "Quickstart",
+      "context": "Then select a provider. Built-in subscription logins include Claude Pro/Max, ChatGPT Plus/Pro (Codex), and GitHub Copilot."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 101,
+      "title": "Quickstart",
+      "context": "You can also run `/login` and select an API-key provider to store the key in `~/.pi/agent/auth.json`."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 103,
+      "title": "Quickstart",
+      "context": "See [Providers](providers) for all supported providers, environment variables, and cloud-provider setup."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 155,
+      "title": "Quickstart",
+      "context": "Type `@` in the editor to fuzzy-search files, or pass files on the command line:"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 216,
+      "title": "Quickstart",
+      "context": "* [Providers](providers) - authentication and model setup."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/quickstart.md",
+      "line": 217,
+      "title": "Quickstart",
+      "context": "* [Settings](settings) - global and project configuration."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 11,
+      "title": "RPC Mode",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 19,
+      "title": "RPC Mode",
+      "context": "Search documentation"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 43,
+      "title": "RPC Mode",
+      "context": "* `--provider <name>`: Set the LLM provider (anthropic, openai, google, etc.)"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 44,
+      "title": "RPC Mode",
+      "context": "* `--model <pattern>`: Model pattern or ID (supports `provider/id` and optional `:<thinking>`)"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 363,
+      "title": "RPC Mode",
+      "context": "List all configured models."
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 1171,
+      "title": "RPC Mode",
+      "context": "The top-level `usage` field contains the latest cumulative provider-reported usage. It may remain"
+    },
+    {
+      "term": "provider",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 1172,
+      "title": "RPC Mode",
+      "context": "zero until completion when a provider does not report usage during streaming."
+    },
+    {
+      "term": "index",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/rpc.md",
+      "line": 1182,
+      "title": "RPC Mode",
+      "context": "from `message_start` and subsequent events using `contentIndex`. Treat `message_end.message`"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/sessions.md",
+      "line": 11,
+      "title": "Sessions",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/sessions.md",
+      "line": 19,
+      "title": "Sessions",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/sessions.md",
+      "line": 138,
+      "title": "Sessions",
+      "context": "Filter modes are: default, no-tools, user-only, labeled-only, and all. Configure the default with `treeFilterMode` in [Settings](settings)."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/settings.md",
+      "line": 11,
+      "title": "Settings",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/settings.md",
+      "line": 19,
+      "title": "Settings",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 11,
+      "title": "Terminal Setup",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 19,
+      "title": "Terminal Setup",
+      "context": "Search documentation"
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 70,
+      "title": "Terminal Setup",
+      "context": "2. Search for **Trackpad scrolls fast?** and set it to **No**."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 86,
+      "title": "Terminal Setup",
+      "context": "Add to your Ghostty config (`~/Library/Application Support/com.mitchellh.ghostty/config` on macOS, `~/.config/ghostty/config` on Linux):"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 102,
+      "title": "Terminal Setup",
+      "context": "Pi binds `Ctrl+J` as a default newline alias, so `Shift+Enter` keeps working in tmux via that remap without extra pi configuration."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 138,
+      "title": "Terminal Setup",
+      "context": "If you already have a `config.keys` table, add the entry to it."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 155,
+      "title": "Terminal Setup",
+      "context": "Restart Alacritty after changing the config."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 168,
+      "title": "Terminal Setup",
+      "context": "* Linux: `~/.config/Code/User/keybindings.json`"
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/terminal-setup.md",
+      "line": 206,
+      "title": "Terminal Setup",
+      "context": "* `Ctrl+F` searches the transcript in fullscreen mode, and `Ctrl+Up`/`Ctrl+Down` jump between marked messages."
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/usage.md",
+      "line": 11,
+      "title": "Using Pi",
+      "context": "Guides and references for configuring and extending Pi."
+    },
+    {
+      "term": "search",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/usage.md",
+      "line": 19,
+      "title": "Using Pi",
+      "context": "Search documentation"
+    },
+    {
+      "term": "config",
+      "source": "pi.dev",
+      "path": "pages/docs/latest/usage.md",
+      "line": 108,
+      "title": "Using Pi",
+      "context": "Configure delivery in [Settings](settings) with `steeringMode` and `followUpMode`."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 53,
+      "title": "omp.sh book",
+      "context": "* want to choose their own model providers instead of being tied to one;"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 123,
+      "title": "omp.sh book",
+      "context": "Then configure the ACP client with these launch values:"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 132,
+      "title": "omp.sh book",
+      "context": "`omp --mode acp` is equivalent, but `omp acp` is the recommended spelling for client configuration."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 150,
+      "title": "omp.sh book",
+      "context": "Start a new thread from the Agent Panel and select **Oh My Pi**. Zed owns the thread UI; omp owns the agent, provider connection, and model settings."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 160,
+      "title": "omp.sh book",
+      "context": "If the client offers **Set up Oh My Pi in terminal**, choose it to open omp's interactive provider setup. Otherwise:"
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 163,
+      "title": "omp.sh book",
+      "context": "2. Enter `/login` or `/login <provider>` and finish authentication."
+    },
+    {
+      "term": "MCP",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 213,
+      "title": "omp.sh book",
+      "context": "## MCP and editor capabilities"
+    },
+    {
+      "term": "MCP",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 243,
+      "title": "omp.sh book",
+      "context": "### MCP tools are missing"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 333,
+      "title": "omp.sh book",
+      "context": "### Workspace and configuration"
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 380,
+      "title": "omp.sh book",
+      "context": "See [Providers](providers) for model and credential resolution and [Roles](roles) for role selection."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 513,
+      "title": "omp.sh book",
+      "context": "### Authentication and provider inspection"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "book.md",
+      "line": 524,
+      "title": "omp.sh book",
+      "context": "### Plugins, marketplaces, and configuration"
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "llms.txt",
+      "line": 4,
+      "title": "omp.sh manifest",
+      "context": "> Provider: generic · Captured: 2026-08-28T15:03:55Z · Pages: 3"
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "pages/docs.md",
+      "line": 46,
+      "title": "Overview",
+      "context": "* want to choose their own model providers instead of being tied to one;"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 30,
+      "title": "ACP",
+      "context": "Then configure the ACP client with these launch values:"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 39,
+      "title": "ACP",
+      "context": "`omp --mode acp` is equivalent, but `omp acp` is the recommended spelling for client configuration."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 57,
+      "title": "ACP",
+      "context": "Start a new thread from the Agent Panel and select **Oh My Pi**. Zed owns the thread UI; omp owns the agent, provider connection, and model settings."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 67,
+      "title": "ACP",
+      "context": "If the client offers **Set up Oh My Pi in terminal**, choose it to open omp's interactive provider setup. Otherwise:"
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 70,
+      "title": "ACP",
+      "context": "2. Enter `/login` or `/login <provider>` and finish authentication."
+    },
+    {
+      "term": "MCP",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 120,
+      "title": "ACP",
+      "context": "## MCP and editor capabilities"
+    },
+    {
+      "term": "MCP",
+      "source": "omp.sh",
+      "path": "pages/docs/acp.md",
+      "line": 150,
+      "title": "ACP",
+      "context": "### MCP tools are missing"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "pages/docs/cli.md",
+      "line": 85,
+      "title": "CLI reference",
+      "context": "### Workspace and configuration"
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "pages/docs/cli.md",
+      "line": 132,
+      "title": "CLI reference",
+      "context": "See [Providers](providers) for model and credential resolution and [Roles](roles) for role selection."
+    },
+    {
+      "term": "provider",
+      "source": "omp.sh",
+      "path": "pages/docs/cli.md",
+      "line": 265,
+      "title": "CLI reference",
+      "context": "### Authentication and provider inspection"
+    },
+    {
+      "term": "config",
+      "source": "omp.sh",
+      "path": "pages/docs/cli.md",
+      "line": 276,
+      "title": "CLI reference",
+      "context": "### Plugins, marketplaces, and configuration"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 9,
+      "title": "docs.readthedocs.io book",
+      "context": "2. [How-to guides: project setup and configuration](pages/en/stable/guides/setup/index.md)"
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 27,
+      "title": "docs.readthedocs.io book",
+      "context": "Get started with our [tutorial](tutorial/index.html)."
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 47,
+      "title": "docs.readthedocs.io book",
+      "context": "[Read the Docs tutorial](tutorial/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 56,
+      "title": "docs.readthedocs.io book",
+      "context": "## Project setup and configuration"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 60,
+      "title": "docs.readthedocs.io book",
+      "context": "[Configuration file overview](config-file/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 61,
+      "title": "docs.readthedocs.io book",
+      "context": ": Learn how to configure your project with a `.readthedocs.yaml` file."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 125,
+      "title": "docs.readthedocs.io book",
+      "context": "[How to configure pull request builds](guides/pull-requests.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 126,
+      "title": "docs.readthedocs.io book",
+      "context": ": Configure pull request builds for your project."
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 131,
+      "title": "docs.readthedocs.io book",
+      "context": "[All how-to guides](guides/index.html)"
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 138,
+      "title": "docs.readthedocs.io book",
+      "context": "[Public REST API](api/index.html)"
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 144,
+      "title": "docs.readthedocs.io book",
+      "context": "[About Read the Docs](about/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 149,
+      "title": "docs.readthedocs.io book",
+      "context": "# How-to guides: project setup and configuration"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 151,
+      "title": "docs.readthedocs.io book",
+      "context": "The following how-to guides help you solve common tasks and challenges in the setup and configuration stages."
+    },
+    {
+      "term": "provider",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 153,
+      "title": "docs.readthedocs.io book",
+      "context": "⏩️ [Connecting your Read the Docs account to your Git provider](../connecting-git-account.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 156,
+      "title": "docs.readthedocs.io book",
+      "context": "⏩️ [Configuring a Git repository manually](git-repo-manual.html)"
+    },
+    {
+      "term": "provider",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 157,
+      "title": "docs.readthedocs.io book",
+      "context": ": If you are connecting a Git repository from another provider (for instance Gitea or Codeberg),"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 158,
+      "title": "docs.readthedocs.io book",
+      "context": "this guide tells you how to add and configure the webhook **manually**."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 164,
+      "title": "docs.readthedocs.io book",
+      "context": ": Configuring your Read the Docs project for redirecting visitors from one location to another."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 170,
+      "title": "docs.readthedocs.io book",
+      "context": ": This guide shows how to configure a Read the Docs project to use a custom path for the `.readthedocs.yaml` build configuration."
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "book.md",
+      "line": 183,
+      "title": "docs.readthedocs.io book",
+      "context": "[Read the Docs tutorial](../../tutorial/index.html)"
+    },
+    {
+      "term": "provider",
+      "source": "docs.readthedocs.io",
+      "path": "llms.txt",
+      "line": 4,
+      "title": "docs.readthedocs.io manifest",
+      "context": "> Provider: readthedocs · Captured: 2026-08-30T18:23:03Z · Pages: 2"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "llms.txt",
+      "line": 15,
+      "title": "docs.readthedocs.io manifest",
+      "context": "- [How-to guides: project setup and configuration](pages/en/stable/guides/setup/index.md): https://docs.readthedocs.io/en/stable/guides/setup/index.html"
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 23,
+      "title": "Read the Docs: documentation simplified",
+      "context": "Get started with our [tutorial](tutorial/index.html)."
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 43,
+      "title": "Read the Docs: documentation simplified",
+      "context": "[Read the Docs tutorial](tutorial/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 52,
+      "title": "Read the Docs: documentation simplified",
+      "context": "## Project setup and configuration"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 56,
+      "title": "Read the Docs: documentation simplified",
+      "context": "[Configuration file overview](config-file/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 57,
+      "title": "Read the Docs: documentation simplified",
+      "context": ": Learn how to configure your project with a `.readthedocs.yaml` file."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 121,
+      "title": "Read the Docs: documentation simplified",
+      "context": "[How to configure pull request builds](guides/pull-requests.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 122,
+      "title": "Read the Docs: documentation simplified",
+      "context": ": Configure pull request builds for your project."
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 127,
+      "title": "Read the Docs: documentation simplified",
+      "context": "[All how-to guides](guides/index.html)"
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 134,
+      "title": "Read the Docs: documentation simplified",
+      "context": "[Public REST API](api/index.html)"
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable.md",
+      "line": 140,
+      "title": "Read the Docs: documentation simplified",
+      "context": "[About Read the Docs](about/index.html)"
+    },
+    {
+      "term": "search",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/api/index.md",
+      "line": 42,
+      "title": "Public REST API",
+      "context": "* [Server side search API](../server-side-search/api.html)"
+    },
+    {
+      "term": "search",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/api/index.md",
+      "line": 43,
+      "title": "Public REST API",
+      "context": "+ [API v3](../server-side-search/api.html#api-v3)"
+    },
+    {
+      "term": "search",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/api/index.md",
+      "line": 44,
+      "title": "Public REST API",
+      "context": "- [Migrating from API v2](../server-side-search/api.html#migrating-from-api-v2)"
+    },
+    {
+      "term": "search",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/api/index.md",
+      "line": 45,
+      "title": "Public REST API",
+      "context": "+ [Authentication and authorization](../server-side-search/api.html#authentication-and-authorization)"
+    },
+    {
+      "term": "search",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/api/index.md",
+      "line": 46,
+      "title": "Public REST API",
+      "context": "+ [API v2 (deprecated)](../server-side-search/api.html#api-v2-deprecated)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 9,
+      "title": "How-to guides: project setup and configuration",
+      "context": "# How-to guides: project setup and configuration"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 11,
+      "title": "How-to guides: project setup and configuration",
+      "context": "The following how-to guides help you solve common tasks and challenges in the setup and configuration stages."
+    },
+    {
+      "term": "provider",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 13,
+      "title": "How-to guides: project setup and configuration",
+      "context": "⏩️ [Connecting your Read the Docs account to your Git provider](../connecting-git-account.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 16,
+      "title": "How-to guides: project setup and configuration",
+      "context": "⏩️ [Configuring a Git repository manually](git-repo-manual.html)"
+    },
+    {
+      "term": "provider",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 17,
+      "title": "How-to guides: project setup and configuration",
+      "context": ": If you are connecting a Git repository from another provider (for instance Gitea or Codeberg),"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 18,
+      "title": "How-to guides: project setup and configuration",
+      "context": "this guide tells you how to add and configure the webhook **manually**."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 24,
+      "title": "How-to guides: project setup and configuration",
+      "context": ": Configuring your Read the Docs project for redirecting visitors from one location to another."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 30,
+      "title": "How-to guides: project setup and configuration",
+      "context": ": This guide shows how to configure a Read the Docs project to use a custom path for the `.readthedocs.yaml` build configuration."
+    },
+    {
+      "term": "index",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/guides/setup/index.md",
+      "line": 43,
+      "title": "How-to guides: project setup and configuration",
+      "context": "[Read the Docs tutorial](../../tutorial/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 27,
+      "title": "Adding a documentation project",
+      "context": "7. Add a [configuration file](../glossary.html#term-configuration-file) to your repository if it doesn’t exist yet."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 33,
+      "title": "Adding a documentation project",
+      "context": ": Your project will be automatically configured with a Git integration."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 40,
+      "title": "Adding a documentation project",
+      "context": "3. Click on Configure manually."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 44,
+      "title": "Adding a documentation project",
+      "context": "7. Add a [configuration file](../glossary.html#term-configuration-file) to your repository if it doesn’t exist yet."
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 51,
+      "title": "Adding a documentation project",
+      "context": "[How to manually configure a Git repository integration](../guides/setup/git-repo-manual.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 65,
+      "title": "Adding a documentation project",
+      "context": "[Configuration file overview](../config-file/index.html)"
+    },
+    {
+      "term": "config",
+      "source": "docs.readthedocs.io",
+      "path": "pages/en/stable/intro/add-project.md",
+      "line": 66,
+      "title": "Adding a documentation project",
+      "context": ": Practical steps to add a configuration file to your documentation project."
+    },
+    {
+      "term": "provider",
+      "source": "docs.openviking.ai",
+      "path": "llms.txt",
+      "line": 4,
+      "title": "docs.openviking.ai manifest",
+      "context": "> Provider: vitepress · Captured: 2026-09-05T14:21:28Z · Pages: 2"
+    }
+  ]
+}

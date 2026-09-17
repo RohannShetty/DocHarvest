@@ -1,18 +1,16 @@
 import React from 'react';
-import { Header } from '@/components/Header';
-import { Hero } from '@/components/Hero';
-import { DocTypeSelector } from '@/components/DocTypeSelector';
-import { AgentEcosystemShowcase } from '@/components/AgentEcosystemShowcase';
-import { OutputContract } from '@/components/OutputContract';
-import { ExportStudioPreview } from '@/components/ExportStudioPreview';
-import { FeatureMatrix } from '@/components/FeatureMatrix';
-import { McpShowcase } from '@/components/McpShowcase';
-import { PersonaShowcase } from '@/components/PersonaShowcase';
-import { GithubReleaseFeed } from '@/components/GithubReleaseFeed';
-import { FaqSection } from '@/components/FaqSection';
-import { Footer } from '@/components/Footer';
 import { ClientContainer } from '@/components/ClientContainer';
+import { IndexSection } from '@/components/IndexSection';
+import { ManifestTree } from '@/components/ManifestTree';
+import { ProviderTable } from '@/components/ProviderTable';
+import { AgentTools } from '@/components/AgentTools';
+import { ComparisonTable } from '@/components/ComparisonTable';
+import { Workflows } from '@/components/Workflows';
+import { Releases } from '@/components/Releases';
+import { FaqSheet } from '@/components/FaqSheet';
+import { Colophon } from '@/components/Colophon';
 import { getDocHarvestGithubData } from '@/lib/github';
+import { INDEX_DATA, MANIFEST } from '@/lib/indexData';
 
 export const revalidate = 3600;
 
@@ -20,41 +18,37 @@ export default async function Page() {
   const githubData = await getDocHarvestGithubData();
 
   return (
-    <ClientContainer githubData={githubData}>
-      {/* 1. Header is rendered in ClientContainer to manage install modal state */}
+    <ClientContainer githubData={githubData} indexData={INDEX_DATA}>
       <main>
-        {/* 2. Hero with interactive terminal demo (rendered inside ClientContainer) */}
-        
-        {/* 3. Supported AI Agent & IDE Ecosystem Directory */}
-        <AgentEcosystemShowcase />
+        {/* 00. Masthead + index specimen — rendered inside ClientContainer */}
 
-        {/* 4. Framework Intelligence & AST Heuristic Inspection */}
-        <DocTypeSelector />
+        {/* 01. The index: every emitted line, with its file and line number */}
+        <IndexSection indexData={INDEX_DATA} />
 
-        {/* 5. Four-Part Output Contract */}
-        <OutputContract />
+        {/* 02. The manifest: the measured output tree and its plates */}
+        <ManifestTree manifest={MANIFEST} />
 
-        {/* 6. Export Studio Code Inspection */}
-        <ExportStudioPreview />
+        {/* 03. The providers: detection order, signals and sample sites */}
+        <ProviderTable />
 
-        {/* 7. Capability Comparison Matrix vs Raw Scrapers & Cloud APIs */}
-        <FeatureMatrix />
+        {/* 04. The agents: MCP tools, resources, prompts, configs, one transcript */}
+        <AgentTools />
 
-        {/* 8. FastMCP Agent Tooling Showcase */}
-        <McpShowcase />
+        {/* 05. The comparison: eight capabilities, three columns */}
+        <ComparisonTable />
 
-        {/* 9. Three Persona Workflows */}
-        <PersonaShowcase />
+        {/* 06. The workflows: three readers, three commands */}
+        <Workflows />
 
-        {/* 10. Live GitHub Release Feed & Telemetry */}
-        <GithubReleaseFeed data={githubData} />
+        {/* 07. Releases: fetched at build time, sizes only when measured */}
+        <Releases data={githubData} />
 
-        {/* 11. Frequently Asked Questions */}
-        <FaqSection />
+        {/* 08. The FAQ: the same array the FAQPage JSON-LD reads */}
+        <FaqSheet />
       </main>
 
-      {/* 12. Footer */}
-      <Footer />
+      {/* 09. Colophon */}
+      <Colophon />
     </ClientContainer>
   );
 }

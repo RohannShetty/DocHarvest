@@ -1,110 +1,114 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import { Moon, Star, Sun } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
-import { Sun, Moon, Terminal, Download, Star, Sparkles } from 'lucide-react';
 import { GithubIcon } from './Icons';
 import { VERSION } from '../lib/version';
+
+/**
+ * The sheet's sticky head.
+ *
+ * Typeset wordmark, the seven section anchors as mono caps, the star count, the
+ * theme toggle and one primary action. Amber is reserved for the primary action
+ * here; every other control stays in the zinc ramp.
+ */
+
+const NAV = [
+  { href: '#index', label: 'THE INDEX' },
+  { href: '#contract', label: 'THE MANIFEST' },
+  { href: '#platforms', label: 'PROVIDERS' },
+  { href: '#agents', label: 'AGENTS' },
+  { href: '#matrix', label: 'COMPARISON' },
+  { href: '#workflows', label: 'WORKFLOWS' },
+  { href: '#releases', label: 'RELEASES' },
+];
+
+/** The rail is lg-only, so every line gets a control on small screens. */
+const COMPACT_NAV = [...NAV, { href: '#faq', label: 'FAQ' }, { href: '#colophon', label: 'COLOPHON' }];
 
 interface HeaderProps {
   stars?: number;
   onOpenInstallModal: () => void;
 }
 
-export function Header({ stars = 128, onOpenInstallModal }: HeaderProps) {
+export function Header({ stars, onOpenInstallModal }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const nextThemeLabel = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        
-        {/* Brand identity */}
-        <Link href="/" className="group flex items-center gap-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-mono font-bold text-lg shadow-md group-hover:scale-105 transition-transform duration-200">
-            <Terminal className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-base font-extrabold tracking-tight text-foreground">
-                DocHarvest
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-card/50 px-2 py-0.5 text-[10px] font-mono font-bold text-cyan">
-                v{VERSION}
-              </span>
-            </div>
-            <span className="text-[10px] text-muted-foreground font-mono tracking-wider">
-              Universal Doc Harvester &amp; RAG Compiler
-            </span>
-          </div>
-        </Link>
+    <header className="sticky top-0 z-40 border-b border-rule bg-bond">
+      <div className="flex h-14 items-center justify-between gap-6 px-6 lg:px-12">
+        <a
+          href="#top"
+          className="flex shrink-0 cursor-pointer items-baseline gap-2 focus-visible:outline-2 focus-visible:outline-match"
+        >
+          <span className="sheet-term text-base font-semibold text-ink">DocHarvest</span>
+          <span className="sheet-num text-[11px] text-ink-3">v{VERSION}</span>
+        </a>
 
-        {/* Navigation Anchors */}
-        <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-muted-foreground">
-          <a href="#agents" className="hover:text-primary transition-colors text-cyan">
-            Agents &amp; IDEs
-          </a>
-          <a href="#platforms" className="hover:text-foreground transition-colors">
-            Platforms
-          </a>
-          <a href="#contract" className="hover:text-foreground transition-colors">
-            Output Contract
-          </a>
-          <a href="#studio" className="hover:text-foreground transition-colors">
-            Export Studio
-          </a>
-          <a href="#matrix" className="hover:text-foreground transition-colors">
-            Comparison
-          </a>
-          <a href="#mcp" className="hover:text-foreground transition-colors">
-            FastMCP Server
-          </a>
-          <a href="#releases" className="hover:text-foreground transition-colors">
-            Releases
-          </a>
+        <nav aria-label="Sections" className="hidden items-center gap-5 lg:flex">
+          {NAV.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className="sheet-label cursor-pointer transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-4">
-          {/* GitHub Star Button */}
+        <div className="flex shrink-0 items-center gap-4">
           <a
             href="https://github.com/RohannShetty/gitbook-downloader"
             target="_blank"
             rel="noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border bg-secondary/50 text-xs font-mono text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all duration-200"
+            className="sheet-num inline-flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
-            <GithubIcon className="h-4 w-4" />
-            <span className="font-bold">Star</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded bg-background/80 border border-border text-[10px] font-bold text-foreground">
-              {stars}
-            </span>
+            <GithubIcon className="h-3.5 w-3.5" />
+            {stars !== undefined && (
+              <span className="inline-flex items-center gap-1">
+                <Star className="h-3 w-3" />
+                {stars}
+              </span>
+            )}
           </a>
 
-          {/* Theme Switcher */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg border border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={nextThemeLabel}
+            aria-label={nextThemeLabel}
+            className="inline-flex cursor-pointer items-center text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
-            {theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-cyan/50" />
-            ) : (
-              <Moon className="h-4 w-4 text-cyan/50" />
-            )}
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
-          {/* Quick Install Trigger CTA */}
           <button
             onClick={onOpenInstallModal}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-4 text-xs font-mono font-bold text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 transition-all duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary active:scale-95"
+            className="sheet-num cursor-pointer bg-match px-3 py-1.5 text-[12px] font-semibold text-bond transition-colors hover:bg-match-deep focus-visible:outline-2 focus-visible:outline-match"
           >
-            <Download className="h-3.5 w-3.5" />
-            <span>Install CLI / GUI</span>
+            Install
           </button>
         </div>
-
       </div>
+
+      <nav aria-label="Sections (compact)" className="border-t border-rule lg:hidden">
+        <ul className="flex gap-5 overflow-x-auto px-6 py-2">
+          {COMPACT_NAV.map((item) => (
+            <li key={item.href}>
+              <a
+                href={item.href}
+                className="sheet-label block cursor-pointer whitespace-nowrap transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </header>
   );
 }
+
+export default Header;

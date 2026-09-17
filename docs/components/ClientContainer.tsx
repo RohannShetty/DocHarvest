@@ -2,37 +2,38 @@
 
 import React, { useState } from 'react';
 import { Header } from './Header';
-import { Hero } from './Hero';
+import { Masthead } from './Masthead';
+import { SheetRail } from './SheetRail';
 import { InstallModal } from './InstallModal';
-import { DocHarvestGithubData } from '../lib/github';
+import type { DocHarvestGithubData } from '../lib/github';
+import type { IndexData } from '../lib/indexData';
 
 interface ClientContainerProps {
   githubData: DocHarvestGithubData;
+  indexData: IndexData;
   children: React.ReactNode;
 }
 
-export function ClientContainer({ githubData, children }: ClientContainerProps) {
+export function ClientContainer({ githubData, indexData, children }: ClientContainerProps) {
   const [installModalOpen, setInstallModalOpen] = useState(false);
+  const openInstallModal = () => setInstallModalOpen(true);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Top Sticky Header */}
-      <Header
-        stars={githubData.stats.stars}
-        onOpenInstallModal={() => setInstallModalOpen(true)}
-      />
+    // The rail owns the left 56px at lg and up; everything else clears it.
+    <div className="flex min-h-screen flex-col lg:pl-14">
+      <SheetRail />
 
-      {/* Hero Section */}
-      <Hero onOpenInstallModal={() => setInstallModalOpen(true)} />
+      <Header stars={githubData.stats.stars} onOpenInstallModal={openInstallModal} />
 
-      {/* Child Server Sections */}
+      {/* Line 00 — the masthead, beside the live index specimen */}
+      <Masthead onOpenInstallModal={openInstallModal} indexData={indexData} />
+
+      {/* Lines 01–09 — the sheet, rendered by the server component */}
       {children}
 
-      {/* Multi-OS Install Modal */}
-      <InstallModal
-        isOpen={installModalOpen}
-        onClose={() => setInstallModalOpen(false)}
-      />
+      <InstallModal isOpen={installModalOpen} onClose={() => setInstallModalOpen(false)} />
     </div>
   );
 }
+
+export default ClientContainer;

@@ -1,6 +1,7 @@
 // Centralized marketing stats for DocHarvest.
 // Single source of truth — components import STATS from here instead of hardcoding.
 // Bump values here; consumers update automatically.
+// source: docs/SEO_GUIDE.md §3 canonical metrics
 
 export const STATS = {
   agentsShipped: 12,        // harness cards rendered in the showcase
@@ -9,6 +10,8 @@ export const STATS = {
   reductionPct: 83,         // measured token reduction vs raw HTML (82.8%)
   speedPagesPerSec: 37.0,   // 673 pages / 18.2 s on the canonical capture
   captureTimeSec: 18.2,     // wall-clock seconds for the reference capture
+  testsPassing: 765,        // uv run pytest, 2026-09-16
+  mcpTools: 12,             // tools registered in src/gitbook_downloader/mcp/server.py
 } as const;
 
 export type DocHarvestStats = typeof STATS;

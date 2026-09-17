@@ -7,8 +7,9 @@ const octokit = new Octokit({
 
 export interface ReleaseAsset {
   name: string;
-  size: number;
-  downloadCount: number;
+  /** `null` when the build fell back to a static release (no API measurement). */
+  size: number | null;
+  downloadCount: number | null;
   browserDownloadUrl: string;
   os: 'windows' | 'linux' | 'macos' | 'python' | 'source';
 }
@@ -42,6 +43,8 @@ export interface DocHarvestGithubData {
   stats: RepoStats;
   latestRelease: ReleaseInfo;
   recentCommits: CommitInfo[];
+  /** ISO instant of the build-time fetch; `null` when the static fallback was used. */
+  fetchedAt: string | null;
 }
 
 export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
@@ -110,6 +113,7 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
       },
       latestRelease: releaseInfo,
       recentCommits,
+      fetchedAt: new Date().toISOString(),
     };
   } catch (err: any) {
     console.error('Failed to fetch DocHarvest GitHub data, using static fallback:', err.message);
@@ -122,6 +126,7 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
         updatedAt: new Date().toISOString(),
       },
       latestRelease: getFallbackRelease(),
+      fetchedAt: null,
       recentCommits: [
         {
           sha: '8c61e9e',
@@ -178,22 +183,22 @@ function getFallbackRelease(): ReleaseInfo {
     assets: [
       {
         name: 'docharvest-windows-latest.exe',
-        size: 34500000,
-        downloadCount: 520,
+        size: null,
+        downloadCount: null,
         browserDownloadUrl: DOWNLOAD_URLS.windows,
         os: 'windows',
       },
       {
         name: 'docharvest-linux-x86_64',
-        size: 48300000,
-        downloadCount: 210,
+        size: null,
+        downloadCount: null,
         browserDownloadUrl: DOWNLOAD_URLS.linux,
         os: 'linux',
       },
       {
         name: 'docharvest-macos-universal',
-        size: 30400000,
-        downloadCount: 290,
+        size: null,
+        downloadCount: null,
         browserDownloadUrl: DOWNLOAD_URLS.macos,
         os: 'macos',
       },

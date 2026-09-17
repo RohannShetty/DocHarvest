@@ -1,35 +1,39 @@
+import { STATS } from '../lib/stats'
+
+/**
+ * Claim-checked showcase data.
+ *
+ * Rules this file obeys (they mirror docs/SEO_GUIDE.md §3):
+ *   - every count is either the code's own value (provider priorities, tool
+ *     registration order) or derived from a list in this file, never typed twice;
+ *   - no invented HTML, hashes, sizes or dates — the page's measurements come
+ *     from docs/data/manifest.json, produced by scripts/build-index-data.mjs;
+ *   - a number that is not in the canonical metrics table does not appear.
+ */
+
 export interface DocFramework {
   id: string
   name: string
-  badge: string
-  color: string
+  /** Real site the detector handles; the table links to it. */
   sampleUrl: string
-  heuristicMatch: string
+  /** `Provider.priority` from src/gitbook_downloader/providers/<id>.py */
   detectionPriority: number
-  description: string
-  features: string[]
-  rawHtmlSnippet: string
-  cleanMarkdownSnippet: string
 }
 
 export interface AgentHarness {
   id: string
   name: string
   category: 'AI IDE' | 'Terminal Agent' | 'Extension' | 'CLI Harness'
-  badge: string
   configPath: string
   configSnippet: string
-  cliCommand: string
-  description: string
-  highlights: string[]
 }
 
+/** Harness cards rendered in this sheet (see STATS.agentsShipped). */
 export const AI_AGENTS: AgentHarness[] = [
   {
     id: "cursor",
     name: "Cursor IDE",
     category: "AI IDE",
-    badge: "1-Click FastMCP",
     configPath: ".cursor/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -39,15 +43,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uvx gitbook-downloader mcp",
-    description: "Connect DocHarvest to Cursor via FastMCP stdio. Cursor's Composer and Chat can search, query concepts, and download docs without leaving the editor.",
-    highlights: ["Token-efficient BM25 search (~200 tokens)", "Direct symbol & API endpoint graph navigation", "Auto-indexing on demand"]
   },
   {
     id: "claude",
     name: "Claude Code / Desktop",
     category: "Terminal Agent",
-    badge: "Native stdio Server",
     configPath: "claude_desktop_config.json",
     configSnippet: `{
   "mcpServers": {
@@ -57,15 +57,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uv run docharvest mcp",
-    description: "Equip Claude Code CLI and Claude Desktop with 12 native documentation tools, pre-structured prompt templates, and docs:// resources.",
-    highlights: ["MCP Prompts (search_docset, summarize_library)", "docs://{domain}/book resource URIs", "Zero hallucination on new APIs"]
   },
   {
     id: "opencode",
     name: "OpenCode",
     category: "Terminal Agent",
-    badge: "Full Protocol Support",
     configPath: "~/.config/opencode/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -75,15 +71,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "python -m gitbook_downloader.mcp",
-    description: "OpenCode autonomous agent integration. Gives OpenCode instant local documentation harvest and BM25 search tools.",
-    highlights: ["Autonomous background doc harvesting", "Instant SQLite FTS5 querying", "Local-first private operation"]
   },
   {
     id: "omp",
     name: "Oh My Pi (omp.sh)",
     category: "Terminal Agent",
-    badge: "MCP + Bundled Skill",
     configPath: ".omp/mcp.json (project) · ~/.omp/agent/mcp.json (user)",
     configSnippet: `{
   "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
@@ -96,15 +88,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "docharvest skill install docharvest -o .omp/skills",
-    description: "Oh My Pi reads .omp/mcp.json and discovers the bundled docharvest skill, so this repository works with no manual setup. timeout: 0 stops the client's default from cutting off a multi-minute full-site crawl.",
-    highlights: ["Ships .omp/mcp.json + skill in-repo", "timeout: 0 for full-site crawls", "Headless SPA rendering (--render)"]
   },
   {
     id: "windsurf",
     name: "Windsurf (Codeium)",
     category: "AI IDE",
-    badge: "Cascade Flow Ready",
     configPath: "~/.codeium/windsurf/mcp_config.json",
     configSnippet: `{
   "mcpServers": {
@@ -114,15 +102,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "python -m gitbook_downloader.mcp",
-    description: "Supercharge Windsurf's Cascade flow with real-time documentation retrieval. Keeps agent context locked to exact library versions.",
-    highlights: ["Version-diff tracking across releases", "Direct book.md chapter reading", "Works offline once harvested"]
   },
   {
     id: "vscode-cline",
     name: "VS Code (Cline / Roo Code / Copilot)",
     category: "Extension",
-    badge: "Multi-Extension Ready",
     configPath: ".vscode/mcp.json",
     configSnippet: `{
   "servers": {
@@ -133,15 +117,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uvx gitbook-downloader mcp",
-    description: "Universal stdio integration for GitHub Copilot, Cline, Roo Code, and Continue in VS Code with zero remote server requirements.",
-    highlights: ["Compatible with Roo Code & Cline", "Standardized stdio protocol", "Instant local doc queries"]
   },
   {
     id: "codex",
     name: "CommandCode / Codex CLI",
     category: "CLI Harness",
-    badge: "Multi-Agent Hub",
     configPath: ".codex/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -151,15 +131,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uv run docharvest mcp",
-    description: "Seamless documentation toolchain for OpenAI Codex CLI, CommandCode, and multi-agent orchestrators running in terminal workflows.",
-    highlights: ["Multi-agent parallel doc queries", "Domain-locked concurrency", "Deterministic content hashes"]
   },
   {
     id: "kilocode",
     name: "Kilo Code",
     category: "AI IDE",
-    badge: "High-Speed Agent",
     configPath: ".kilo/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -169,15 +145,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uvx gitbook-downloader mcp",
-    description: "Enhance Kilo Code with fast offline documentation access and automated concept graph relationship mapping.",
-    highlights: ["Sub-15ms BM25 search queries", "Prerequisite concept traversal", "Zero rate limits"]
   },
   {
     id: "grok",
     name: "Grok Build",
     category: "CLI Harness",
-    badge: "Agentic Build Engine",
     configPath: ".grok/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -187,15 +159,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uv run docharvest mcp",
-    description: "Provide Grok Build with direct local documentation querying tools for autonomous repository maintenance and code refactoring.",
-    highlights: ["Verified llms.txt discovery", "Full handbook reading (get_doc)", "Deterministic output contract"]
   },
   {
     id: "gemini",
     name: "Gemini CLI / Antigravity",
     category: "CLI Harness",
-    badge: "Native Protocol Ready",
     configPath: ".gemini/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -205,15 +173,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uv run docharvest mcp",
-    description: "Integrated documentation compiler for Gemini CLI and Google Antigravity developer agents with structured tool schemas.",
-    highlights: ["Cryptographically verifiable manifests", "Offline RAG JSONL exports", "Subpath crawl scoping"]
   },
   {
     id: "trae",
     name: "Trae & Qoder",
     category: "AI IDE",
-    badge: "Global IDE Integration",
     configPath: ".trae/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -223,15 +187,11 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "uvx gitbook-downloader mcp",
-    description: "Plug-and-play documentation server for ByteDance Trae and Qoder IDE workflows across global developer ecosystems.",
-    highlights: ["Zero external cloud telemetry", "Pure-Python PDF exports", "SQLite BM25 search index"]
   },
   {
     id: "vibe",
     name: "Mistral Vibe & Rovo Dev",
     category: "CLI Harness",
-    badge: "Enterprise Standard",
     configPath: ".vibe/mcp.json",
     configSnippet: `{
   "mcpServers": {
@@ -241,435 +201,152 @@ export const AI_AGENTS: AgentHarness[] = [
     }
   }
 }`,
-    cliCommand: "python -m gitbook_downloader.mcp",
-    description: "Full FastMCP v2 compliance for Mistral Vibe and Atlassian Rovo Dev agent environments.",
-    highlights: ["Enterprise air-gapped readiness", "Changelog diff generation", "Deterministic AST scraping"]
   }
 ];
 
+/**
+ * The 14 client configs documented in the README, in README order.
+ * `AgentTools` lists them and `FAQ_ITEMS` names them — one list, so the count
+ * and the enumeration can never disagree.
+ */
+export const DOC_HARVEST_CLIENTS: string[] = [
+  "Claude Code",
+  "Claude Desktop",
+  "Cursor",
+  "Windsurf",
+  "VS Code",
+  "JetBrains",
+  "Zed",
+  "Cline",
+  "Continue.dev",
+  "Kiro",
+  "OpenCode",
+  "Oh My Pi (omp.sh)",
+  "Antigravity / Gemini CLI",
+  "OpenAI Codex CLI",
+];
+
+/**
+ * Detector names, real sample sites and the priority values compiled into
+ * `src/gitbook_downloader/providers/*.py` (100 → 60; `generic` is 0 and lives
+ * in the provider table itself). Signal prose lives in ProviderTable, quoted
+ * from each `detect()` docstring.
+ */
 export const DOC_FRAMEWORKS: DocFramework[] = [
   {
     id: "gitbook",
     name: "GitBook",
-    badge: "Native Space Indexer",
-    color: "from-blue-500/20 to-cyan-500/20 border-cyan-500/30 text-cyan-400",
     sampleUrl: "https://docs.openalgo.in/v/v2.0/api-reference",
-    heuristicMatch: "space_id detection + /v/ version dropdowns + direct .md endpoint probe",
     detectionPriority: 100,
-    description: "Deep GitBook spaces integration. Traverses multi-version dropdowns, parses space manifest JSON, and probes raw .md endpoints to fetch author-original markdown directly.",
-    features: [
-      "Direct .md raw endpoint probing bypassing HTML conversion",
-      "Multi-version space selector traversal (/v/v2.0/, /v/latest)",
-      "Preserves embedded code block tabs and parameter tables",
-      "Automatic TOC generation from summary tree structure"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (42.8 KB HTML Soup) -->
-<div class="gitbook-root-container" data-space="sp_987x">
-  <nav class="sidebar-nav-sticky-top"><div class="cookie-banner-wrap">...</div>
-  <ul class="nav-tree-level-1"><li class="active"><a href="/v/v2.0/auth">OAuth</a></li>...</ul>
-  <main class="page-content-wrapper">
-    <div class="header-anchor-wrap"><h1 id="oauth2">OAuth 2.0 Auth<a class="anchor" href="#oauth2">¶</a></h1></div>
-    <div class="alert alert-warning"><svg class="icon">...</svg><span>Token expires in 3600s</span></div>
-    <div class="code-block-container" data-lang="python">
-      <div class="code-header"><span class="lang-label">Python</span><button class="copy-btn">Copy</button></div>
-      <pre><code><span class="token-keyword">import</span> <span class="token-variable">requests</span>...</code></pre>
-    </div>
-  </main>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://docs.openalgo.in/v/v2.0/api-reference/oauth
-title: "OAuth 2.0 Authentication"
-crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-9b99da415c218d5a7faeefd0e1562d31134686790cbb9db5e0fd0e5f73db2491"
-site_version: "v2.0"
----
-
-# OAuth 2.0 Authentication
-
-> ⚠️ **Warning:** Access tokens expire after 3600 seconds. Refresh via \`/oauth/v2/token\`.
-
-## Request Signature
-
-\`\`\`python
-import requests
-
-response = requests.post(
-    "https://api.openalgo.in/oauth/token",
-    json={"client_id": "pk_live_...", "grant_type": "client_credentials"}
-)
-\`\`\``
   },
   {
     id: "mintlify",
     name: "Mintlify",
-    badge: "MDX Component AST Filter",
-    color: "from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400",
     sampleUrl: "https://docs.anthropic.com/en/docs",
-    heuristicMatch: "mint.json manifest + <Snippet> & <Card> custom component unnesting",
-    detectionPriority: 95,
-    description: "Converts Mintlify MDX tags (<Accordion>, <ParamField>, <ResponseField>, <Tab>) into clean standard CommonMark with zero JSX syntax leakage.",
-    features: [
-      "Translates interactive API playground tabs into multi-language snippets",
-      "Expands <ParamField> and <Expandable> into clear tables",
-      "Captures navigation hierarchy from mint.json manifests",
-      "Strips interactive feedback widgets and analytics scripts"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (38.4 KB JSX/HTML DOM) -->
-<div class="mint-article-container" id="content">
-  <div class="mint-breadcrumbs">Docs &gt; API &gt; Messages</div>
-  <div class="custom-card-group flex gap-4">
-    <div class="mint-tab-header active" data-tab="curl">cURL</div>
-    <div class="mint-tab-header" data-tab="python">Python</div>
-  </div>
-  <div class="param-field-root" data-name="model" data-type="string" data-required="true">
-    <span class="badge badge-required">Required</span>
-    <p>The model that will complete your prompt.</p>
-  </div>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://docs.anthropic.com/en/docs/api-reference/messages
-title: "Create a Message"
-crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-6390baeb88e3c3e53bd0919c23b891517436d6f373a80b5b02be70c819ede6f9"
-framework: "mintlify"
----
-
-# Create a Message
-
-### Parameters
-
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| \`model\` | string | **Yes** | The model that will complete your prompt. |
-| \`max_tokens\` | integer | **Yes** | Maximum tokens to generate before stopping. |`
+    detectionPriority: 90,
   },
   {
     id: "docusaurus",
     name: "Docusaurus",
-    badge: "Versioned Docset Flattener",
-    color: "from-amber-500/20 to-orange-500/20 border-amber-500/30 text-amber-400",
     sampleUrl: "https://reactnative.dev/docs/getting-started",
-    heuristicMatch: "docusaurus-plugin-content-docs + __docusaurus state + /docs/next/",
-    detectionPriority: 90,
-    description: "Detects Docusaurus React SPAs. Traverses version dropdowns, isolates the main <article> container, and strips sticky sidebars and edit-on-GitHub links.",
-    features: [
-      "Isolates <article> DOM removing sidebar navigation and footer links",
-      "Preserves Admonition callouts (:::tip, :::danger, :::note)",
-      "Recursively expands React tabs (<Tabs> and <TabItem>)",
-      "Extracts frontmatter metadata from Docusaurus injected state"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (49.1 KB Hydration Bundle) -->
-<div class="docMainContainer_gTbr">
-  <aside class="theme-doc-sidebar-container">...</aside>
-  <main class="docMainContainer">
-    <div class="theme-admonition theme-admonition-tip">
-      <div class="admonitionHeading"><h5>Tip</h5></div>
-      <div class="admonitionContent"><p>Use React Native CLI for native code.</p></div>
-    </div>
-  </main>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://reactnative.dev/docs/getting-started
-title: "Environment Setup"
-crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-5137e1f50cf27887cacd03deab8807d96828b4f837f87712d82be61bdd675c45"
-framework: "docusaurus"
----
-
-# Setting up the development environment
-
-> 💡 **Tip:** Use the React Native CLI if you need to build native Swift/Kotlin code.`
+    detectionPriority: 80,
   },
   {
     id: "nextra",
     name: "Nextra",
-    badge: "Next.js Static Content Extractor",
-    color: "from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-400",
     sampleUrl: "https://swr.vercel.app/docs/getting-started",
-    heuristicMatch: "nextra-content + next-data-payload + _meta.json",
-    detectionPriority: 85,
-    description: "Extracts docs built with Vercel Nextra. Parses _meta.json files to build exact navigation hierarchy and extracts clean article content.",
-    features: [
-      "Parses _meta.json for exact menu hierarchy and ordering",
-      "Strips Next.js page transitions and script hydration tags",
-      "Extracts clean code blocks with syntax highlighting indicators",
-      "Preserves Nextra Callout and Steps components"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (31.7 KB HTML) -->
-<article class="nextra-body nextra-content">
-  <div class="nextra-breadcrumb">...</div>
-  <h1 class="nextra-heading">Getting Started</h1>
-  <div class="nextra-callout nextra-callout-info">
-    <div class="nextra-callout-icon">...</div>
-    <div class="nextra-callout-text">SWR is a React Hooks library for data fetching.</div>
-  </div>
-</article>`,
-    cleanMarkdownSnippet: `---
-source_url: https://swr.vercel.app/docs/getting-started
-title: "Getting Started"
-crawl_date: "2026-08-28T16:42:19Z"
-content_hash: "sha256-01cf8e05e3da0c9ada8b44cec414c2780a5f946699482b856a0945113cdefe64"
-framework: "nextra"
----
-
-# Getting Started
-
-> ℹ️ **Note:** SWR is a React Hooks library for data fetching.
-
-\`\`\`bash
-npm install swr
-\`\`\``
-  },
-  {
-    id: "readme",
-    name: "ReadMe.io",
-    badge: "OAS 3.0 API Schema Unfolder",
-    color: "from-sky-500/20 to-blue-500/20 border-sky-500/30 text-sky-400",
-    sampleUrl: "https://docs.readme.com/reference",
-    heuristicMatch: "readme.io/reference/ + /api-explorer/ + swagger schema parser",
-    detectionPriority: 80,
-    description: "Unfolds ReadMe interactive API docs. Extracts OpenAPI endpoints, query parameter schemas, and response examples into clear markdown tables.",
-    features: [
-      "Converts OpenAPI JSON specifications into structured markdown",
-      "Extracts request headers, authentication requirements, and payload bodies",
-      "Strips interactive 'Try It' test consoles and API key inputs",
-      "Consolidates response status codes (200, 400, 401, 500) with JSON mocks"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (44.5 KB API Explorer DOM) -->
-<div class="api-explorer-root" data-method="POST" data-endpoint="/v1/users">
-  <div class="interactive-form-console"><input name="api_key" type="password" />...</div>
-  <div class="param-row"><code>email</code><span>string (required)</span></div>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://api.example.com/reference/create-user
-title: "Create User"
-http_method: "POST"
-endpoint: "/v1/users"
----
-
-# Create User \`POST /v1/users\`
-
-### Body Parameters
-
-| Parameter | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| \`email\` | string | **Yes** | User email address. |`
+    detectionPriority: 75,
   },
   {
     id: "vitepress",
     name: "VitePress",
-    badge: "Vue-Powered Static Tree Compiler",
-    color: "from-emerald-500/20 to-green-500/20 border-emerald-500/30 text-emerald-400",
     sampleUrl: "https://vitepress.dev/guide/what-is-vitepress",
-    heuristicMatch: "vp-doc + vitepress-nav + .vitepress/config.ts",
-    detectionPriority: 75,
-    description: "Harvests VitePress documentation portals. Extracts frontmatter, table of contents, and multi-language code snippets without Vue template tags.",
-    features: [
-      "Isolates .vp-doc markdown container",
-      "Transforms Vue custom containers (::: info, ::: warning)",
-      "Preserves code group tabs with file name badges",
-      "Generates unified offline handbook from sidebar configuration"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (29.2 KB Vue DOM) -->
-<div class="VPContent">
-  <div class="VPDoc">
-    <div class="custom-block tip"><p class="custom-block-title">TIP</p><p>VitePress is built on Vite.</p></div>
-  </div>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://vitepress.dev/guide/what-is-vitepress
-title: "What is VitePress?"
-crawl_date: "2026-08-28T16:42:19Z"
----
-
-# What is VitePress?
-
-> 💡 **Tip:** VitePress is built on Vite and Vue 3.`
+    detectionPriority: 72,
   },
   {
     id: "mkdocs",
     name: "MkDocs",
-    badge: "Material Python Documentation Harvester",
-    color: "from-indigo-500/20 to-violet-500/20 border-indigo-500/30 text-indigo-400",
     sampleUrl: "https://squidfunk.github.io/mkdocs-material/",
-    heuristicMatch: "md-content + mkdocs.yml + search_index.json",
     detectionPriority: 70,
-    description: "Parses MkDocs and Material for MkDocs. Extracts complete documentation hierarchy, search_index.json files, and code tabs.",
-    features: [
-      "Direct extraction of pre-compiled search_index.json for instant indexing",
-      "Strips Material for MkDocs search modal and header navigation",
-      "Preserves pymdownx code blocks and content tabs",
-      "Extracts mathematical formulas (MathJax / KaTeX) cleanly"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (35.1 KB MkDocs HTML) -->
-<div class="md-content">
-  <article class="md-content__inner md-typeset">
-    <h1>Material for MkDocs</h1>
-    <div class="admonition note"><p class="admonition-title">Note</p><p>Built with Python.</p></div>
-  </article>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://squidfunk.github.io/mkdocs-material/
-title: "Material for MkDocs"
-crawl_date: "2026-08-28T16:42:19Z"
----
-
-# Material for MkDocs
-
-> ℹ️ **Note:** Built with Python and modern CSS.`
+  },
+  {
+    id: "readme",
+    name: "ReadMe.io",
+    sampleUrl: "https://docs.readme.com/reference",
+    detectionPriority: 65,
   },
   {
     id: "readthedocs",
     name: "ReadTheDocs",
-    badge: "Sphinx / reStructuredText AST",
-    color: "from-teal-500/20 to-cyan-500/20 border-teal-500/30 text-teal-400",
     sampleUrl: "https://docs.readthedocs.io/en/stable/",
-    heuristicMatch: "readthedocs-data + div.rst-content + div.document",
     detectionPriority: 60,
-    description: "Converts Sphinx and ReadTheDocs portals. Handles multi-version flyouts, strips Sphinx search bars, and converts reStructuredText directive blocks to clean CommonMark.",
-    features: [
-      "Translates Sphinx directives (.. note::, .. code-block::) into Markdown blocks",
-      "Strips RTD flyout menus, search modals, and build version banners",
-      "Extracts full API signatures, method docstrings, and parameter tables",
-      "Preserves cross-page intersphinx reference links"
-    ],
-    rawHtmlSnippet: `<!-- Raw Scraper Output (41.3 KB Sphinx HTML) -->
-<div class="rst-content">
-  <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-    <h1>Read the Docs Documentation</h1>
-    <div class="admonition tip"><p class="admonition-title">Tip</p><p>Sphinx documentation builder.</p></div>
-  </div>
-</div>`,
-    cleanMarkdownSnippet: `---
-source_url: https://docs.readthedocs.io/en/stable/
-title: "Read the Docs Documentation"
-crawl_date: "2026-08-28T16:42:19Z"
-framework: "readthedocs"
----
-
-# Read the Docs Documentation
-
-> 💡 **Tip:** Built with Sphinx documentation builder.`
-  }
-];
-
-export const CONTRACT_FORMATS = [
-  {
-    id: "markdown",
-    title: "1. Consolidated Markdown",
-    subtitle: "Unified book.md for LLM System Prompts",
-    badge: "Universal Context",
-    fileExt: "book.md",
-    description: "Merges the entire documentation portal into a single coherent, top-to-bottom Markdown file with an automatic table of contents and internal anchor links.",
-    features: [
-      "Automated hierarchical Table of Contents",
-      "Relative link remapping to internal document anchors",
-      "Zero redundant headers, sidebars, or footers",
-      "Perfect for pasting directly into Claude Project Knowledge, Cursor, or ChatGPT Custom GPTs"
-    ]
-  },
-  {
-    id: "rag",
-    title: "2. Vector RAG JSONL",
-    subtitle: "Chunked & Tokenized for Vector Databases",
-    badge: "RAG & Vector Search",
-    fileExt: "dataset.jsonl",
-    description: "Every page is parsed into semantic chunks with token counts, SHA-256 content hashes, breadcrumb taxonomies, and source URL metadata.",
-    features: [
-      "Pre-calculated token counts (cl100k_base / o200k_base compatible)",
-      "Cryptographic SHA-256 content hashes for incremental synchronization",
-      "Breadcrumb taxonomy arrays: ['API Reference', 'Orders', 'Create']",
-      "Direct drop-in for LangChain, LlamaIndex, ChromaDB, and Pinecone"
-    ]
-  },
-  {
-    id: "llmstxt",
-    title: "3. Standard llms.txt",
-    subtitle: "The AI Discovery Manifest Standard",
-    badge: "AI Discovery Manifest",
-    fileExt: "llms.txt",
-    description: "Implements the official llms.txt standard proposed for AI agent consumption, organizing core guides, API schemas, and secondary links.",
-    features: [
-      "Structured # Heading with brief summary",
-      "## Docs Section with clean markdown links",
-      "## Optional Section for advanced reference",
-      "Standard compliance for automated Cursor, Claude & OpenCode indexing"
-    ]
-  },
-  {
-    id: "pdf",
-    title: "4. Publication-Grade PDF",
-    subtitle: "Formatted Offline Printable Handbook",
-    badge: "Offline Printable",
-    fileExt: "handbook.pdf",
-    description: "Built on pure-Python fpdf2 layout engine with zero C-dependencies. Generates a beautifully styled, searchable offline PDF with cover page, TOC, and syntax-highlighted code.",
-    features: [
-      "Pure-Python fpdf2 rendering (zero WeasyPrint/wkhtmltopdf dependencies)",
-      "Automatic multi-level Table of Contents with page number targets",
-      "Syntax-highlighted code blocks with rounded container styling",
-      "Page headers, footers, and timestamp watermarks"
-    ]
   }
 ];
 
 export const MATRIX_ROWS = [
   {
-    feature: "Native AST Framework Extraction (GitBook, Mintlify, Docusaurus)",
+    feature: "Native AST framework extraction (GitBook, Mintlify, Docusaurus)",
     docharvest: true,
     rawScrapers: false,
     cloudApis: "Partial",
     detail: "Automatically isolates article DOMs and probes raw markdown endpoints directly."
   },
   {
-    feature: "Zero HTML/JSX Soup in Markdown Output (83% Token Cut)",
+    feature: `Zero HTML/JSX soup in the emitted Markdown (~${STATS.reductionPct}% token reduction)`,
     docharvest: true,
     rawScrapers: false,
     cloudApis: true,
     detail: "Strips cookie banners, navbars, sidebars, and interactive widget code."
   },
   {
-    feature: "Built-in FastMCP v2 Server for 14 Documented AI Coding Agents (Cursor, Claude, OpenCode, Pi)",
+    feature: `Built-in FastMCP v2 server (${STATS.mcpTools} tools) for ${DOC_HARVEST_CLIENTS.length} documented AI clients`,
     docharvest: true,
     rawScrapers: false,
     cloudApis: "API Key Req",
-    detail: "12 native MCP tools, resources & prompts running over stdio directly inside your agent."
+    detail: `${STATS.mcpTools} native MCP tools, resources & prompts running over stdio directly inside your agent.`
   },
   {
-    feature: "Standard llms.txt & Vector RAG JSONL Compilation",
+    feature: "Standard llms.txt & vector RAG JSONL compilation",
     docharvest: true,
     rawScrapers: false,
     cloudApis: false,
     detail: "Builds unified RAG chunk files with token counts and SHA-256 content hashes."
   },
   {
-    feature: "Embedded SQLite FTS5 BM25 Full-Text Search (<15ms)",
+    feature: "Embedded SQLite FTS5 BM25 full-text search",
     docharvest: true,
     rawScrapers: false,
     cloudApis: false,
-    detail: "Instant ranked keyword search queries across thousands of harvested pages."
+    detail: "Ranked keyword search queries across thousands of harvested pages."
   },
   {
-    feature: "Pure-Python PDF Handbook Generation with TOC (fpdf2)",
+    feature: "Pure-Python PDF handbook generation with TOC (fpdf2)",
     docharvest: true,
     rawScrapers: false,
     cloudApis: false,
     detail: "Zero external C-library dependencies (no WeasyPrint or wkhtmltopdf)."
   },
   {
-    feature: "Client-Side SPA Playwright Rendering (--render)",
+    feature: "Client-side SPA Playwright rendering (--render)",
     docharvest: true,
     rawScrapers: false,
     cloudApis: true,
     detail: "Crawls heavy client-rendered JavaScript portals like omp.sh with headless browser hydration."
   },
   {
-    feature: "100% Free, Open Source (MIT) & Zero Cloud Telemetry",
+    feature: "100% free, open source (MIT) & zero cloud telemetry",
     docharvest: true,
     rawScrapers: true,
     cloudApis: false,
     detail: "No subscription fees, no per-page charges, and zero data leaves your local machine."
   }
 ];
+
+/** Join names the way the FAQ reads them: "a, b, and c". */
+function enumerate(names: string[]): string {
+  if (names.length <= 1) return names.join('');
+  return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`;
+}
 
 export const FAQ_ITEMS = [
   {
@@ -682,7 +359,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: "Which AI coding agents and IDEs support DocHarvest FastMCP?",
-    a: "DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and ships ready-made configs for 14 documented clients: Cursor, Claude Code, Claude Desktop, OpenCode, Oh My Pi (omp.sh), Windsurf (Codeium), VS Code (Copilot, Cline, Roo Code, Continue), JetBrains, Zed, Kiro, Gemini CLI, and OpenAI Codex CLI."
+    a: `DocHarvest's FastMCP v2 server is fully standard-compliant over stdio and ships ready-made configs for ${DOC_HARVEST_CLIENTS.length} documented clients: ${enumerate(DOC_HARVEST_CLIENTS)}.`
   },
   {
     q: "Does it work with client-rendered JavaScript Single-Page Applications (SPAs)?",

@@ -1,143 +1,113 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 
-// Mock next/link to avoid Next.js router dependency
-vi.mock('next/link', () => ({
-  default: ({ children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) =>
-    React.createElement('a', props, children),
-  __esModule: true,
-}));
-
-// Import all components under audit
-import { AgentEcosystemShowcase } from '../AgentEcosystemShowcase';
-import { DocTypeSelector } from '../DocTypeSelector';
-import { ExportStudioPreview } from '../ExportStudioPreview';
-import { FaqSection } from '../FaqSection';
-import { Footer } from '../Footer';
-import { GithubReleaseFeed } from '../GithubReleaseFeed';
+import { AgentTools } from '../AgentTools';
+import { Colophon } from '../Colophon';
+import { ComparisonTable } from '../ComparisonTable';
+import { FaqSheet } from '../FaqSheet';
 import { Header } from '../Header';
-import { Hero } from '../Hero';
 import { InstallModal } from '../InstallModal';
-import { McpShowcase } from '../McpShowcase';
-import { OutputContract } from '../OutputContract';
+import { ManifestTree } from '../ManifestTree';
+import { Masthead } from '../Masthead';
+import { ProviderTable } from '../ProviderTable';
+import { Releases } from '../Releases';
 import { ThemeProvider } from '../ThemeProvider';
-import type { DocHarvestGithubData } from '../../lib/github';
+import { GITHUB_FIXTURE, INDEX_PROVENANCE, INDEX_ROWS, MANIFEST_FIXTURE } from './sheetFixtures';
 
 /**
- * Helper: find every <button> with cursor-pointer in the rendered output
- * and assert it also carries focus-visible:outline-2 and
- * focus-visible:outline-primary.
+ * Every control that looks clickable must carry the keyboard ring: the square
+ * amber `focus-visible` outline. The guard at the bottom keeps this suite honest
+ * — a component with no pointer controls must fail rather than pass vacuously.
  */
-function verifyFocusVisibleButtons(
-  container: HTMLElement,
-  componentName: string,
-): void {
-  const buttons = container.querySelectorAll('button, a[href]');
-  let cursorButtons = 0;
+function verifyFocusVisibleControls(container: HTMLElement, componentName: string): void {
+  const controls = container.querySelectorAll('button, a[href]');
+  let cursorControls = 0;
 
-  buttons.forEach((btn, idx) => {
-    const cls = btn.getAttribute('class') || '';
-    if (!cls.includes('cursor-pointer')) return;
+  controls.forEach((control, index) => {
+    const className = control.getAttribute('class') || '';
+    if (!className.includes('cursor-pointer')) return;
 
-    cursorButtons++;
+    cursorControls++;
 
-    expect(cls, `${componentName}: button[${idx}] has cursor-pointer but is missing focus-visible:outline-2`)
-      .toContain('focus-visible:outline-2');
-    expect(cls, `${componentName}: button[${idx}] has cursor-pointer but is missing focus-visible:outline-primary`)
-      .toContain('focus-visible:outline-primary');
+    expect(
+      className,
+      `${componentName}: control[${index}] has cursor-pointer but is missing focus-visible:outline-2`,
+    ).toContain('focus-visible:outline-2');
+    expect(
+      className,
+      `${componentName}: control[${index}] has cursor-pointer but is missing focus-visible:outline-match`,
+    ).toContain('focus-visible:outline-match');
   });
 
-  if (cursorButtons === 0) {
-    throw new Error(`${componentName}: expected at least one button with cursor-pointer to verify — guard against false positives`);
+  if (cursorControls === 0) {
+    throw new Error(
+      `${componentName}: expected at least one control with cursor-pointer to verify — guard against false positives`,
+    );
   }
 }
 
-// Minimal mock data for GithubReleaseFeed
-const mockGithubData = {
-  stats: {
-    stars: 128,
-    forks: 50,
-    openIssues: 3,
-    watchers: 10,
-    updatedAt: '2026-08-30',
-  },
-  latestRelease: {
-    tag: 'v11.0.5',
-    name: 'v11.0.5',
-    publishedAt: '2026-08-30',
-    body: '## What’s Changed\nSome changes',
-    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.5',
-    assets: [],
-  },
-  recentCommits: [
-    {
-      sha: 'abc1234',
-      message: 'Fix something',
-      date: '2026-08-30',
-      author: 'Rohan Shetty',
-      url: 'https://github.com/RohannShetty/gitbook-downloader/commit/abc1234',
-    },
-  ],
-} as unknown as DocHarvestGithubData;
+const indexData = { provenance: INDEX_PROVENANCE, rows: INDEX_ROWS };
 
-describe('focus-visible outline standardisation on interactive buttons', () => {
-  it('AgentEcosystemShowcase — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<AgentEcosystemShowcase />);
-    verifyFocusVisibleButtons(container, 'AgentEcosystemShowcase');
+describe('focus-visible outline on every pointer control', () => {
+  it('AgentTools', () => {
+    verifyFocusVisibleControls(render(<AgentTools />).container, 'AgentTools');
   });
 
-  it('DocTypeSelector — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<DocTypeSelector />);
-    verifyFocusVisibleButtons(container, 'DocTypeSelector');
+  it('Colophon', () => {
+    verifyFocusVisibleControls(render(<Colophon />).container, 'Colophon');
   });
 
-  it('ExportStudioPreview — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<ExportStudioPreview />);
-    verifyFocusVisibleButtons(container, 'ExportStudioPreview');
+  it('FaqSheet', () => {
+    verifyFocusVisibleControls(render(<FaqSheet />).container, 'FaqSheet');
   });
 
-  it('FaqSection — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<FaqSection />);
-    verifyFocusVisibleButtons(container, 'FaqSection');
-  });
-
-  it('Footer — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<Footer />);
-    verifyFocusVisibleButtons(container, 'Footer');
-  });
-
-  it('GithubReleaseFeed — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<GithubReleaseFeed data={mockGithubData} />);
-    verifyFocusVisibleButtons(container, 'GithubReleaseFeed');
-  });
-
-  it('Header — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(
-      <ThemeProvider>
-        <Header onOpenInstallModal={() => {}} />
-      </ThemeProvider>,
+  it('Header', () => {
+    verifyFocusVisibleControls(
+      render(
+        <ThemeProvider>
+          <Header stars={128} onOpenInstallModal={() => {}} />
+        </ThemeProvider>,
+      ).container,
+      'Header',
     );
-    verifyFocusVisibleButtons(container, 'Header');
   });
 
-  it('Hero — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<Hero onOpenInstallModal={() => {}} />);
-    verifyFocusVisibleButtons(container, 'Hero');
+  it('InstallModal', () => {
+    verifyFocusVisibleControls(
+      render(<InstallModal isOpen={true} onClose={() => {}} />).container,
+      'InstallModal',
+    );
   });
 
-  it('InstallModal — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<InstallModal isOpen={true} onClose={() => {}} />);
-    verifyFocusVisibleButtons(container, 'InstallModal');
+  it('ManifestTree', () => {
+    verifyFocusVisibleControls(
+      render(<ManifestTree manifest={MANIFEST_FIXTURE} />).container,
+      'ManifestTree',
+    );
   });
 
-  it('McpShowcase — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<McpShowcase />);
-    verifyFocusVisibleButtons(container, 'McpShowcase');
+  it('Masthead', () => {
+    verifyFocusVisibleControls(
+      render(<Masthead onOpenInstallModal={() => {}} indexData={indexData} />).container,
+      'Masthead',
+    );
   });
 
-  it('OutputContract — buttons with cursor-pointer have focus-visible classes', () => {
-    const { container } = render(<OutputContract />);
-    verifyFocusVisibleButtons(container, 'OutputContract');
+  it('ProviderTable', () => {
+    verifyFocusVisibleControls(render(<ProviderTable />).container, 'ProviderTable');
+  });
+
+  it('Releases', () => {
+    verifyFocusVisibleControls(render(<Releases data={GITHUB_FIXTURE} />).container, 'Releases');
+  });
+});
+
+describe('focus-visible guard', () => {
+  it('throws when a component renders no pointer controls', () => {
+    const { container } = render(<ComparisonTable />);
+    expect(() => verifyFocusVisibleControls(container, 'ComparisonTable')).toThrow(
+      /guard against false positives/,
+    );
   });
 });
