@@ -130,7 +130,7 @@ export function AgentTools() {
               aria-label="Copy MCP configuration"
               className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
               <span className="sheet-label">{copied ? 'copied' : 'copy json'}</span>
             </button>
           </div>

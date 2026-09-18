@@ -70,9 +70,13 @@ export function App() {
     loadLibrary()
     
     // Check if first-time user tour should be shown
-    const tourCompleted = localStorage.getItem("docharvest_tour_completed")
-    if (!tourCompleted) {
-      setTourOpen(true)
+    try {
+      const tourCompleted = localStorage.getItem("docharvest_tour_completed")
+      if (!tourCompleted) {
+        setTourOpen(true)
+      }
+    } catch {
+      // Storage unavailable or restricted in webview
     }
   }, [])
 

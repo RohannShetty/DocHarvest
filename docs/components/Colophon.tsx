@@ -57,7 +57,7 @@ export function Colophon() {
               rel="noreferrer"
               className="sheet-label inline-flex cursor-pointer items-center gap-1.5 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
-              {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
+              {Icon ? <Icon aria-hidden="true" className="h-3.5 w-3.5" /> : null}
               {label}
             </a>
           ))}
@@ -68,7 +68,7 @@ export function Colophon() {
             className="sheet-label ml-auto inline-flex cursor-pointer items-center gap-1.5 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
             Back to top
-            <ArrowUp className="h-3.5 w-3.5" />
+            <ArrowUp aria-hidden="true" className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

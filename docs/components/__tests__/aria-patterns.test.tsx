@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 
 import { FaqSheet } from '../FaqSheet';
 import { IndexSheet } from '../IndexSheet';
+import { InstallModal } from '../InstallModal';
 import { ManifestTree } from '../ManifestTree';
 import { FAQ_ITEMS } from '../../data/showcaseData';
 import { INDEX_PROVENANCE, INDEX_ROWS, MANIFEST_FIXTURE } from './sheetFixtures';
@@ -50,6 +51,12 @@ describe('FaqSheet ARIA patterns', () => {
     await user.click(buttons[1]);
     expect(buttons[1]).toHaveAttribute('aria-expanded', 'false');
   });
+  it('gives open FAQ panel role="region" and aria-labelledby pointing to button', () => {
+    render(<FaqSheet />);
+    const button = screen.getAllByRole('button')[0];
+    const panel = screen.getByRole('region');
+    expect(panel).toHaveAttribute('aria-labelledby', button.id);
+  });
 });
 
 // ─── ManifestTree: four plates as a tab set ──────────────────────────────────
@@ -81,6 +88,21 @@ describe('ManifestTree ARIA patterns', () => {
     expect(tabs[0]).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[1].id);
     expect(screen.getByText(/Markdown capture of/)).toBeInTheDocument();
+  });
+
+  it('navigates tabs with keyboard arrow keys', async () => {
+    const user = userEvent.setup();
+    render(<ManifestTree manifest={MANIFEST_FIXTURE} />);
+    const tabs = screen.getAllByRole('tab');
+
+    await user.click(tabs[0]);
+    await user.keyboard('{ArrowRight}');
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[1]).toHaveFocus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[0]).toHaveFocus();
   });
 
   it('states the absence when the capture has no RAG export', async () => {
@@ -133,5 +155,35 @@ describe('IndexSheet ARIA patterns', () => {
 
     await user.keyboard('{ArrowUp}');
     expect(field).toHaveAttribute('aria-activedescendant', options[0].id);
+  });
+});
+
+// ─── InstallModal: tablist and tabpanel ───────────────────────────────────────
+
+describe('InstallModal ARIA patterns', () => {
+  it('pairs the visible tabpanel with the selected tab', () => {
+    render(<InstallModal isOpen={true} onClose={() => {}} />);
+    const tabs = screen.getAllByRole('tab');
+    const panel = screen.getByRole('tabpanel');
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(panel).toHaveAttribute('aria-labelledby', tabs[0].id);
+    expect(tabs[0]).toHaveAttribute('aria-controls', panel.id);
+  });
+
+  it('navigates tabs with keyboard arrow keys and swaps tabpanel', async () => {
+    const user = userEvent.setup();
+    render(<InstallModal isOpen={true} onClose={() => {}} />);
+    const tabs = screen.getAllByRole('tab');
+
+    await user.click(tabs[0]);
+    await user.keyboard('{ArrowRight}');
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[1]).toHaveFocus();
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[1].id);
+
+    await user.keyboard('{ArrowLeft}');
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[0]).toHaveFocus();
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[0].id);
   });
 });

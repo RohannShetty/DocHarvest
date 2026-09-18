@@ -63,7 +63,7 @@ export function Masthead({ onOpenInstallModal, indexData }: MastheadProps) {
               aria-label="Copy capture command"
               className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
               <span className="sheet-label">{copied ? 'copied' : 'copy'}</span>
             </button>
           </div>
@@ -82,7 +82,7 @@ export function Masthead({ onOpenInstallModal, indexData }: MastheadProps) {
               className="sheet-label inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
               Repository
-              <ArrowUpRight className="h-3.5 w-3.5" />
+              <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
             </a>
           </div>
 
@@ -90,13 +90,13 @@ export function Masthead({ onOpenInstallModal, indexData }: MastheadProps) {
             Free &amp; MIT · No account · No API key · Nothing leaves your machine
           </p>
 
-          <dl className="mt-10 grid grid-cols-2 border-t border-rule">
+          <ul role="list" className="mt-10 grid grid-cols-2 border-t border-rule">
             {figures.map((figure) => (
-              <div key={figure} className="border-b border-rule py-3 pr-4 odd:border-r">
-                <dd className="sheet-num text-sm text-ink">{figure}</dd>
-              </div>
+              <li key={figure} className="border-b border-rule py-3 pr-4 odd:border-r">
+                <span className="sheet-num text-sm text-ink">{figure}</span>
+              </li>
             ))}
-          </dl>
+          </ul>
           <p className="sheet-label mt-3">
             Reference capture: docs.openalgo.in · canonical metrics: docs/SEO_GUIDE.md §3
           </p>

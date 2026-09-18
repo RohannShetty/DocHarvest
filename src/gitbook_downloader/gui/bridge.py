@@ -47,6 +47,17 @@ class ApiBridge:
         self._emit_queue: queue.Queue[tuple[str, Any]] = queue.Queue()
         self._emit_drain_stop = threading.Event()
         self._emit_drain_thread: threading.Thread | None = None
+        self._event_listeners: list[Any] = []
+
+    def add_event_listener(self, listener: Any) -> None:
+        """Register a callback (func_name, data) for progress and completion events."""
+        if listener not in self._event_listeners:
+            self._event_listeners.append(listener)
+
+    def remove_event_listener(self, listener: Any) -> None:
+        """Unregister a previously registered event listener."""
+        if listener in self._event_listeners:
+            self._event_listeners.remove(listener)
 
     def start_emit_drain(self) -> None:
         """Start the queue-drain thread (call once after window is set)."""
@@ -78,11 +89,17 @@ class ApiBridge:
                 pass
 
     def _emit_to_js(self, func_name: str, data: Any) -> None:
-        """Queue a JS callback for the drain thread to fire on the UI thread.
+        """Queue a JS callback for the drain thread to fire on the UI thread, and notify listeners.
 
         Safe to call from any thread (worker or UI). Returns immediately;
         actual evaluate_js happens on the drain thread.
         """
+        for listener in list(self._event_listeners):
+            try:
+                listener(func_name, data)
+            except Exception:
+                pass
+
         if self._window is None:
             return
         try:

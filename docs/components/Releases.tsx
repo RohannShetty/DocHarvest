@@ -125,7 +125,7 @@ export function Releases({ data }: ReleasesProps) {
                 className="sheet-label inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
               >
                 Open {release.tag} on GitHub
-                <ArrowUpRight className="h-3.5 w-3.5" />
+                <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
               </a>
             </p>
 
@@ -164,7 +164,7 @@ export function Releases({ data }: ReleasesProps) {
                   aria-label="Copy verification command"
                   className="inline-flex cursor-pointer items-center gap-1.5 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
                 >
-                  {copied === 'verify' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied === 'verify' ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
                   <span className="sheet-label">{copied === 'verify' ? 'copied' : 'copy verification command'}</span>
                 </button>
               </div>
@@ -185,7 +185,7 @@ export function Releases({ data }: ReleasesProps) {
                     aria-label="Copy commit hash"
                     className="sheet-num shrink-0 cursor-pointer pt-0.5 text-[12px] text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
                   >
-                    [{commit.sha}]
+                    {copied === commit.sha ? <span className="text-match">[copied]</span> : `[${commit.sha}]`}
                   </button>
                   <div className="min-w-0 flex-1">
                     <a
@@ -214,7 +214,7 @@ export function Releases({ data }: ReleasesProps) {
                 className="sheet-label inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
               >
                 View Full Log
-                <ArrowUpRight className="h-3.5 w-3.5" />
+                <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />
               </a>
             </p>
           </div>

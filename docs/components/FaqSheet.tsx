@@ -30,6 +30,7 @@ export function FaqSheet() {
             return (
               <div key={item.q} className="border-b border-rule">
                 <button
+                  id={`faq-button-${index}`}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
                   aria-controls={`faq-content-${index}`}
@@ -44,7 +45,11 @@ export function FaqSheet() {
                 </button>
 
                 {isOpen && (
-                  <div id={`faq-content-${index}`}>
+                  <div
+                    id={`faq-content-${index}`}
+                    role="region"
+                    aria-labelledby={`faq-button-${index}`}
+                  >
                     <p className="sheet-body pb-5 pr-8 text-[13px]">{item.a}</p>
                   </div>
                 )}

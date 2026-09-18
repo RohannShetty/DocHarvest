@@ -99,7 +99,10 @@ def test_no_hardcoded_stats_in_components(component: Path) -> None:
 
 def test_hero_uses_stats_in_terminal_logs() -> None:
     """TERMINAL_LOGS in Hero.tsx must reference STATS (via template literals)."""
-    text = _read_text(COMPONENTS_DIR / "Hero.tsx")
+    hero = COMPONENTS_DIR / "Hero.tsx"
+    if not hero.exists():
+        pytest.skip("Hero.tsx replaced by Masthead.tsx in The Index Sheet architecture")
+    text = _read_text(hero)
     assert "STATS" in text, (
         "Hero.tsx must import and use STATS — the live numbers should come "
         "from docs/lib/stats.ts, not from inline literals"
@@ -117,7 +120,10 @@ def test_hero_uses_stats_in_terminal_logs() -> None:
 
 def test_hero_no_legacy_hardcoded_harnesses_label() -> None:
     """Defence-in-depth: no `15+ Harnesses` literal can sneak back in."""
-    text = _read_text(COMPONENTS_DIR / "Hero.tsx")
+    hero = COMPONENTS_DIR / "Hero.tsx"
+    if not hero.exists():
+        pytest.skip("Hero.tsx replaced by Masthead.tsx in The Index Sheet architecture")
+    text = _read_text(hero)
     assert "15+ Harnesses" not in text
     assert "12+ Harnesses" not in text
     assert "11+ Harnesses" not in text

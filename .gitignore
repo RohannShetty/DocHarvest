@@ -41,6 +41,7 @@ graphify-out/
 # pytest & coverage
 .pytest_cache/
 .tmp_pytest/
+.tmp_pytest_cache/
 .coverage
 .coverage.*
 coverage.xml
@@ -124,6 +125,7 @@ docs/dist/
 
 
 .opencode/
+.omp/plans/
 .superpowers/
 .impeccable/
 

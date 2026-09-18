@@ -165,7 +165,7 @@ function getFallbackRelease(): ReleaseInfo {
   return {
     tag: `v${VERSION}`,
     name: `DocHarvest v${VERSION}`,
-    publishedAt: '2026-09-16',
+    publishedAt: '2026-09-18',
     body: `## Highlights
 
 - Native FastMCP v2 server: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more).
@@ -173,12 +173,11 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.0.9
+### What's New in v11.0.10
 
-- Universal MCP skill: the bundled docharvest SKILL.md is harness-neutral — it drives the FastMCP v2 server over standard stdio, so one skill serves every MCP-capable agent harness (Cursor, Claude Code/Desktop, VS Code, Windsurf, OpenCode, Codex, Oh My Pi).
-- Install into any harness layout: docharvest skill install docharvest -o <harness-skills-dir> writes <dir>/docharvest/SKILL.md for .agents/skills, .claude/skills, .cursor/skills, .gemini/skills, .github/skills and .omp/skills.
-- Harness-neutral recovery wording: the skill no longer hardcodes one harness's reload command; it defers to the harness's own MCP reload or reconnect step, with Oh My Pi (/mcp reload after ./.omp/mcp.json) named as the example.
-- Documentation pass: README, changelog and this release feed carry the same universal-integration summary for the MCP skill.`,
+- Standalone Browser GUI & SSE Bridge: added \`gitbook-dl gui --browser zen\` (supporting Zen Browser, Chrome, Firefox, and system defaults) with an in-browser PyWebView JS Proxy shim.
+- Real-Time Progress Streaming: Server-Sent Events (SSE) stream live crawl and download events directly to the browser UI without native webview dependencies.
+- Universal agent integration: full compatibility across all AI assistant harnesses and standalone browser environments.`,
     htmlUrl: `https://github.com/RohannShetty/gitbook-downloader/releases/tag/v${VERSION}`,
     assets: [
       {

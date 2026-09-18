@@ -82,6 +82,29 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = INSTALL_OPTIONS.findIndex((option) => option.id === activeTab.id);
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      const nextIndex = (currentIndex + 1) % INSTALL_OPTIONS.length;
+      setActiveTab(INSTALL_OPTIONS[nextIndex]);
+      document.getElementById(`install-tab-${INSTALL_OPTIONS[nextIndex].id}`)?.focus();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      const prevIndex = (currentIndex - 1 + INSTALL_OPTIONS.length) % INSTALL_OPTIONS.length;
+      setActiveTab(INSTALL_OPTIONS[prevIndex]);
+      document.getElementById(`install-tab-${INSTALL_OPTIONS[prevIndex].id}`)?.focus();
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      setActiveTab(INSTALL_OPTIONS[0]);
+      document.getElementById(`install-tab-${INSTALL_OPTIONS[0].id}`)?.focus();
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      setActiveTab(INSTALL_OPTIONS[INSTALL_OPTIONS.length - 1]);
+      document.getElementById(`install-tab-${INSTALL_OPTIONS[INSTALL_OPTIONS.length - 1].id}`)?.focus();
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-fadeIn"
@@ -96,7 +119,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
       >
         <div className="flex items-start justify-between gap-4 border-b border-rule pb-4">
           <div className="flex items-baseline gap-3">
-            <Download className="h-4 w-4 shrink-0 text-ink-3" />
+            <Download aria-hidden="true" className="h-4 w-4 shrink-0 text-ink-3" />
             <div>
               <h2 className="sheet-term text-[15px] text-ink">Install DocHarvest v{VERSION}</h2>
               <p className="sheet-label mt-1">standalone · pip · uvx · docker</p>
@@ -107,18 +130,25 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             aria-label="Close"
             className="cursor-pointer text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
-            <X className="h-4 w-4" />
+            <X aria-hidden="true" className="h-4 w-4" />
           </button>
         </div>
 
-        <div role="tablist" aria-label="Install method" className="mt-5 flex flex-wrap border-b border-rule-strong">
+        <div
+          role="tablist"
+          aria-label="Install method"
+          onKeyDown={handleTabKeyDown}
+          className="mt-5 flex flex-wrap border-b border-rule-strong"
+        >
           {INSTALL_OPTIONS.map((option) => {
             const isActive = option.id === activeTab.id;
             return (
               <button
                 key={option.id}
                 role="tab"
+                id={`install-tab-${option.id}`}
                 aria-selected={isActive}
+                aria-controls={`install-panel-${option.id}`}
                 onClick={() => setActiveTab(option)}
                 className={`sheet-num inline-flex cursor-pointer items-center gap-2 border-r border-rule px-4 py-2 text-[11px] tracking-[0.14em] transition-colors focus-visible:outline-2 focus-visible:outline-match ${
                   isActive ? 'text-match' : 'text-ink-3 hover:text-ink'
@@ -131,7 +161,13 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
           })}
         </div>
 
-        <div className="mt-4">
+        <div
+          role="tabpanel"
+          id={`install-panel-${activeTab.id}`}
+          aria-labelledby={`install-tab-${activeTab.id}`}
+          tabIndex={0}
+          className="mt-4 focus-visible:outline-2 focus-visible:outline-match"
+        >
           <div className="flex items-baseline justify-between">
             <span className="sheet-label">terminal</span>
             <button
@@ -139,7 +175,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
               aria-label="Copy install command"
               className="inline-flex cursor-pointer items-center gap-1.5 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
               <span className="sheet-label">{copied ? 'copied' : 'copy'}</span>
             </button>
           </div>

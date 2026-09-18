@@ -50,6 +50,29 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
   const ragOutput = capture.outputs.find((output) => output.path.endsWith('_rag.jsonl'));
   const plateFile = plateData?.file ?? ragOutput?.path ?? null;
 
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = PLATES.findIndex((candidate) => candidate.key === activePlate);
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      const nextIndex = (currentIndex + 1) % PLATES.length;
+      setActivePlate(PLATES[nextIndex].key);
+      document.getElementById(`plate-tab-${PLATES[nextIndex].key}`)?.focus();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      const prevIndex = (currentIndex - 1 + PLATES.length) % PLATES.length;
+      setActivePlate(PLATES[prevIndex].key);
+      document.getElementById(`plate-tab-${PLATES[prevIndex].key}`)?.focus();
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      setActivePlate(PLATES[0].key);
+      document.getElementById(`plate-tab-${PLATES[0].key}`)?.focus();
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      setActivePlate(PLATES[PLATES.length - 1].key);
+      document.getElementById(`plate-tab-${PLATES[PLATES.length - 1].key}`)?.focus();
+    }
+  };
+
   return (
     <section
       id="contract"
@@ -110,7 +133,12 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
 
         {/* The plates: verbatim heads of the files above. */}
         <div className="mt-12">
-          <div role="tablist" aria-label="Manifest plates" className="flex flex-wrap border-b border-rule-strong">
+          <div
+            role="tablist"
+            aria-label="Manifest plates"
+            onKeyDown={handleTabKeyDown}
+            className="flex flex-wrap border-b border-rule-strong"
+          >
             {PLATES.map((candidate) => {
               const isActive = candidate.key === activePlate;
               return (
@@ -135,7 +163,8 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
             id={`plate-${plate.key}`}
             role="tabpanel"
             aria-labelledby={`plate-tab-${plate.key}`}
-            className="mt-4"
+            tabIndex={0}
+            className="mt-4 focus-visible:outline-2 focus-visible:outline-match"
           >
             {plateFile && <p className="sheet-label mb-2">{plateFile}</p>}
             {plateData?.excerpt ? (

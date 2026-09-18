@@ -26,7 +26,7 @@ from pathlib import Path
 try:
     from . import __version__
 except ImportError:  # pragma: no cover - direct-script fallback
-    __version__ = "11.0.9"
+    __version__ = "11.0.10"
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
@@ -549,7 +549,16 @@ def cmd_mcp(args) -> int:
 
 
 def cmd_gui(args) -> int:
-    """Launch the Desktop GUI."""
+    """Launch the Desktop GUI or open in a web browser."""
+    browser = getattr(args, "browser", None)
+    port = getattr(args, "port", 0)
+    if browser:
+        try:
+            from .gui.server import launch_browser_gui
+            return launch_browser_gui(browser=browser, port=port)
+        except Exception as exc:
+            print(f"Error launching browser GUI: {exc}", file=sys.stderr)
+            return 1
     return _launch_gui()
 
 
@@ -676,7 +685,15 @@ def build_parser() -> argparse.ArgumentParser:
     sk.set_defaults(func=cmd_skill)
 
     # gui
-    gp = sub.add_parser("gui", help="Launch the Desktop GUI application")
+    gp = sub.add_parser("gui", help="Launch the Desktop GUI application or web browser interface")
+    gp.add_argument(
+        "--browser", "-b", nargs="?", const="default", default=None,
+        help="Open the GUI in a web browser (e.g. 'zen', 'chrome', or default)",
+    )
+    gp.add_argument(
+        "--port", "-p", type=int, default=0,
+        help="Port to serve the GUI on when using --browser (default: random free port)",
+    )
     gp.set_defaults(func=cmd_gui)
 
     # tui
@@ -697,10 +714,10 @@ def main(argv: list[str] | None = None) -> int:
     # Route top-level flags directly to corresponding commands
     first = argv[0].lower()
     if first in ("--gui", "-gui"):
-        return _launch_gui()
-    if first in ("--mcp", "-mcp"):
+        argv[0] = "gui"
+    elif first in ("--mcp", "-mcp"):
         return cmd_mcp(None)
-    if first in ("--tui", "-tui"):
+    elif first in ("--tui", "-tui"):
         return _launch_tui()
 
     # Bare-URL sugar: `gitbook-dl https://…` == `gitbook-dl capture https://…`

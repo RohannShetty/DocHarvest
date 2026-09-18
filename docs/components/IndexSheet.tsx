@@ -136,7 +136,7 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
             setCopied(null);
           }}
           onKeyDown={handleKeyDown}
-          className="w-full bg-transparent font-mono text-sm text-ink outline-none placeholder:text-ink-3"
+          className="w-full bg-transparent font-mono text-sm text-ink outline-none placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-match"
         />
         {copied && (
           <span className="sheet-label shrink-0 text-match" aria-live="polite">
@@ -184,7 +184,13 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
                   id={`${listId}-opt-${entry.option}`}
                   role="option"
                   aria-selected={isActive}
-                  className={`relative flex items-start gap-3 border-b border-rule py-2 pl-3 pr-2 text-[13px] text-ink before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-match before:opacity-0 before:content-[''] hover:before:opacity-100 ${
+                  onClick={() => {
+                    setActiveIndex(entry.option);
+                    const citation = `${row.path}:${row.line}`;
+                    navigator.clipboard?.writeText(citation).catch(() => undefined);
+                    setCopied(citation);
+                  }}
+                  className={`relative flex cursor-pointer items-start gap-3 border-b border-rule py-2 pl-3 pr-2 text-[13px] text-ink before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-match before:opacity-0 before:content-[''] hover:before:opacity-100 ${
                     isActive ? 'before:opacity-100' : ''
                   }`}
                 >

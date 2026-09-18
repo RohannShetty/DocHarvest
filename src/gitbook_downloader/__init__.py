@@ -1,6 +1,6 @@
-"""DocHarvest (gitbook-downloader) v11.0.9 — Modern shadcn/ui Desktop & CLI documentation harvesting platform."""
+"""DocHarvest (gitbook-downloader) v11.0.10 — Modern shadcn/ui Desktop & CLI documentation harvesting platform."""
 
-__version__ = "11.0.9"
+__version__ = "11.0.10"
 __author__ = "Rohan Shetty"
 
 from .utils import (

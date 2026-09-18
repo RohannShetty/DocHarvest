@@ -807,7 +807,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       r="40"
                       stroke="currentColor"
                       strokeWidth="8"
-                      className="text-muted/20"
+                      className="text-slate-200 dark:text-muted/40"
                       fill="transparent"
                     />
                     <circle
@@ -820,7 +820,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       strokeDashoffset={251.2 - (251.2 * progressPercent) / 100}
                       strokeLinecap="round"
                       className={`transition-all duration-500 ${
-                        isComplete ? "text-emerald-600 dark:text-emerald-500" : captureError ? "text-destructive" : "text-primary"
+                        isComplete ? "text-emerald-600 dark:text-emerald-400" : captureError ? "text-destructive" : "text-primary"
                       }`}
                       fill="transparent"
                     />
@@ -829,7 +829,8 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                     <span className="text-2xl font-bold tracking-tight text-foreground font-mono">
                       {isComplete ? "100%" : `${progressPercent}%`}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                      {isCapturing && <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />}
                       {isComplete ? "COMPLETE" : isCapturing ? "CRAWLING" : captureError ? "ERROR" : "READY"}
                     </span>
                   </div>
@@ -838,12 +839,12 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 <div className="w-full flex flex-col gap-1">
                   <Progress 
                     value={progressPercent} 
-                    className="h-2 rounded-full overflow-hidden bg-muted/40"
+                    className="h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-muted/40 border border-border/30"
                     indicatorClassName={isComplete ? "bg-emerald-500" : captureError ? "bg-destructive" : "bg-primary animate-shimmer"}
                   />
                   <div className="flex justify-between text-[11px] text-muted-foreground pt-1 font-mono">
-                    <span>{downloadedCount} / {discoveredCount || downloadedCount} pages</span>
-                    <span>{speedPagesPerSec} p/s</span>
+                    <span className="font-medium text-foreground/80">{downloadedCount} / {discoveredCount || downloadedCount} pages</span>
+                    <span className="text-primary font-semibold">{speedPagesPerSec} p/s</span>
                   </div>
                 </div>
               </CardContent>
@@ -853,7 +854,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Card className="glass-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Discovered URLs</CardTitle>
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
                   <Globe className="h-4 w-4" />
                 </div>
               </CardHeader>
@@ -867,7 +868,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Card className="glass-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Downloaded Pages</CardTitle>
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-500">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <FileCheck className="h-4 w-4" />
                 </div>
               </CardHeader>
@@ -881,14 +882,17 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Card className="glass-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Elapsed Time</CardTitle>
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-500">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                   <Clock className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-foreground font-mono">{elapsedSeconds}s</div>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  {failedCount > 0 ? `${failedCount} skipped / error pages` : "Optimal socket throughput"}
+                <p className="text-[11px] mt-1 flex items-center justify-between">
+                  <span className={failedCount > 0 ? "text-amber-600 dark:text-amber-400 font-medium" : "text-muted-foreground"}>
+                    {failedCount > 0 ? `${failedCount} skipped / error` : "Optimal socket throughput"}
+                  </span>
+                  <span className="font-mono text-[10px] text-muted-foreground">{speedPagesPerSec} p/s</span>
                 </p>
               </CardContent>
             </Card>
@@ -991,7 +995,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   variant={logFilter === "downloaded" ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setLogFilter("downloaded")}
-                  className="h-6 text-[11px] px-2 rounded-md font-medium text-emerald-700 dark:text-emerald-500"
+                  className="h-6 text-[11px] px-2 rounded-md font-medium text-emerald-700 dark:text-emerald-400"
                 >
                   Downloaded ({logs.filter(l => l.level === "downloaded").length})
                 </Button>
@@ -1025,6 +1029,16 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   />
                 </div>
                 <Button
+                  variant={autoScroll ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={() => setAutoScroll(!autoScroll)}
+                  className={`h-7 px-2 text-xs border-border/70 interactive-scale ${autoScroll ? "text-primary font-medium" : "text-muted-foreground"}`}
+                  title={autoScroll ? "Auto-scroll is active" : "Auto-scroll is paused"}
+                >
+                  <ChevronDown className={`h-3 w-3 mr-1 transition-transform ${autoScroll ? "" : "-rotate-90"}`} />
+                  <span className="hidden sm:inline text-[10px] font-mono">{autoScroll ? "Auto-scroll" : "Paused"}</span>
+                </Button>
+                <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
@@ -1054,7 +1068,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             {/* Log Stream Window */}
             <div 
               ref={logScrollRef}
-              className="h-72 overflow-y-auto p-4 font-mono text-xs flex flex-col gap-1.5 bg-background/60 leading-relaxed select-text"
+              className="h-72 overflow-y-auto p-4 font-mono text-xs flex flex-col gap-1.5 bg-slate-50/70 dark:bg-black/50 border-t border-border/40 leading-relaxed select-text shadow-inner"
             >
               {filteredLogs.length === 0 ? (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-xs italic">
@@ -1064,15 +1078,15 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 </div>
               ) : (
                 filteredLogs.map((log) => (
-                  <div key={log.id} className="flex items-start gap-2 py-0.5 border-b border-border/20 last:border-none">
+                  <div key={log.id} className="flex items-start gap-2 py-0.5 border-b border-border/30 dark:border-border/20 last:border-none">
                     <span className="text-muted-foreground/70 text-[10px] select-none shrink-0 pt-0.5">[{log.time}]</span>
                     {log.level === "downloaded" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/40 text-emerald-700 bg-emerald-500/10 dark:text-emerald-500 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-600/30 text-emerald-800 bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-400 dark:bg-emerald-500/10 shrink-0 font-mono">
                         DOWNLOADED
                       </Badge>
                     )}
                     {log.level === "discovered" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-primary/40 text-primary bg-primary/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-sky-600/30 text-sky-800 bg-sky-50 dark:border-primary/40 dark:text-sky-400 dark:bg-primary/10 shrink-0 font-mono">
                         DISCOVERED
                       </Badge>
                     )}
@@ -1082,7 +1096,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       </Badge>
                     )}
                     {log.level === "written" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-400/40 text-emerald-700 bg-emerald-400/10 dark:text-emerald-400 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-600/30 text-emerald-800 bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-400 dark:bg-emerald-400/10 shrink-0 font-mono">
                         WRITTEN
                       </Badge>
                     )}
@@ -1092,10 +1106,10 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       </Badge>
                     )}
                     <span className={`break-all ${
-                      log.level === "downloaded" ? "text-foreground font-medium" :
-                      log.level === "discovered" ? "text-primary/90" :
-                      log.level === "error" ? "text-destructive font-medium" :
-                      "text-muted-foreground"
+                      log.level === "downloaded" ? "text-emerald-900 dark:text-emerald-300 font-medium" :
+                      log.level === "discovered" ? "text-sky-900 dark:text-sky-300" :
+                      log.level === "error" ? "text-rose-700 dark:text-rose-400 font-medium" :
+                      "text-slate-700 dark:text-slate-300"
                     }`}>
                       {log.message}
                     </span>

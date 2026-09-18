@@ -84,7 +84,9 @@ export function ProviderTable() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-b border-rule align-top">
-                <td className="sheet-num py-3 pr-4 text-[13px] text-ink">{row.name}</td>
+                <th scope="row" className="sheet-num py-3 pr-4 text-left font-normal text-[13px] text-ink">
+                  {row.name}
+                </th>
                 <td className="sheet-num py-3 pr-4 text-[13px] text-ink-2">{row.detectionPriority}</td>
                 <td className="sheet-body py-3 pr-4 text-[13px]">{SIGNALS[row.id]}</td>
                 <td className="sheet-num py-3 text-[13px] text-ink-3">

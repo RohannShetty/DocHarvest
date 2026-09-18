@@ -32,13 +32,20 @@ def test_install_modal_no_invisible_cyan_text() -> None:
 
 
 def test_install_modal_uses_readable_cyan_text() -> None:
-    """The install panel must use a readable cyan token (>= /80 opacity)."""
+    """The install panel must use readable text contrast.
+
+    In the legacy cyan theme, it required >= /80 opacity; in the Index Sheet
+    palette, it uses the ink/bond ramp or readable tokens.
+    """
     text = INSTALL_MODAL.read_text(encoding="utf-8")
-    # Match the readable tokens: text-cyan/80, text-cyan/90, text-cyan, or
-    # text-cyan-XXX (the solid color). At least one must appear on the
-    # command panel rendering.
-    readable = re.search(r"text-cyan(?:-[0-9]+)?(?:/(?:[8-9]\d|100))?", text)
-    assert readable is not None, (
-        f"{INSTALL_MODAL.name} should use a readable `text-cyan*` token on "
-        f"the install command panel"
-    )
+    if "text-cyan" in text:
+        readable = re.search(r"text-cyan(?:-[0-9]+)?(?:/(?:[8-9]\d|100))?", text)
+        assert readable is not None, (
+            f"{INSTALL_MODAL.name} should use a readable `text-cyan*` token on "
+            f"the install command panel"
+        )
+    else:
+        # Index Sheet palette: uses text-ink / sheet-num typography
+        assert "text-ink" in text or "sheet-num" in text, (
+            f"{INSTALL_MODAL.name} must use readable text-ink/sheet-num tokens"
+        )

@@ -89,18 +89,18 @@ export const MANIFEST_FIXTURE: Manifest = {
 export const GITHUB_FIXTURE: DocHarvestGithubData = {
   stats: { stars: 128, forks: 16, openIssues: 0, watchers: 128, updatedAt: '2026-09-16T00:00:00Z' },
   latestRelease: {
-    tag: 'v11.0.9',
-    name: 'DocHarvest v11.0.9',
-    publishedAt: '2026-09-16',
-    body: '## Highlights\n\n- Universal MCP skill for every harness.',
-    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.9',
+    tag: 'v11.0.10',
+    name: 'DocHarvest v11.0.10',
+    publishedAt: '2026-09-18',
+    body: '## Highlights\n\n- Standalone browser GUI server with Zen Browser launch and real-time SSE streaming.',
+    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.0.10',
     assets: [
       {
         name: 'docharvest-windows-latest.exe',
         size: 34500000,
         downloadCount: 520,
         browserDownloadUrl:
-          'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.9/docharvest-windows-latest.exe',
+          'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.10/docharvest-windows-latest.exe',
         os: 'windows',
       },
       {
@@ -108,7 +108,7 @@ export const GITHUB_FIXTURE: DocHarvestGithubData = {
         size: null,
         downloadCount: null,
         browserDownloadUrl:
-          'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.9/docharvest-ubuntu-latest',
+          'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.10/docharvest-ubuntu-latest',
         os: 'linux',
       },
     ],

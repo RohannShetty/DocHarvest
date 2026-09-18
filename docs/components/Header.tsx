@@ -64,12 +64,13 @@ export function Header({ stars, onOpenInstallModal }: HeaderProps) {
             href="https://github.com/RohannShetty/gitbook-downloader"
             target="_blank"
             rel="noreferrer"
+            aria-label={stars !== undefined ? `GitHub repository, ${stars} stars` : 'GitHub repository'}
             className="sheet-num inline-flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
             <GithubIcon className="h-3.5 w-3.5" />
             {stars !== undefined && (
               <span className="inline-flex items-center gap-1">
-                <Star className="h-3 w-3" />
+                <Star aria-hidden="true" className="h-3 w-3" />
                 {stars}
               </span>
             )}
@@ -81,7 +82,7 @@ export function Header({ stars, onOpenInstallModal }: HeaderProps) {
             aria-label={nextThemeLabel}
             className="inline-flex cursor-pointer items-center text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {theme === 'dark' ? <Sun aria-hidden="true" className="h-4 w-4" /> : <Moon aria-hidden="true" className="h-4 w-4" />}
           </button>
 
           <button

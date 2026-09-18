@@ -22,14 +22,25 @@ def get_web_dir() -> Path:
     return Path(__file__).resolve().parent / "web"
 
 
-def launch_gui(title: str | None = None, debug: bool = False) -> None:
-    """Open the native Windows Desktop GUI application window."""
+def launch_gui(
+    title: str | None = None,
+    debug: bool = False,
+    browser: str | bool | None = None,
+    port: int = 0,
+) -> None:
+    """Open the GUI in a native Desktop window or a web browser (e.g. Zen)."""
+    if browser:
+        from .server import launch_browser_gui
+        target_browser = "zen" if browser is True else str(browser)
+        launch_browser_gui(browser=target_browser, port=port)
+        return
+
     if title is None:
         title = f"DocHarvest v{__version__}"
     try:
         import webview
     except ImportError as exc:
-        raise ImportError(f"pywebview is required for GUI mode: {exc}") from exc
+        raise ImportError(f"pywebview is required for native GUI mode: {exc}") from exc
 
 
     web_dir = get_web_dir()

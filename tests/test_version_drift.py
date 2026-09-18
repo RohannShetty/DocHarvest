@@ -1,6 +1,6 @@
 """Version drift regression.
 
-Single source of truth for DocHarvest version: ``11.0.9``.
+Single source of truth for DocHarvest version: ``11.0.10``.
 
 This test fails if any of the canonical reference files drift from that value.
 The list below is curated (not a grep over the whole tree) so that:
@@ -9,11 +9,11 @@ The list below is curated (not a grep over the whole tree) so that:
 - ``package-lock.json`` lockfile entries like ``@octokit/endpoint@11.0.4`` are
   not DocHarvest version literals (out of scope).
 - ``docs/lib/version.ts`` and ``src/gitbook_downloader/__init__.py`` are the
-  canonical sources and MUST equal ``11.0.9`` (we assert equality, not just
+  canonical sources and MUST equal ``11.0.10`` (we assert equality, not just
   presence).
-- ``frontend/index.html`` <title> must read ``DocHarvest v11.0.9``.
+- ``frontend/index.html`` <title> must read ``DocHarvest v11.0.10``.
 
-Drift signals (these MUST all read ``11.0.9`` after Phase 1 step 1):
+Drift signals (these MUST all read ``11.0.10`` after Phase 1 step 1):
 - README.md version badge.
 - src/gitbook_downloader/cli.py direct-script fallback.
 - src/gitbook_downloader/gui/bridge.py User-Agent (it must use
@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_VERSION = "11.0.9"
+CANONICAL_VERSION = "11.0.10"
 
 
 # Files where the value MUST literally equal CANONICAL_VERSION (not just
@@ -122,11 +122,11 @@ def test_no_stale_version_literal(path: Path) -> None:
 
 
 def test_cli_version_fallback_uses_canonical_value() -> None:
-    """The direct-script fallback in cli.py MUST equal 11.0.9 (not 9.0.0b1)."""
+    """The direct-script fallback in cli.py MUST equal 11.0.10 (not 9.0.0b1)."""
     cli_text = _read_text(REPO_ROOT / "src" / "gitbook_downloader" / "cli.py")
     # The fallback literal is the value in the `except ImportError` branch.
-    assert "__version__ = \"11.0.9\"" in cli_text, (
-        "cli.py direct-script fallback should be 11.0.9, not 9.0.0b1"
+    assert "__version__ = \"11.0.10\"" in cli_text, (
+        "cli.py direct-script fallback should be 11.0.10, not 9.0.0b1"
     )
     assert "9.0.0b1" not in cli_text, (
         "cli.py still contains stale 9.0.0b1 fallback"

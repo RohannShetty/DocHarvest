@@ -5,6 +5,31 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.0.10] - 2026-09-18
+
+### 🌐 Standalone Browser GUI & Real-Time Event Bridge
+
+Adds first-class support for running the DocHarvest Desktop GUI in any standard web browser (with automated detection and launch for Zen Browser, Google Chrome, Mozilla Firefox, or the system default), backed by an in-browser `window.pywebview` JS Proxy shim and Server-Sent Events (SSE) streaming.
+
+### Added
+
+- **Standalone Browser GUI Server** (`src/gitbook_downloader/gui/server.py`):
+  Lightweight multi-threaded HTTP server that serves the production GUI application assets, automatically injects a transparent `window.pywebview` Proxy shim, and bridges all native desktop GUI APIs to Python's `ApiBridge` without requiring WebView2 or C-runtime dependencies.
+- **Automated Zen Browser Detection & Launch**:
+  `find_zen_browser()` scans standard installation directories across Windows (`Program Files`, `AppData`, `LocalAppData`), macOS, and Linux to locate and launch the Zen Browser executable directly.
+- **Server-Sent Events (SSE) Progress Bridge**:
+  `/api/events` endpoint streams live crawl discovery, download counts, and completion statuses directly from Python background threads into browser JavaScript callbacks (`window.onCaptureProgress`, `window.onCaptureDone`).
+- **CLI Browser Flags**:
+  Added `--browser` (`-b`) and `--port` (`-p`) flags to `docharvest gui` / `gitbook-dl gui` (e.g. `docharvest gui --browser zen --port 4173`).
+- **External Event Listener Hooks**:
+  Added `add_event_listener` and `remove_event_listener` to `ApiBridge` (`src/gitbook_downloader/gui/bridge.py`) so external servers can subscribe to internal GUI event dispatching.
+- **The Index Sheet Showcase Redesign**:
+  Updated the Next.js showcase web application with The Index Sheet design system, live capture statistics, and responsive tabbed architecture.
+
+### Changed
+
+- **Version bump to 11.0.10** across all Python modules, frontend constants, showcase packages, test suites, and documentation files.
+
 ## [11.0.9] - 2026-09-16
 
 ### 🧠 Universal MCP Skill: One Skill for Every MCP-Capable Agent Harness

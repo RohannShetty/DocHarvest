@@ -11,12 +11,36 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function getStoredTheme(): Theme | null {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = window.localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') {
+        return saved;
+      }
+    }
+  } catch {
+    // Storage restricted or unavailable
+  }
+  return null;
+}
+
+function setStoredTheme(next: Theme): void {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('theme', next);
+    }
+  } catch {
+    // Storage restricted or unavailable
+  }
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as Theme;
+    const saved = getStoredTheme();
     if (saved) {
       setTheme(saved);
       document.documentElement.classList.toggle('light', saved === 'light');
@@ -29,7 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
-    localStorage.setItem('theme', next);
+    setStoredTheme(next);
     document.documentElement.classList.toggle('light', next === 'light');
   };
 

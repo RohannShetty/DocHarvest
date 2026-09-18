@@ -123,7 +123,11 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
 
   const handleNext = () => {
     if (isLast) {
-      localStorage.setItem("docharvest_tour_completed", "true")
+      try {
+        localStorage.setItem("docharvest_tour_completed", "true")
+      } catch {
+        // Storage unavailable or restricted
+      }
       onClose()
     } else {
       setCurrentStep((prev) => prev + 1)
@@ -135,7 +139,11 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
   }
 
   const handleSkip = () => {
-    localStorage.setItem("docharvest_tour_completed", "true")
+    try {
+      localStorage.setItem("docharvest_tour_completed", "true")
+    } catch {
+      // Storage unavailable or restricted
+    }
     onClose()
   }
 
