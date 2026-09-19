@@ -47,7 +47,9 @@ declare global {
         open_file: (path: string) => Promise<any>
         read_file: (filePath: string) => Promise<any>
         search_docs: (query: string, domain?: string) => Promise<any[]>
+        list_snapshots: (domain: string) => Promise<any[]>
         diff_snapshots: (domain: string, v1: string, v2: string) => Promise<any>
+        get_doc_graph: (domain: string, query?: string) => Promise<any>
         get_diagnostics: () => Promise<any>
         get_system_info: () => Promise<any>
         get_lock_status: (domain?: string) => Promise<any>
@@ -119,9 +121,17 @@ export const pyApi = {
     if (window.pywebview?.api?.search_docs) return await window.pywebview.api.search_docs(query, domain)
     return []
   },
+  listSnapshots: async (domain: string) => {
+    if (window.pywebview?.api?.list_snapshots) return await window.pywebview.api.list_snapshots(domain)
+    return []
+  },
   diffSnapshots: async (domain: string, v1: string, v2: string) => {
     if (window.pywebview?.api?.diff_snapshots) return await window.pywebview.api.diff_snapshots(domain, v1, v2)
     return { success: true, changes: [] }
+  },
+  getDocGraph: async (domain: string, query?: string) => {
+    if (window.pywebview?.api?.get_doc_graph) return await window.pywebview.api.get_doc_graph(domain, query)
+    return { success: true, domain, node_count: 0, edge_count: 0, nodes: [], edges: [], results: [] }
   },
   getDiagnostics: async () => {
     if (window.pywebview?.api?.get_diagnostics) return await window.pywebview.api.get_diagnostics()

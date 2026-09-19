@@ -643,6 +643,71 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
+    def get_doc_graph(self, domain: str, query: str = "") -> dict[str, Any]:
+        """Build and query the concept and entity graph for domain."""
+        try:
+            from ..search.graph import build_graph_from_pages
+            doc_dir = self._storage._domain_dir(domain)
+            pages_dir = doc_dir / "pages"
+            if not pages_dir.exists():
+                return {
+                    "success": True,
+                    "domain": domain,
+                    "node_count": 0,
+                    "edge_count": 0,
+                    "nodes": [],
+                    "edges": [],
+                    "matches_count": 0,
+                    "results": []
+                }
+            graph = build_graph_from_pages(domain, pages_dir)
+            if query and query.strip():
+                res = graph.query(query.strip(), limit=25)
+                res["success"] = True
+                return res
+
+            nodes = [
+                {
+                    "id": n.id,
+                    "label": n.label,
+                    "type": n.node_type,
+                    "file": n.file_path,
+                    "snippet": n.snippet,
+                }
+                for n in list(graph.nodes.values())[:150]
+            ]
+            edges = [
+                {
+                    "source": e.source_id,
+                    "target": e.target_id,
+                    "relation": e.relation,
+                }
+                for e in graph.edges[:250]
+                if e.source_id in graph.nodes and e.target_id in graph.nodes
+            ]
+            return {
+                "success": True,
+                "domain": domain,
+                "node_count": len(graph.nodes),
+                "edge_count": len(graph.edges),
+                "nodes": nodes,
+                "edges": edges,
+                "matches_count": len(nodes),
+                "results": [
+                    {
+                        "id": n.id,
+                        "label": n.label,
+                        "type": n.node_type,
+                        "file": n.file_path,
+                        "snippet": n.snippet,
+                        "connected_entities": graph.get_neighbors(n.id, depth=1)[:6]
+                    }
+                    for n in list(graph.nodes.values())[:50]
+                ]
+            }
+        except Exception as exc:
+            return {"success": False, "error": str(exc), "nodes": [], "edges": [], "results": []}
+
     # ── Export Studio ────────────────────────────────────────────────────
 
     def export_doc(

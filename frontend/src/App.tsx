@@ -94,24 +94,61 @@ export function App() {
     root.classList.toggle("light", theme === "light")
   }, [theme])
 
-  // Global Ctrl+K / Cmd+K listener
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setCmdMenuOpen((open) => !open)
-      }
-    }
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
-
   // Theme switcher
   const handleToggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark"
     setTheme(next)
     persistTheme(next)
   }
+
+  // Global Keyboard Navigation Shortcuts
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName) || (e.target as HTMLElement)?.isContentEditable
+
+      // Universal Command Palette (Ctrl+K / Cmd+K)
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setCmdMenuOpen((open) => !open)
+        return
+      }
+
+      // Toggle Theme (Ctrl+T / Cmd+T)
+      if (e.key === "t" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        handleToggleTheme()
+        return
+      }
+
+      // Refresh Library (Ctrl+R / Cmd+R when not prevented, or custom)
+      if (e.key === "r" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault()
+        loadLibrary()
+        return
+      }
+
+      // Number-based tab switching (1-7 without Ctrl when not focused on input, or Ctrl+1..7 always)
+      if (!isInput && !e.altKey && !e.metaKey && !e.ctrlKey) {
+        if (e.key === "1") { setActiveTab("capture"); return }
+        if (e.key === "2") { setActiveTab("library"); return }
+        if (e.key === "3") { setActiveTab("search"); return }
+        if (e.key === "4") { setActiveTab("diff"); return }
+        if (e.key === "5") { setActiveTab("export"); return }
+        if (e.key === "6") { setActiveTab("docs"); return }
+        if (e.key === "7") { setActiveTab("diagnostics"); return }
+      } else if (e.ctrlKey || e.metaKey) {
+        if (e.key === "1") { e.preventDefault(); setActiveTab("capture"); return }
+        if (e.key === "2") { e.preventDefault(); setActiveTab("library"); return }
+        if (e.key === "3") { e.preventDefault(); setActiveTab("search"); return }
+        if (e.key === "4") { e.preventDefault(); setActiveTab("diff"); return }
+        if (e.key === "5") { e.preventDefault(); setActiveTab("export"); return }
+        if (e.key === "6") { e.preventDefault(); setActiveTab("docs"); return }
+        if (e.key === "7") { e.preventDefault(); setActiveTab("diagnostics"); return }
+      }
+    }
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [theme])
 
   const handleSelectExport = (domain: string) => {
     setExportDomain(domain)
@@ -157,7 +194,7 @@ export function App() {
           />
         )}
         {activeTab === "diff" && (
-          <DiffView library={library} />
+          <DiffView library={library} onOpenDocReader={setReaderDomain} />
         )}
         {activeTab === "export" && (
           <ExportView library={library} selectedDomain={exportDomain} />

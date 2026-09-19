@@ -6,11 +6,13 @@
 
 ### Turn Any Documentation Site into LLM-Ready Markdown, Vector Context & Offline Books
 
-**Zero-Config CLI · React Desktop GUI · Native FastMCP Server · Pure-Python PDF Studio**
+**Universal Agent Skill · Native FastMCP v2 Server (12 Tools) · Zero-Config CLI · Desktop GUI · Pure-Python PDF Studio**
 
 [![Version: 11.0.10](https://img.shields.io/badge/version-11.0.10-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
+[![MCP: FastMCP v2](https://img.shields.io/badge/MCP-FastMCP%20v2-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-v2-server)
+[![Agent Skill: Universal](https://img.shields.io/badge/Skill-Universal%20(14%2B%20Harnesses)-ec4899?style=flat-square&labelColor=090d16)](#-agent-skills-universal-mcp-skill-for-every-agent-harness)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
 [![Tests: 765 Passing](https://img.shields.io/badge/tests-765%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)
@@ -26,20 +28,34 @@
 
 ## ⚡ Overview
 
-**Your coding agent doesn't read documentation — it reads web pages.** Navbars, cookie banners, search modals, and footer scripts can make up 80–85% of a raw page's bytes before a single API fact arrives. Chunks captured without source URLs make hallucinations unfalsifiable, and per-page cloud API bills spike the moment you index a real docs portal.
+**Your coding agent doesn't read documentation — it reads web pages.** Navbars, cookie banners, search modals, and footer scripts make up **80–85% of a raw page's bytes** before a single API fact arrives. Chunks captured without source URLs make hallucinations unfalsifiable, and per-page cloud scraping API bills spike the moment you index a real documentation portal.
 
-**DocHarvest** (package: `gitbook-downloader`) fixes that locally, in one command. It detects the documentation platform, bounds the crawl strictly to documentation subpaths, extracts clean markdown via direct `.md` endpoint probing and AST-based DOM cleaning, and compiles a deterministic, noise-free knowledge corpus — measured at **~83% token reduction** on a real portal (full-suite reference capture: **673 pages in 18.2 seconds**).
+**DocHarvest** (package: `gitbook-downloader`) compiles any technical documentation site into a pristine, structured local knowledge base with verifiable SHA-256 provenance:
 
-Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, building vector RAG pipelines with **LangChain & LlamaIndex**, reading offline on an airplane, or archiving technical libraries — every capture ends in the same verifiable shape: clean markdown with SHA-256 provenance, ready for your agent or your bookshelf.
+- ⚡ **Ultra-Fast Throughput**: Reference capture of **673 pages in 18.2 seconds** (~37 pages/sec) directly into SQLite FTS5 BM25 search and semantic graphs.
+- 🎯 **~83% Token Reduction**: Eliminates boilerplate DOM trees, sidebars, anchor spam, and tracking wrappers, delivering high-density context directly to your LLMs.
+- 🧠 **Universal Agent Skill (`SKILL.md`)**: Bundled, harness-neutral intelligence that equips 14+ coding agents (Cursor, Claude Code, Windsurf, Gemini CLI, Oh My Pi, Codex) with self-orchestrated harvesting and retrieval workflows via a single install command (`docharvest skill install docharvest -o <dir>`).
+- 🔌 **Native FastMCP v2 Server**: 12 zero-friction tools, MCP Resources (`docs://{domain}/book`), and MCP Prompts over stdio, ready out-of-the-box with zero API keys or cloud dependencies.
+- 🔒 **Deterministic SHA-256 Provenance**: Every page is stored with an exact SHA-256 content hash in YAML frontmatter for caching, version diffing, and citation verification.
+
+Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, building vector RAG pipelines with **LangChain & LlamaIndex**, reading offline on an airplane, or archiving technical libraries — every capture ends in the same verifiable shape: clean markdown ready for your agent or your bookshelf.
 
 ---
 
 ## ⏱️ 30-Second Start
 
 ```bash
+# 1. Install via pip (FastMCP v2 server & bundled skill included)
 pip install gitbook-downloader
+
+# 2. Capture a complete docs site with RAG JSONL and offline PDF
 docharvest capture https://docs.openalgo.in/ --rag --pdf
+
+# 3. Equip your AI agent with the Universal DocHarvest Skill
+docharvest skill install docharvest -o .cursor/skills     # or .claude/skills, .agents/skills...
 ```
+
+No API key. No account. No telemetry. When the command finishes you own a `book.md`, an `llms.txt`, a RAG JSONL dataset, and a printable PDF — all local, all MIT. Full install paths (standalone `.exe`, uvx, optional extras) are in [Quick Start](#-quick-start).
 
 No API key. No account. No telemetry. When the command finishes you own a `book.md`, an `llms.txt`, a RAG JSONL dataset, and a printable PDF — all local, all MIT. Full install paths (standalone `.exe`, uvx, optional extras) are in [Quick Start](#-quick-start).
 
@@ -240,41 +256,56 @@ docharvest gui --browser zen
 
 ## 🧠 Agent Skills: Universal MCP Skill for Every Agent Harness
 
-The FastMCP server gives an agent *tools*; the bundled **docharvest** skill tells it *when and how* to call them. One skill, one `SKILL.md`, a universal integration: the server speaks standard MCP over stdio and the skill text is harness-neutral, so any MCP-capable agent harness — Cursor, Claude Code/Desktop, VS Code, Windsurf, OpenCode, Codex, Oh My Pi — can load it.
+The FastMCP server gives an agent **tools**; the bundled **docharvest** skill gives it **reasoning & workflow intelligence**. It teaches LLM agents when and how to call tools without redundant network crawls, how to bound context windows to avoid token bloat, and how to verify cryptographic SHA-256 provenance.
 
-What the skill encodes:
+One skill, one `SKILL.md`, universal cross-agent compatibility: the server speaks standard MCP over `stdio` and the skill format follows the universal open agent standard, allowing all 14+ MCP-capable agent harnesses to load and execute it natively.
 
-- The `download_docs` → `search_docs`/`read_doc` → `export_docs` workflow, in the order that avoids redundant network crawls.
-- Library layout (`~/.gitbook-downloader/docs/<domain>/`) and the `output_mode="library"` default.
-- Version commands: `list_versions`, `diff_versions`, `get_changelog`.
-- The `docharvest` CLI fallback for harnesses where the MCP server is not connected.
+### 🌐 Universal Harness Matrix (14+ Supported Environments)
 
-The skill is bundled **inside the installed package**, so it is versioned with the code and needs no per-harness copy in the repository:
+Install the bundled skill into any agent's discovery directory in a single command with `docharvest skill install docharvest -o <target_dir>`:
+
+| Agent / Harness | Skill Target Directory | 1-Command Skill Installation | Trigger / Invocation |
+| :--- | :--- | :--- | :--- |
+| **Cursor** | `.cursor/skills` | `docharvest skill install docharvest -o .cursor/skills` | Auto-invoked or `@docharvest` |
+| **Claude Code** | `.claude/skills` | `docharvest skill install docharvest -o .claude/skills` | `claude` prompt / `/skill:docharvest` |
+| **Claude Desktop** | `~/.claude/skills` | `docharvest skill install docharvest -o ~/.claude/skills` | Natural language queries |
+| **Windsurf** | `.codeium/skills` | `docharvest skill install docharvest -o .codeium/skills` | Cascade auto-dispatch |
+| **Oh My Pi (OMP)** | `.omp/skills` | `docharvest skill install docharvest -o .omp/skills` | `/skill:docharvest <query>` |
+| **VS Code (Copilot/MCP)** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Chat agent prompt |
+| **Antigravity / Gemini CLI** | `.gemini/skills` | `docharvest skill install docharvest -o .gemini/skills` | CLI skill invocation |
+| **GitHub Copilot Workspace** | `.github/skills` | `docharvest skill install docharvest -o .github/skills` | Workspace agent prompt |
+| **JetBrains AI Assistant** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | AI Assistant prompt |
+| **Zed** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Context server prompt |
+| **Cline** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Task auto-execution |
+| **Continue.dev** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | `@docs` context prompt |
+| **Kiro** | `.kiro/skills` | `docharvest skill install docharvest -o .kiro/skills` | Kiro agent runner |
+| **OpenCode** | `.opencode/skills` | `docharvest skill install docharvest -o .opencode/skills` | Agent command bar |
+| **OpenAI Codex CLI** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | CLI assistant prompt |
+| **Universal / Standard Agents** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Standard discovery loader |
+
+### What the Skill Encodes:
+
+- **Autonomous Two-Stage Lookup**: Instructs the agent to check `list_domains` and `find_docs` first, reusing local cached libraries before triggering network crawls.
+- **AST-Aware Token Slicing**: Employs `read_doc(domain, topic=..., max_tokens=4000)` to pull precise sub-headings without splitting code blocks or tables.
+- **Topological Traversal**: Uses `query_doc_graph` and `get_related_concepts` to navigate prerequisite concepts and API references across complex documentation hierarchies.
+- **Automated Version Audits**: Executes `list_versions`, `diff_versions`, and `get_changelog` to analyze documentation drifts and API updates over time.
+- **Graceful CLI Seam**: Transparently falls back to `docharvest capture` and `docharvest search` when running in environments without active MCP server connections.
 
 ```bash
-# See what is bundled and where the canonical file lives
+# Inspect all bundled skills:
 docharvest skill list
 
-# Install into the skills directory your agent harness reads
-docharvest skill install docharvest -o .agents/skills     # default
-docharvest skill install docharvest -o .claude/skills
-docharvest skill install docharvest -o .cursor/skills
-docharvest skill install docharvest -o .gemini/skills
-docharvest skill install docharvest -o .github/skills
-docharvest skill install docharvest -o .omp/skills
+# Install into your current workspace root:
+docharvest skill install docharvest -o .agents/skills
 ```
-
-Layout written is `<target>/docharvest/SKILL.md` — harness loaders discover skills one level under a `skills/` root, so nested paths are ignored. Existing files are preserved unless you pass `--force`.
-
-Out of the box: this repository also commits the skill at `.omp/skills/docharvest/SKILL.md` next to `.omp/mcp.json`, so opening the checkout in Oh My Pi registers both the server and the skill with no setup. Invoke it explicitly with `/skill:docharvest <doc-url | search query>`.
 
 ---
 
 ## 🔌 AI Agent Integration: Native FastMCP v2 Server
 
-DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that exposes 12 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with both `mcp<2` and `mcp>=2.1`.
+DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server exposing 12 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with `mcp<2` and `mcp>=2.1`.
 
-> **The `mcp` SDK ships in the base install.** `pip install gitbook-downloader` (or `uvx gitbook-downloader mcp`) is enough — no extras required. The `gitbook-downloader[mcp]` extra is still accepted for backward compatibility but is now a no-op.
+> **Zero-Dependency SDK**: The `mcp` SDK ships directly inside the base package. `pip install gitbook-downloader` or `uvx gitbook-downloader mcp` works out of the box with no extra steps.
 
 ### All 12 Native MCP Tools
 
@@ -309,9 +340,7 @@ DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server that
 
 ---
 
-### IDE & Agent Configuration Matrix (14 Clients)
-
-*The three most common clients are shown inline — expand the list for all 14.*
+### Zero-Setup MCP Configuration Snippets (14 Clients)
 
 #### 1. Claude Code
 ```bash

@@ -4,7 +4,7 @@
 // source: docs/SEO_GUIDE.md §3 canonical metrics
 
 export const STATS = {
-  agentsShipped: 12,        // harness cards rendered in the showcase
+  agentsShipped: 17,        // harness cards rendered in the showcase
   harnesses: 14,            // documented client configs in the README matrix
   pagesCaptured: 673,       // pages in the canonical full-suite OpenAlgo capture
   reductionPct: 83,         // measured token reduction vs raw HTML (82.8%)

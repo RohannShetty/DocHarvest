@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Search, Sparkles, BookOpen, ExternalLink, Hash, Copy, Check, Filter } from "lucide-react"
+import { Search, Sparkles, BookOpen, ExternalLink, Hash, Copy, Check, Filter, X, ArrowRight, CornerDownLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -12,26 +12,59 @@ interface SearchViewProps {
   onOpenDocReader: (domain: string) => void
 }
 
+const SAMPLE_QUERIES = [
+  "Authentication",
+  "API endpoints",
+  "Configuration options",
+  "Installation setup",
+  "Rate limits & quotas",
+  "Error handling",
+  "Webhooks",
+  "CLI reference"
+]
+
 export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader }) => {
   const [query, setQuery] = useState<string>("")
   const [selectedDomain, setSelectedDomain] = useState<string>("all")
   const [results, setResults] = useState<any[]>([])
   const [searching, setSearching] = useState<boolean>(false)
   const [hasSearched, setHasSearched] = useState<boolean>(false)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
-  const handleSearch = async () => {
-    if (!query.trim()) return
+  const handleSearch = async (overrideQuery?: string) => {
+    const q = (overrideQuery ?? query).trim()
+    if (!q) return
     setSearching(true)
     setHasSearched(true)
     try {
       const domainFilter = selectedDomain === "all" ? undefined : selectedDomain
-      const hits = await pyApi.searchDocs(query.trim(), domainFilter)
+      const hits = await pyApi.searchDocs(q, domainFilter)
       setResults(hits || [])
     } catch (err: any) {
       toast.error(`Search error: ${err.message}`)
     } finally {
       setSearching(false)
     }
+  }
+
+  const handleCopySnippet = (snippet: string, idx: number) => {
+    navigator.clipboard.writeText(snippet)
+    setCopiedIndex(idx)
+    toast.success("Copied search snippet to clipboard")
+    setTimeout(() => setCopiedIndex(null), 2000)
+  }
+
+  // Highlight search terms inside snippet text
+  const highlightSnippet = (text: string, highlight: string) => {
+    if (!highlight.trim()) return text
+    const parts = text.split(new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
+    return parts.map((part, i) => 
+      part.toLowerCase() === highlight.toLowerCase() ? (
+        <mark key={i} className="bg-amber-500/30 text-foreground font-semibold px-0.5 rounded">
+          {part}
+        </mark>
+      ) : part
+    )
   }
 
   return (
@@ -44,17 +77,17 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
             <span>Search Studio</span>
           </h1>
           <Badge variant="secondary" className="font-mono text-xs border border-border bg-muted/60">
-            SQLite FTS5 & BM25
+            SQLite FTS5 &amp; BM25
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Search across headers, code blocks, and full markdown text with BM25 keyword relevance ranking.
+          Search across headers, code blocks, endpoints, and full markdown text with BM25 keyword relevance ranking.
         </p>
       </div>
 
       {/* Search Input Bar */}
-      <Card className="glass-card shadow-sm">
-        <CardContent className="p-5 space-y-3">
+      <Card className="glass-card shadow-sm border-border/70">
+        <CardContent className="p-5 space-y-3.5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -63,8 +96,20 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="pl-10 h-11 text-sm bg-background/80 font-mono focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+                className="pl-10 pr-9 h-11 text-sm bg-background/80 font-mono focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
               />
+              {query && (
+                <button
+                  onClick={() => {
+                    setQuery("")
+                    setResults([])
+                    setHasSearched(false)
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             <select
@@ -72,21 +117,38 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
               onChange={(e) => setSelectedDomain(e.target.value)}
               className="h-11 rounded-lg border border-border bg-background/80 px-3 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary/40 font-mono"
             >
-              <option value="all">All Documentation Domains</option>
+              <option value="all">All Documentation Domains ({library.length})</option>
               {library.map((item) => (
                 <option key={item.domain} value={item.domain}>
-                  {item.domain}
+                  {item.domain} ({item.pages || item.pages_count || 0} p)
                 </option>
               ))}
             </select>
 
             <Button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               disabled={searching || !query.trim()}
               className="h-11 px-7 font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 interactive-scale"
             >
               {searching ? "Searching..." : "Search"}
             </Button>
+          </div>
+
+          {/* Sample Query Suggestions */}
+          <div className="flex items-center gap-1.5 flex-wrap pt-1 text-xs">
+            <span className="text-muted-foreground text-[11px] font-mono mr-1">Try:</span>
+            {SAMPLE_QUERIES.map((sq) => (
+              <button
+                key={sq}
+                onClick={() => {
+                  setQuery(sq)
+                  handleSearch(sq)
+                }}
+                className="text-[11px] px-2.5 py-0.5 rounded-full border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors font-mono"
+              >
+                {sq}
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -98,7 +160,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
         </div>
       ) : hasSearched && results.length === 0 ? (
         <Card className="glass-card p-10 text-center border-dashed border-border/80">
-          <p className="text-sm text-muted-foreground">No matches found for "{query}". Try a different keyword or search across all domains.</p>
+          <p className="text-sm text-muted-foreground">No matches found for &quot;{query}&quot;. Try a different keyword or search across all domains.</p>
         </Card>
       ) : results.length > 0 ? (
         <div className="space-y-3.5 animate-in fade-in-50 duration-300">
@@ -114,6 +176,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                   <div className="space-y-2 overflow-hidden flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-foreground truncate font-mono">{r.title || r.domain}</span>
+                      {r.section_heading && (
+                        <Badge variant="outline" className="text-[10px] font-mono py-0 h-4 border-primary/30 text-primary bg-primary/5">
+                          <Hash className="h-3 w-3 mr-0.5" />
+                          {r.section_heading}
+                        </Badge>
+                      )}
                       <Badge variant="outline" className="text-[10px] font-mono py-0 h-4 border-border text-muted-foreground">
                         {r.domain}
                       </Badge>
@@ -123,22 +191,42 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                         </Badge>
                       )}
                     </div>
+
                     {r.snippet && (
                       <p className="text-xs text-muted-foreground font-mono leading-relaxed line-clamp-3 bg-muted/30 p-2.5 rounded-lg border border-border/40 select-text">
-                        {r.snippet}
+                        {highlightSnippet(r.snippet, query)}
                       </p>
                     )}
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onOpenDocReader(r.domain)}
-                    className="h-8 text-xs shrink-0 text-primary border-primary/30 hover:bg-primary/10 interactive-scale"
-                  >
-                    <BookOpen className="h-3.5 w-3.5 mr-1.5" />
-                    Read
-                  </Button>
+                  <div className="flex flex-col gap-1.5 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onOpenDocReader(r.domain)}
+                      className="h-8 text-xs text-primary border-primary/30 hover:bg-primary/10 interactive-scale"
+                    >
+                      <BookOpen className="h-3.5 w-3.5 mr-1.5" />
+                      Read
+                    </Button>
+
+                    {r.snippet && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopySnippet(r.snippet, idx)}
+                        className="h-7 text-[11px] px-2 text-muted-foreground hover:text-foreground"
+                        title="Copy text snippet"
+                      >
+                        {copiedIndex === idx ? (
+                          <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                        ) : (
+                          <Copy className="h-3 w-3 mr-1" />
+                        )}
+                        <span>{copiedIndex === idx ? "Copied" : "Copy"}</span>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))}

@@ -17,7 +17,10 @@ import {
   Check,
   Pencil,
   Edit3,
-  X
+  X,
+  CheckSquare,
+  Square,
+  Share2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,11 +47,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onOpenDocReader,
   onSelectExport
 }) => {
-  const [filter, setFilter] = useState<string>("")
+  const [filter, setFilter] = useState<string>("" )
   const [sortBy, setSortBy] = useState<SortField>("date")
   const [renamingDomain, setRenamingDomain] = useState<string | null>(null)
   const [renameInput, setRenameInput] = useState<string>("")
   const [isRenaming, setIsRenaming] = useState<boolean>(false)
+
+  // Batch multi-select state
+  const [selectedDomains, setSelectedDomains] = useState<string[]>([])
+  const [isBatchMode, setIsBatchMode] = useState<boolean>(false)
 
   const filteredAndSorted = useMemo(() => {
     const q = filter.toLowerCase().trim()
@@ -121,6 +128,39 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     }
   }
 
+  const handleBatchDelete = async () => {
+    if (selectedDomains.length === 0) return
+    if (confirm(`Are you sure you want to delete ${selectedDomains.length} documentation sets from your library?`)) {
+      for (const d of selectedDomains) {
+        try {
+          await pyApi.deleteDomain(d)
+        } catch {
+          // continue
+        }
+      }
+      toast.success(`Deleted ${selectedDomains.length} documentation sets`)
+      setSelectedDomains([])
+      setIsBatchMode(false)
+      onRefresh()
+    }
+  }
+
+  const toggleSelectDomain = (domain: string) => {
+    if (selectedDomains.includes(domain)) {
+      setSelectedDomains(selectedDomains.filter(d => d !== domain))
+    } else {
+      setSelectedDomains([...selectedDomains, domain])
+    }
+  }
+
+  const handleSelectAll = () => {
+    if (selectedDomains.length === filteredAndSorted.length) {
+      setSelectedDomains([])
+    } else {
+      setSelectedDomains(filteredAndSorted.map(i => i.domain))
+    }
+  }
+
   const handleOpenFolder = (folderPath?: string) => {
     if (folderPath) {
       pyApi.openFolder(folderPath)
@@ -134,7 +174,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     if (p.includes("mintlify")) return "border-teal-500/30 text-teal-700 bg-teal-500/10 dark:text-teal-400"
     if (p.includes("docusaurus")) return "border-emerald-500/30 text-emerald-700 bg-emerald-500/10 dark:text-emerald-400"
     if (p.includes("readthedocs")) return "border-blue-500/30 text-blue-700 bg-blue-500/10 dark:text-blue-400"
-    return "border-purple-500/30 text-purple-700 bg-purple-500/10 dark:text-purple-400"
+    return "border-amber-500/30 text-amber-700 bg-amber-500/10 dark:text-amber-400"
   }
 
   return (
@@ -220,14 +260,22 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-60">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Filter library..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="pl-9 h-9 text-xs bg-background/80 font-mono"
+              className="pl-9 pr-7 h-9 text-xs bg-background/80 font-mono"
             />
+            {filter && (
+              <button
+                onClick={() => setFilter("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 bg-background/80 border border-border p-1 rounded-lg">
@@ -235,7 +283,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortField)}
-              className="bg-transparent text-foreground text-xs outline-none cursor-pointer pr-1"
+              className="bg-transparent text-foreground text-xs outline-none cursor-pointer pr-1 font-mono"
             >
               <option value="date">Sort: Recent</option>
               <option value="pages">Sort: Page Count</option>
@@ -243,6 +291,19 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               <option value="name">Sort: Domain</option>
             </select>
           </div>
+
+          <Button
+            variant={isBatchMode ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => {
+              setIsBatchMode(!isBatchMode)
+              setSelectedDomains([])
+            }}
+            className="h-9 px-3 text-xs border-border interactive-scale"
+          >
+            {isBatchMode ? <CheckSquare className="h-3.5 w-3.5 mr-1 text-primary" /> : <Square className="h-3.5 w-3.5 mr-1" />}
+            Batch
+          </Button>
 
           <Button 
             variant="outline" 
@@ -255,6 +316,38 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Batch Action Bar */}
+      {isBatchMode && (
+        <Card className="border-primary/40 bg-primary/10 backdrop-blur-md shadow-sm p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAll}
+              className="h-8 text-xs bg-background/80"
+            >
+              {selectedDomains.length === filteredAndSorted.length ? "Deselect All" : `Select All (${filteredAndSorted.length})`}
+            </Button>
+            <span className="text-xs font-mono text-foreground font-semibold">
+              {selectedDomains.length} item{selectedDomains.length === 1 ? "" : "s"} selected
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBatchDelete}
+              disabled={selectedDomains.length === 0}
+              className="h-8 text-xs"
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              Delete Selected
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Library Grid */}
       {loading ? (
@@ -276,17 +369,29 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           {filteredAndSorted.map((item) => {
             const pageCount = item.pages ?? item.pages_count ?? 0
             const folderPath = item.path || item.folder || ""
+            const isSelected = selectedDomains.includes(item.domain)
             return (
               <Card
                 key={item.domain}
-                className="glass-card flex flex-col justify-between group shadow-sm hover:border-primary/50"
+                className={`glass-card flex flex-col justify-between group shadow-sm transition-all ${
+                  isSelected ? "border-primary bg-primary/10 shadow-md shadow-primary/15" : "hover:border-primary/50"
+                }`}
               >
                 <CardHeader className="p-5 pb-3">
                   <div className="flex items-start justify-between gap-2.5">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform">
-                        <BookOpen className="h-4 w-4" />
-                      </div>
+                      {isBatchMode ? (
+                        <button
+                          onClick={() => toggleSelectDomain(item.domain)}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background"
+                        >
+                          {isSelected ? <Check className="h-4 w-4 text-primary" /> : null}
+                        </button>
+                      ) : (
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform">
+                          <BookOpen className="h-4 w-4" />
+                        </div>
+                      )}
                       <div className="overflow-hidden">
                         <h4 className="font-semibold text-sm text-foreground truncate font-mono" title={item.domain}>
                           {item.title && item.title !== item.domain ? item.title : item.domain}

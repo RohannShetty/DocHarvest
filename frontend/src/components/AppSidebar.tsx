@@ -49,7 +49,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     { id: "capture" as TabId, label: "Capture Studio", icon: Download, badge: null },
     { id: "library" as TabId, label: "Document Library", icon: Library, badge: null },
     { id: "search" as TabId, label: "Search Studio", icon: Search, badge: null },
-    { id: "diff" as TabId, label: "Snapshot Diff", icon: GitCompare, badge: null },
+    { id: "diff" as TabId, label: "DocGraph & Diff", icon: GitCompare, badge: "Graph" },
     { id: "export" as TabId, label: "Export Studio", icon: FileUp, badge: "RAG" },
     { id: "docs" as TabId, label: "Documentation", icon: BookOpen, badge: null },
     { id: "diagnostics" as TabId, label: "Diagnostics", icon: Activity, badge: null },
