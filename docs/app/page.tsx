@@ -1,5 +1,7 @@
 import React from 'react';
 import { ClientContainer } from '@/components/ClientContainer';
+import { FeatureBento } from '@/components/FeatureBento';
+import { InteractivePlayground } from '@/components/InteractivePlayground';
 import { IndexSection } from '@/components/IndexSection';
 import { ManifestTree } from '@/components/ManifestTree';
 import { ProviderTable } from '@/components/ProviderTable';
@@ -22,32 +24,38 @@ export default async function Page() {
       <main>
         {/* 00. Masthead + index specimen — rendered inside ClientContainer */}
 
-        {/* 01. The index: every emitted line, with its file and line number */}
-        <IndexSection indexData={INDEX_DATA} />
+        {/* 01. The 4 Core Architectural Pillars */}
+        <FeatureBento />
 
-        {/* 02. The manifest: the measured output tree and its plates */}
-        <ManifestTree manifest={MANIFEST} />
+        {/* 02. Interactive Studio & URL Auto-detection Simulator */}
+        <InteractivePlayground />
 
-        {/* 03. The providers: detection order, signals and sample sites */}
-        <ProviderTable />
-
-        {/* 04. The agents: MCP tools, resources, prompts, configs, one transcript */}
+        {/* 03. The Agents: FastMCP v2 tools, multi-agent simulation, token benchmark & 14+ harness switcher */}
         <AgentTools />
 
-        {/* 05. The comparison: eight capabilities, three columns */}
+        {/* 04. The Index: every emitted line, with its file and line number */}
+        <IndexSection indexData={INDEX_DATA} />
+
+        {/* 05. The Manifest: the measured output tree and its plates */}
+        <ManifestTree manifest={MANIFEST} />
+
+        {/* 06. The Providers: detection order, signals and sample sites */}
+        <ProviderTable />
+
+        {/* 07. The Comparison: eight capabilities, three columns */}
         <ComparisonTable />
 
-        {/* 06. The workflows: three readers, three commands */}
+        {/* 08. The Workflows: three readers, three commands */}
         <Workflows />
 
-        {/* 07. Releases: fetched at build time, sizes only when measured */}
+        {/* 09. Releases: fetched at build time, sizes only when measured */}
         <Releases data={githubData} />
 
-        {/* 08. The FAQ: the same array the FAQPage JSON-LD reads */}
+        {/* 10. The FAQ: the same array the FAQPage JSON-LD reads */}
         <FaqSheet />
       </main>
 
-      {/* 09. Colophon */}
+      {/* 11. Colophon */}
       <Colophon />
     </ClientContainer>
   );
