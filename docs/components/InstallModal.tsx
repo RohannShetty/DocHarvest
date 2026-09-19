@@ -107,28 +107,28 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-fadeIn"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Install DocHarvest v${VERSION}`}
-        className="relative w-full max-w-2xl border border-rule-strong bg-bond p-6 sm:p-8"
+        className="relative w-full max-w-2xl border border-rule-strong bg-bond p-6 sm:p-8 shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-rule pb-4">
           <div className="flex items-baseline gap-3">
-            <Download aria-hidden="true" className="h-4 w-4 shrink-0 text-ink-3" />
+            <Download aria-hidden="true" className="h-4 w-4 shrink-0 text-match" />
             <div>
-              <h2 className="sheet-term text-[15px] text-ink">Install DocHarvest v{VERSION}</h2>
-              <p className="sheet-label mt-1">standalone · pip · uvx · docker</p>
+              <h2 className="sheet-term text-[16px] font-semibold text-ink">Install DocHarvest v{VERSION}</h2>
+              <p className="sheet-label mt-1 text-ink-3">standalone · pip · uvx · docker</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="cursor-pointer text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+            className="cursor-pointer text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match p-1"
           >
             <X aria-hidden="true" className="h-4 w-4" />
           </button>
@@ -150,8 +150,8 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
                 aria-selected={isActive}
                 aria-controls={`install-panel-${option.id}`}
                 onClick={() => setActiveTab(option)}
-                className={`sheet-num inline-flex cursor-pointer items-center gap-2 border-r border-rule px-4 py-2 text-[11px] tracking-[0.14em] transition-colors focus-visible:outline-2 focus-visible:outline-match ${
-                  isActive ? 'text-match' : 'text-ink-3 hover:text-ink'
+                className={`sheet-num inline-flex cursor-pointer items-center gap-2 border-r border-rule px-4 py-2.5 text-[11px] tracking-[0.14em] transition-all focus-visible:outline-2 focus-visible:outline-match ${
+                  isActive ? 'text-match bg-bond-2 border-t-2 border-t-match font-semibold' : 'text-ink-3 hover:text-ink hover:bg-bond-2/40'
                 }`}
               >
                 <option.Icon className="h-3.5 w-3.5" />
@@ -168,32 +168,43 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
           tabIndex={0}
           className="mt-4 focus-visible:outline-2 focus-visible:outline-match"
         >
-          <div className="flex items-baseline justify-between">
-            <span className="sheet-label">terminal</span>
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="sheet-label text-ink-3">terminal</span>
             <button
               onClick={copyCommand}
               aria-label="Copy install command"
               className="inline-flex cursor-pointer items-center gap-1.5 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
-              {copied ? <Check aria-hidden="true" className="h-3.5 w-3.5" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
-              <span className="sheet-label">{copied ? 'copied' : 'copy'}</span>
+              {copied ? (
+                <>
+                  <Check aria-hidden="true" className="h-3.5 w-3.5 text-match" />
+                  <span className="sheet-label text-match">copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy aria-hidden="true" className="h-3.5 w-3.5" />
+                  <span className="sheet-label">copy</span>
+                </>
+              )}
             </button>
           </div>
-          <pre className="mt-2 overflow-x-auto text-[12px] leading-relaxed">{activeTab.command}</pre>
+          <pre className="mt-2 overflow-x-auto text-[12px] leading-relaxed border border-rule bg-bond-2 p-3.5 font-mono shadow-sm">
+            {activeTab.command}
+          </pre>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
+        <div className="mt-6 flex items-center justify-between gap-4 border-t border-rule pt-4">
           <a
             href={activeTab.ctaUrl}
             target="_blank"
             rel="noreferrer"
-            className="sheet-num cursor-pointer bg-match px-4 py-2 text-[12px] font-semibold text-bond transition-colors hover:bg-match-deep focus-visible:outline-2 focus-visible:outline-match"
+            className="sheet-num cursor-pointer bg-match px-4 py-2 text-[12px] font-semibold text-bond transition-all hover:bg-match-deep active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-match"
           >
             {activeTab.ctaLabel}
           </a>
           <button
             onClick={onClose}
-            className="sheet-label cursor-pointer transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+            className="sheet-label cursor-pointer text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
             Close
           </button>

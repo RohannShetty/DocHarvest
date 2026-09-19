@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Terminal, Check, Copy, Sparkles, ArrowRight, Layers, FileCode, CheckCircle2, Shield } from 'lucide-react';
-import { DOC_FRAMEWORKS } from '../data/showcaseData';
+import { Terminal, Check, Copy, CheckCircle2 } from 'lucide-react';
 
 interface SampleSite {
   id: string;
@@ -98,12 +97,12 @@ export function InteractivePlayground() {
     <section
       id="playground"
       aria-label="Interactive Capture Playground"
-      className="scroll-mt-16 border-t border-rule-strong px-6 py-16 lg:px-12"
+      className="scroll-mt-16 border-t border-rule-strong bg-bond px-6 py-20 lg:px-12"
     >
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
           <div>
-            <p className="sheet-label">INTERACTIVE STUDIO</p>
+            <p className="sheet-label text-match">INTERACTIVE STUDIO</p>
             <h2 className="sheet-head mt-2 text-ink">
               Try It Live: Pick a Documentation Site
             </h2>
@@ -113,7 +112,7 @@ export function InteractivePlayground() {
           </span>
         </div>
 
-        <p className="sheet-body mt-4 max-w-[68ch]">
+        <p className="sheet-body mt-4 max-w-[68ch] text-ink-2 leading-relaxed">
           Select a sample documentation portal or enter your own doc URL. See how DocHarvest detects
           the framework, isolates raw markdown endpoints, eliminates HTML noise, and outputs structured corpora.
         </p>
@@ -134,7 +133,7 @@ export function InteractivePlayground() {
                   setSelectedSite(site);
                   setCustomUrl('');
                 }}
-                className={`sheet-label cursor-pointer px-3.5 py-2 transition-colors focus-visible:outline-2 focus-visible:outline-match ${
+                className={`sheet-label cursor-pointer px-4 py-2 transition-all active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-match ${
                   isSelected
                     ? 'bg-match text-bond font-semibold'
                     : 'border border-rule bg-bond-2 text-ink-2 hover:border-rule-strong hover:text-ink'
@@ -147,8 +146,8 @@ export function InteractivePlayground() {
         </div>
 
         {/* Custom URL Input Bar */}
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center border border-rule bg-bond-2 p-3">
-          <span className="sheet-label shrink-0 text-ink-3">TARGET URL:</span>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center border border-rule-strong bg-bond-2 p-3.5 shadow-sm">
+          <span className="sheet-label shrink-0 text-ink-3 tracking-wider">TARGET URL:</span>
           <input
             type="url"
             aria-label="Enter documentation URL"
@@ -161,7 +160,7 @@ export function InteractivePlayground() {
             <button
               type="button"
               onClick={() => setCustomUrl('')}
-              className="sheet-label shrink-0 cursor-pointer text-ink-3 hover:text-ink"
+              className="sheet-label shrink-0 cursor-pointer text-ink-3 hover:text-ink px-2.5 py-1 bg-bond border border-rule"
             >
               Reset
             </button>
@@ -169,7 +168,7 @@ export function InteractivePlayground() {
         </div>
 
         {/* Real-time Telemetry & Output Simulation Card */}
-        <div className="mt-6 border border-rule-strong bg-bond-2 p-6">
+        <div className="mt-6 border border-rule-strong bg-gradient-to-b from-bond-2 to-bond-2/70 p-6 shadow-sm">
           <div className="grid gap-6 lg:grid-cols-12">
             {/* Left: Command & Pipeline */}
             <div className="lg:col-span-7">
@@ -182,7 +181,7 @@ export function InteractivePlayground() {
                 </span>
               </div>
 
-              <div className="mt-4 border border-rule bg-bond p-3">
+              <div className="mt-4 border border-rule bg-bond p-4">
                 <div className="flex items-center justify-between">
                   <span className="sheet-label flex items-center gap-1.5 text-ink">
                     <Terminal aria-hidden="true" className="h-3.5 w-3.5 text-match" />
@@ -197,7 +196,7 @@ export function InteractivePlayground() {
                     {copied ? (
                       <>
                         <Check aria-hidden="true" className="h-3.5 w-3.5 text-match" />
-                        <span className="text-match">copied</span>
+                        <span className="text-match font-medium">copied</span>
                       </>
                     ) : (
                       <>
@@ -207,15 +206,15 @@ export function InteractivePlayground() {
                     )}
                   </button>
                 </div>
-                <code className="sheet-num mt-2 block break-all text-[12px] text-ink">
+                <code className="sheet-num mt-2.5 block break-all text-[12px] text-ink font-mono">
                   {captureCmd}
                 </code>
               </div>
 
               {/* FastMCP tool call equivalent */}
-              <div className="mt-4 border border-rule bg-bond p-3">
-                <span className="sheet-label text-ink-3 block mb-1">FastMCP v2 Equivalent:</span>
-                <code className="sheet-num text-[11px] text-match block">
+              <div className="mt-4 border border-rule bg-bond p-4">
+                <span className="sheet-label text-ink-3 block mb-1.5">FastMCP v2 Equivalent:</span>
+                <code className="sheet-num text-[11px] text-match block font-mono">
                   {`mcp.call_tool("download_docs", { url: "${activeUrl}", max_pages: ${selectedSite.pagesSample} })`}
                 </code>
               </div>
@@ -223,19 +222,19 @@ export function InteractivePlayground() {
 
             {/* Right: Metrics & Emitted Files */}
             <div className="border-t border-rule pt-4 lg:col-span-5 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-              <span className="sheet-label">Measured Extraction Impact</span>
+              <span className="sheet-label text-match">Measured Extraction Impact</span>
 
               <div className="mt-3 grid grid-cols-2 gap-3 border-t border-rule pt-3 sheet-num">
                 <div>
-                  <span className="sheet-label text-[10px]">Raw Web Size</span>
-                  <p className="text-[13px] text-alert">{selectedSite.rawSize}</p>
+                  <span className="sheet-label text-[10px] text-ink-3">Raw Web Size</span>
+                  <p className="text-[13px] text-alert font-mono font-medium">{selectedSite.rawSize}</p>
                 </div>
                 <div>
-                  <span className="sheet-label text-[10px]">Clean Markdown</span>
-                  <p className="text-[13px] text-match font-bold">{selectedSite.cleanSize}</p>
+                  <span className="sheet-label text-[10px] text-ink-3">Clean Markdown</span>
+                  <p className="text-[13px] text-match font-mono font-bold">{selectedSite.cleanSize}</p>
                 </div>
                 <div className="col-span-2">
-                  <span className="sheet-label text-[10px]">Context Efficiency</span>
+                  <span className="sheet-label text-[10px] text-ink-3">Context Efficiency</span>
                   <p className="text-[13px] text-match font-semibold">
                     ✓ {selectedSite.tokenSavings}
                   </p>
@@ -243,12 +242,12 @@ export function InteractivePlayground() {
               </div>
 
               <div className="mt-4 border-t border-rule pt-3">
-                <span className="sheet-label text-[10px] block mb-2">Emitted Corpora:</span>
+                <span className="sheet-label text-[10px] text-ink-3 block mb-2">Emitted Corpora:</span>
                 <ul className="space-y-1 sheet-num text-[11px] text-ink-2">
                   {selectedSite.emittedFiles.map((file) => (
                     <li key={file} className="flex items-center gap-1.5">
                       <CheckCircle2 aria-hidden="true" className="h-3 w-3 text-match shrink-0" />
-                      <span className="truncate">{file}</span>
+                      <span className="truncate font-mono">{file}</span>
                     </li>
                   ))}
                 </ul>

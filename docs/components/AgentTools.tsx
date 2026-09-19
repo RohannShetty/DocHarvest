@@ -45,14 +45,14 @@ export function AgentTools() {
     <section
       id="agents"
       data-sheet-line="04"
-      className="scroll-mt-16 border-t border-rule-strong px-6 py-16 lg:px-12"
+      className="scroll-mt-16 border-t border-rule-strong bg-bond px-6 py-20 lg:px-12"
     >
       <div className="mx-auto max-w-6xl">
-        <p className="sheet-label">04 — THE AGENTS</p>
+        <p className="sheet-label text-match">04 — THE AGENTS</p>
         <h2 className="sheet-head mt-4 text-ink">
           {MCP_TOOLS.length} Tools Over FastMCP v2. Universal Agent Skills.
         </h2>
-        <p className="sheet-body mt-4 max-w-[68ch]">
+        <p className="sheet-body mt-4 max-w-[68ch] text-ink-2 leading-relaxed">
           DocHarvest speaks standard Model Context Protocol over stdio and ships a universal,
           harness-neutral agent skill. Autonomous coding agents use it to crawl, index, query,
           and verify documentation with zero hallucination and zero token waste.
@@ -68,10 +68,10 @@ export function AgentTools() {
         <AgentSkillSwitcher />
 
         {/* 4. MCP Tools Registration Table */}
-        <div className="mt-14 border-t border-rule-strong pt-10">
+        <div className="mt-16 border-t border-rule-strong pt-12">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
             <div>
-              <p className="sheet-label">PROTOCOL SPECIFICATION</p>
+              <p className="sheet-label text-match">PROTOCOL SPECIFICATION</p>
               <h3 className="sheet-head mt-2 text-ink">
                 FastMCP v2 Tool Surface
               </h3>
@@ -81,22 +81,22 @@ export function AgentTools() {
             </p>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
+          <div className="mt-6 overflow-x-auto border border-rule-strong bg-bond-2 shadow-sm">
             <table className="w-full border-collapse text-left">
               <caption className="sr-only">MCP tool and its purpose, in registration order</caption>
               <thead>
-                <tr className="border-b border-rule-strong">
-                  <th scope="col" className="sheet-label py-2 pr-6 font-medium">Tool Name</th>
-                  <th scope="col" className="sheet-label py-2 font-medium">Purpose &amp; AST Guarantee</th>
+                <tr className="border-b border-rule-strong bg-bond">
+                  <th scope="col" className="sheet-label py-3 px-4 font-medium text-ink">Tool Name</th>
+                  <th scope="col" className="sheet-label py-3 px-4 font-medium text-ink">Purpose &amp; AST Guarantee</th>
                 </tr>
               </thead>
               <tbody>
                 {MCP_TOOLS.map((tool) => (
-                  <tr key={tool.name} className="border-b border-rule">
-                    <th scope="row" className="sheet-num w-60 py-2.5 pr-6 text-left text-[13px] font-normal text-ink">
+                  <tr key={tool.name} className="border-b border-rule hover:bg-bond/30 transition-colors">
+                    <th scope="row" className="sheet-num w-60 py-3.5 px-4 text-left text-[13px] font-mono font-medium text-ink">
                       {tool.name}
                     </th>
-                    <td className="sheet-body py-2.5 text-[13px]">{tool.purpose}</td>
+                    <td className="sheet-body py-3.5 px-4 text-[13px] text-ink-2">{tool.purpose}</td>
                   </tr>
                 ))}
               </tbody>
@@ -104,22 +104,22 @@ export function AgentTools() {
           </div>
 
           {/* Resources and Prompts */}
-          <div className="mt-8 grid gap-6 border-t border-rule pt-4 md:grid-cols-2">
-            <div>
-              <p className="sheet-label">resources</p>
-              <ul className="mt-2">
+          <div className="mt-8 grid gap-6 border-t border-rule pt-6 md:grid-cols-2">
+            <div className="border border-rule-strong bg-bond-2 p-5 shadow-sm">
+              <p className="sheet-label text-match">resources</p>
+              <ul className="mt-3 space-y-2">
                 {MCP_RESOURCES.map((resource) => (
-                  <li key={resource} className="sheet-num border-b border-rule py-1.5 text-[13px] text-ink-2">
+                  <li key={resource} className="sheet-num border-b border-rule/60 py-1.5 text-[13px] text-ink font-mono">
                     {resource}
                   </li>
                 ))}
               </ul>
             </div>
-            <div>
-              <p className="sheet-label">prompts</p>
-              <ul className="mt-2">
+            <div className="border border-rule-strong bg-bond-2 p-5 shadow-sm">
+              <p className="sheet-label text-match">prompts</p>
+              <ul className="mt-3 space-y-2">
                 {MCP_PROMPTS.map((prompt) => (
-                  <li key={prompt} className="sheet-num border-b border-rule py-1.5 text-[13px] text-ink-2">
+                  <li key={prompt} className="sheet-num border-b border-rule/60 py-1.5 text-[13px] text-ink font-mono">
                     {prompt}
                   </li>
                 ))}
@@ -128,13 +128,13 @@ export function AgentTools() {
           </div>
 
           {/* Quoted Stdio Session Transcript */}
-          <div className="mt-10 border-t border-rule pt-6">
-            <div className="flex items-baseline justify-between mb-2">
-              <p className="sheet-label">one stdio session, quoted</p>
-              <span className="sheet-num text-[11px] text-ink-3">local-artifacts/docharvest-mcp-omp-verification.md</span>
+          <div className="mt-12 border-t border-rule-strong pt-8">
+            <div className="flex items-baseline justify-between mb-2.5">
+              <p className="sheet-label text-ink">one stdio session, quoted</p>
+              <span className="sheet-num text-[11px] text-ink-3 font-mono">local-artifacts/docharvest-mcp-omp-verification.md</span>
             </div>
-            <pre className="overflow-auto text-[12px] leading-relaxed font-mono">{TRANSCRIPT}</pre>
-            <p className="sheet-label mt-2">
+            <pre className="overflow-auto text-[12px] leading-relaxed font-mono border border-rule bg-bond-2 p-4 shadow-sm">{TRANSCRIPT}</pre>
+            <p className="sheet-label mt-2 text-ink-3">
               Verbatim output from real stdio session recording (2026-09-16)
             </p>
           </div>

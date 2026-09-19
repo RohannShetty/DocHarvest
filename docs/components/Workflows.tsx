@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bot, BookOpen, GitCompare, Check, Copy, Sparkles, Terminal } from 'lucide-react';
+import { Bot, BookOpen, GitCompare, Check, Copy } from 'lucide-react';
 
 /**
  * Line 06 — The Workflows.
@@ -52,12 +52,12 @@ export function Workflows() {
     <section
       id="workflows"
       data-sheet-line="06"
-      className="scroll-mt-16 border-t border-rule-strong px-6 py-16 lg:px-12"
+      className="scroll-mt-16 border-t border-rule-strong bg-bond px-6 py-20 lg:px-12"
     >
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
           <div>
-            <p className="sheet-label">06 — THE WORKFLOWS</p>
+            <p className="sheet-label text-match">06 — THE WORKFLOWS</p>
             <h2 className="sheet-head mt-2 text-ink">Three Workflows. Three Canonical Commands.</h2>
           </div>
           <span className="sheet-num text-[12px] text-ink-3">
@@ -65,7 +65,7 @@ export function Workflows() {
           </span>
         </div>
 
-        <p className="sheet-body mt-4 max-w-[68ch]">
+        <p className="sheet-body mt-4 max-w-[68ch] text-ink-2 leading-relaxed">
           Whether you are preparing training data for vector retrieval, archiving documentation for flights,
           or auditing API drift across versions: one deterministic command produces the verified artifact.
         </p>
@@ -77,23 +77,23 @@ export function Workflows() {
             return (
               <div
                 key={workflow.id}
-                className="flex flex-col justify-between border border-rule-strong bg-bond-2 p-5 transition-all hover:border-match/60"
+                className="group flex flex-col justify-between border border-rule-strong bg-gradient-to-b from-bond-2 to-bond-2/70 p-6 transition-all duration-200 hover:border-match/60 shadow-sm"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <div className="inline-flex items-center gap-2 border border-rule bg-bond px-2 py-1">
+                    <div className="inline-flex items-center gap-2 border border-rule bg-bond px-3 py-1">
                       <Icon aria-hidden="true" className="h-3.5 w-3.5 text-match" />
                       <span className="sheet-label text-[10px] text-ink">{workflow.badge}</span>
                     </div>
                   </div>
 
-                  <h3 className="sheet-head mt-4 text-[16px] text-ink">
+                  <h3 className="sheet-head mt-5 text-[17px] text-ink group-hover:text-match transition-colors">
                     {workflow.persona}
                   </h3>
 
-                  <div className="mt-4 border border-rule bg-bond p-2.5">
+                  <div className="mt-4 border border-rule bg-bond p-3">
                     <div className="flex items-center justify-between gap-2">
-                      <code className="sheet-num break-all text-[11px] text-ink">
+                      <code className="sheet-num break-all text-[11px] text-ink font-mono">
                         {workflow.command}
                       </code>
                       <button
@@ -111,14 +111,14 @@ export function Workflows() {
                     </div>
                   </div>
 
-                  <p className="sheet-body mt-4 text-[13px] leading-relaxed">
+                  <p className="sheet-body mt-4 text-[13px] text-ink-2 leading-relaxed">
                     {workflow.desc}
                   </p>
                 </div>
 
-                <div className="mt-6 border-t border-rule pt-3">
+                <div className="mt-6 border-t border-rule pt-4">
                   <span className="sheet-label text-[10px] block text-ink-3">Lands on disk:</span>
-                  <code className="sheet-num mt-1 block truncate text-[11px] text-match">
+                  <code className="sheet-num mt-1 block truncate text-[11px] text-match font-mono font-medium">
                     {workflow.lands}
                   </code>
                 </div>

@@ -39,7 +39,7 @@ function highlight(text: string, needle: string): React.ReactNode {
   while (at !== -1) {
     if (at > cursor) parts.push(text.slice(cursor, at));
     parts.push(
-      <mark key={key++} className="bg-transparent text-match">
+      <mark key={key++} className="bg-match/20 text-match font-semibold px-0.5">
         {text.slice(at, at + target.length)}
       </mark>,
     );
@@ -118,8 +118,8 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-3 border-b border-rule-strong pb-2">
-        <span className="sheet-label shrink-0">filter</span>
+      <div className="flex items-center gap-3 border-b border-rule-strong pb-2.5">
+        <span className="sheet-label shrink-0 text-ink-3 tracking-wider">FILTER:</span>
         <input
           type="search"
           role="combobox"
@@ -139,13 +139,13 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
           className="w-full bg-transparent font-mono text-sm text-ink outline-none placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-match"
         />
         {copied && (
-          <span className="sheet-label shrink-0 text-match" aria-live="polite">
+          <span className="sheet-label shrink-0 text-match font-mono font-medium" aria-live="polite">
             copied {copied}
           </span>
         )}
       </div>
 
-      <p className="sheet-label py-2" aria-live="polite" aria-atomic="true">
+      <p className="sheet-label py-2 text-ink-3" aria-live="polite" aria-atomic="true">
         {visible.length} of {rows.length} rows · {provenance.captures.length} captures · {pages} pages
       </p>
 
@@ -162,20 +162,18 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
                   <li
                     key={`plate-${entry.capture.id}`}
                     role="presentation"
-                    className="sheet-label mt-4 flex flex-wrap items-baseline gap-x-2 border-b border-rule-strong py-2"
+                    className="sheet-label mt-4 flex flex-wrap items-baseline gap-x-2 border-b border-rule-strong py-2 text-ink-3"
                   >
-                    <span className="text-ink">{entry.capture.id}</span>
+                    <span className="text-ink font-mono font-medium">{entry.capture.id}</span>
                     <span>
                       · {entry.capture.pages} pages · captured {isoDate(entry.capture.captured)} · provider{' '}
-                      {entry.capture.provider}
+                      <span className="text-ink font-mono">{entry.capture.provider}</span>
                     </span>
                   </li>
                 );
               }
 
               const row = entry.row;
-              // Amber marks the typed term, never the row's own keyword: at rest
-              // the sheet is zinc, and the only amber is the active line's number.
               const isActive = entry.option === activeIndex;
 
               return (
@@ -190,23 +188,23 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
                     navigator.clipboard?.writeText(citation).catch(() => undefined);
                     setCopied(citation);
                   }}
-                  className={`relative flex cursor-pointer items-start gap-3 border-b border-rule py-2 pl-3 pr-2 text-[13px] text-ink before:absolute before:left-0 before:top-0 before:h-full before:w-px before:bg-match before:opacity-0 before:content-[''] hover:before:opacity-100 ${
-                    isActive ? 'before:opacity-100' : ''
+                  className={`relative flex cursor-pointer items-start gap-3 border-b border-rule/60 py-2.5 pl-3 pr-2 text-[13px] text-ink transition-colors before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-match before:opacity-0 before:content-[''] hover:before:opacity-100 hover:bg-bond-2/60 ${
+                    isActive ? 'before:opacity-100 bg-bond-2/80 font-medium' : ''
                   }`}
                 >
                   <span
-                    className={`sheet-num w-10 shrink-0 text-right ${
-                      isActive ? 'text-match' : 'text-ink-3'
+                    className={`sheet-num w-10 shrink-0 text-right font-mono ${
+                      isActive ? 'text-match font-bold' : 'text-ink-3'
                     }`}
                   >
                     {row.line}
                   </span>
                   <span className="min-w-0 flex-1 break-words leading-relaxed">
-                    <span className="sheet-num text-ink-3 [overflow-wrap:anywhere]">
+                    <span className="sheet-num text-ink-3 font-mono [overflow-wrap:anywhere]">
                       {highlight(row.path, needle)}:{row.line}
                     </span>{' '}
-                    <span className="font-sans">{highlight(row.context, needle)}</span>{' '}
-                    <span className="sheet-label">{row.source}</span>
+                    <span className="font-sans text-ink">{highlight(row.context, needle)}</span>{' '}
+                    <span className="sheet-label text-[10px] text-ink-3 font-mono ml-1">{row.source}</span>
                   </span>
                 </li>
               );

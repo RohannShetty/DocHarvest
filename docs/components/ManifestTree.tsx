@@ -36,9 +36,9 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
 
   if (!capture) {
     return (
-      <section id="contract" data-sheet-line="02" className="scroll-mt-16 border-t border-rule-strong px-6 py-16 lg:px-12">
+      <section id="contract" data-sheet-line="02" className="scroll-mt-16 border-t border-rule-strong bg-bond px-6 py-20 lg:px-12">
         <div className="mx-auto max-w-6xl">
-          <p className="sheet-body">No capture manifest in this build.</p>
+          <p className="sheet-body text-ink-3">No capture manifest in this build.</p>
         </div>
       </section>
     );
@@ -77,43 +77,43 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
     <section
       id="contract"
       data-sheet-line="02"
-      className="scroll-mt-16 border-t border-rule-strong px-6 py-16 lg:px-12"
+      className="scroll-mt-16 border-t border-rule-strong bg-bond px-6 py-20 lg:px-12"
     >
       <div className="mx-auto max-w-6xl">
-        <p className="sheet-label">02 — THE MANIFEST</p>
+        <p className="sheet-label text-match">02 — THE MANIFEST</p>
         <h2 className="sheet-head mt-4 text-ink">One capture. One tree you can read.</h2>
-        <p className="sheet-body mt-4 max-w-[68ch]">
+        <p className="sheet-body mt-4 max-w-[68ch] text-ink-2 leading-relaxed">
           Sizes are bytes measured on disk from{' '}
-          <span className="sheet-num text-ink">{capture.id}</span> ({isoDate(capture.captured)}, provider{' '}
-          {capture.provider}). Two roots hold the same corpus: the library at{' '}
-          <span className="sheet-num text-ink">~/.gitbook-downloader/docs/{domain}/</span> and the local copy at{' '}
-          <span className="sheet-num text-ink">./{domain}-docs/</span>.
+          <span className="sheet-num text-ink font-mono font-medium">{capture.id}</span> ({isoDate(capture.captured)}, provider{' '}
+          <span className="text-ink font-mono font-medium">{capture.provider}</span>). Two roots hold the same corpus: the library at{' '}
+          <span className="sheet-num text-ink font-mono">~/.gitbook-downloader/docs/{domain}/</span> and the local copy at{' '}
+          <span className="sheet-num text-ink font-mono">./{domain}-docs/</span>.
         </p>
 
         {/* The measured tree. */}
-        <div className="mt-10 border-t border-rule-strong">
-          <div className="flex items-baseline justify-between py-3">
-            <span className="sheet-num text-sm text-ink">{domain}/</span>
-            <span className="sheet-label">
+        <div className="mt-10 border border-rule-strong bg-gradient-to-b from-bond-2 to-bond-2/70 p-6 shadow-sm">
+          <div className="flex items-baseline justify-between border-b border-rule pb-3.5">
+            <span className="sheet-num text-sm text-ink font-mono font-semibold">{domain}/</span>
+            <span className="sheet-label text-match">
               {capture.pages} pages · {formatBytes(capture.bytes.total)}
             </span>
           </div>
 
-          <ul className="border-l border-rule pl-4">
+          <ul className="mt-3.5 border-l border-rule pl-4 space-y-1.5">
             {capture.outputs.map((output) => (
               <li
                 key={output.path}
-                className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-rule py-2"
+                className="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-rule/60 py-2.5 hover:bg-bond/30 transition-colors"
               >
-                <span className="sheet-num text-[13px] text-ink">
+                <span className="sheet-num text-[13px] text-ink font-mono">
                   {output.path}
                   {output.libraryName && (
-                    <span className="sheet-label ml-2">local · {output.libraryName} in the library</span>
+                    <span className="sheet-label ml-2 text-ink-3">local · {output.libraryName} in library</span>
                   )}
                 </span>
-                <span className="sheet-num text-[13px] text-ink-2">
+                <span className="sheet-num text-[13px] text-ink-2 font-mono">
                   {output.bytes === null ? (
-                    <span className="sheet-label">not in this capture</span>
+                    <span className="sheet-label text-ink-3">not in this capture</span>
                   ) : (
                     <>
                       {output.pages !== undefined && `${output.pages} pages · `}
@@ -125,19 +125,19 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
             ))}
           </ul>
 
-          <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-4 border-t border-rule-strong pt-3">
-            <span className="sheet-num text-[13px] text-ink-3">~/.gitbook-downloader/search.db</span>
-            <span className="sheet-label">one index, all domains · FTS5</span>
+          <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 border-t border-rule-strong pt-3.5">
+            <span className="sheet-num text-[13px] text-ink-3 font-mono">~/.gitbook-downloader/search.db</span>
+            <span className="sheet-label text-match">one index, all domains · FTS5</span>
           </div>
         </div>
 
         {/* The plates: verbatim heads of the files above. */}
-        <div className="mt-12">
+        <div className="mt-14">
           <div
             role="tablist"
             aria-label="Manifest plates"
             onKeyDown={handleTabKeyDown}
-            className="flex flex-wrap border-b border-rule-strong"
+            className="flex flex-wrap border-b border-rule-strong bg-bond-2"
           >
             {PLATES.map((candidate) => {
               const isActive = candidate.key === activePlate;
@@ -149,8 +149,8 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
                   aria-controls={`plate-${candidate.key}`}
                   id={`plate-tab-${candidate.key}`}
                   onClick={() => setActivePlate(candidate.key)}
-                  className={`sheet-num cursor-pointer border-r border-rule px-4 py-2 text-[11px] tracking-[0.14em] transition-colors focus-visible:outline-2 focus-visible:outline-match ${
-                    isActive ? 'text-match' : 'text-ink-3 hover:text-ink'
+                  className={`sheet-num cursor-pointer border-r border-rule px-5 py-2.5 text-[11px] tracking-[0.14em] transition-all focus-visible:outline-2 focus-visible:outline-match ${
+                    isActive ? 'text-match bg-bond border-t-2 border-t-match font-semibold' : 'text-ink-3 hover:text-ink hover:bg-bond/50'
                   }`}
                 >
                   {candidate.numeral} · {candidate.label}
@@ -166,13 +166,13 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
             tabIndex={0}
             className="mt-4 focus-visible:outline-2 focus-visible:outline-match"
           >
-            {plateFile && <p className="sheet-label mb-2">{plateFile}</p>}
+            {plateFile && <p className="sheet-label mb-2.5 text-ink-3 font-mono">{plateFile}</p>}
             {plateData?.excerpt ? (
-              <pre className="max-h-[420px] overflow-auto text-[12px] leading-relaxed">
+              <pre className="max-h-[420px] overflow-auto text-[12px] leading-relaxed border border-rule-strong bg-bond-2 p-4 shadow-sm font-mono">
                 {plateData.excerpt}
               </pre>
             ) : (
-              <p className="sheet-body border border-rule bg-bond-2 px-4 py-6 text-ink-2">
+              <p className="sheet-body border border-rule bg-bond-2 px-4 py-6 text-ink-2 shadow-sm">
                 No RAG export in this capture — run capture with --rag
               </p>
             )}

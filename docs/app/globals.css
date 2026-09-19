@@ -8,12 +8,14 @@
 
 /* The Index Sheet — one world, one accent.
    Near-black bond, 1px hairlines, zero radii, zinc text ramp, amber for the
-   matched term and the active line only. Depth comes from section cuts. */
+   matched term and the active line only. Depth comes from section cuts & subtle lighting. */
 :root {
   --bond: #09090B;
   --bond-2: #0F0F12;
+  --bond-3: #141418;
   --rule: #1F1F23;
   --rule-strong: #2E2E34;
+  --rule-subtle: #18181C;
   --ink: #F4F4F5;
   --ink-2: #A1A1AA;
   /* Marginalia grey is lifted off the documented #71717A: at 11–13px it has to
@@ -21,6 +23,7 @@
   --ink-3: #8A8A93;
   --match: #F59E0B;
   --match-deep: #D97706;
+  --match-subtle: rgba(245, 158, 11, 0.08);
   --alert: #EF4444;
   --radius: 0px;
 }
@@ -28,30 +31,36 @@
 .light {
   --bond: #FBFBFA;
   --bond-2: #F4F4F5;
+  --bond-3: #ECECEF;
   --rule: #E4E4E7;
   --rule-strong: #D4D4D8;
+  --rule-subtle: #EDEDF0;
   --ink: #18181B;
   --ink-2: #52525B;
   /* Same lift on the light bond, where #71717A reads 4.40:1 on plate fills. */
   --ink-3: #6B6B74;
   --match: #B45309;
   --match-deep: #92400E;
+  --match-subtle: rgba(180, 83, 9, 0.06);
   --alert: #B91C1C;
 }
 
 @theme inline {
   --color-bond: var(--bond);
   --color-bond-2: var(--bond-2);
+  --color-bond-3: var(--bond-3);
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
+  --color-rule-subtle: var(--rule-subtle);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
   --color-match: var(--match);
   --color-match-deep: var(--match-deep);
+  --color-match-subtle: var(--match-subtle);
   --color-alert: var(--alert);
 
-  /* Zero radii: no rounded corners anywhere in this world. */
+  /* Zero radii: precise architectural edges */
   --radius-xs: 0px;
   --radius-sm: 0px;
   --radius-md: 0px;
@@ -67,14 +76,15 @@
 }
 
 @layer components {
-  /* Display type — Archivo at its normal width, tight tracking. */
+  /* Display type — Archivo at its normal width, tight tracking with text-wrap balance. */
   .sheet-display {
     font-family: var(--font-sans);
     font-stretch: 100%;
     font-weight: 700;
     font-size: clamp(2.25rem, 4.6vw, 3.75rem);
     line-height: 1.05;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
   }
 
   .sheet-head {
@@ -82,8 +92,9 @@
     font-stretch: 100%;
     font-weight: 600;
     font-size: clamp(1.5rem, 2.6vw, 2.125rem);
-    line-height: 1.1;
+    line-height: 1.15;
     letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 
   /* The line head: "03 — THE PROVIDERS". */
@@ -99,8 +110,9 @@
   .sheet-body {
     font-family: var(--font-sans);
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: 1.625;
     color: var(--ink-2);
+    text-wrap: pretty;
   }
 
   /* Every number, path and command lines up in a column. */
@@ -119,6 +131,18 @@
     font-family: var(--font-sans);
     font-stretch: 75%;
   }
+
+  /* High-end glassmorphic card container */
+  .glass-panel {
+    background-color: var(--bond-2);
+    border: 1px solid var(--rule-strong);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-panel:hover {
+    border-color: color-mix(in srgb, var(--match) 45%, var(--rule-strong));
+  }
 }
 
 * {
@@ -129,10 +153,14 @@
 body {
   background-color: var(--bond);
   color: var(--ink);
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(245, 158, 11, 0.035), transparent 70%),
+    radial-gradient(circle at 100% 100%, rgba(245, 158, 11, 0.015), transparent 50%);
+  background-attachment: fixed;
 }
 
 ::selection {
-  background-color: color-mix(in srgb, var(--match) 25%, transparent);
+  background-color: color-mix(in srgb, var(--match) 28%, transparent);
   color: var(--ink);
 }
 
@@ -175,10 +203,7 @@ h1 { font-weight: 700; }
 h2 { font-weight: 600; }
 h3 { font-weight: 600; }
 
-/* Code wells follow the theme — same bond, hairline, tabular numerals.
-   Unlayered rule on purpose: it must outrank Tailwind utility classes so a
-   stray low-opacity text color or bg-transparent override on a <pre> can
-   never regress the well back to unreadable. */
+/* Code wells follow the theme — same bond, hairline, tabular numerals. */
 pre {
   background-color: var(--bond-2);
   color: var(--ink);
@@ -187,11 +212,23 @@ pre {
   overflow-x: auto;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 code {
   font-family: var(--font-mono);
   font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle pulse glow for live indicators */
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-glow {
+  animation: ambient-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* fadeIn keyframe — referenced by animate-fadeIn utility in Tailwind v4.
@@ -205,10 +242,7 @@ code {
   animation: fadeIn 0.4s ease-out both;
 }
 
-/* One authored moment: the index specimen unrolls from its top rule on first
-   paint — a clip-path reveal, not a fade, so the sheet reads as paper coming
-   down. The content is in the DOM throughout: a dropped animation still shows
-   the sheet, and prefers-reduced-motion collapses it above. */
+/* Author unfurl animation */
 @keyframes sheet-unfurl {
   from { clip-path: inset(0 0 92% 0); }
   to   { clip-path: inset(0 0 0 0); }

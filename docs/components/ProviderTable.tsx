@@ -50,77 +50,77 @@ export function ProviderTable() {
     <section
       id="platforms"
       data-sheet-line="03"
-      className="scroll-mt-16 border-t border-rule-strong px-6 py-16 lg:px-12"
+      className="scroll-mt-16 border-t border-rule-strong bg-bond px-6 py-20 lg:px-12"
     >
       <div className="mx-auto max-w-6xl">
-        <p className="sheet-label">03 — THE PROVIDERS</p>
+        <p className="sheet-label text-match">03 — THE PROVIDERS</p>
         <h2 className="sheet-head mt-4 text-ink">
           {rows.length - 1} detectors, one fallback.
         </h2>
-        <p className="sheet-body mt-4 max-w-[68ch]">
+        <p className="sheet-body mt-4 max-w-[68ch] text-ink-2 leading-relaxed">
           Detection runs in priority order, highest first; each detector reads the page&rsquo;s own
           markers.
         </p>
 
-        <div className="mt-10 overflow-x-auto">
+        <div className="mt-10 overflow-x-auto border border-rule-strong bg-gradient-to-b from-bond-2 to-bond-2/70 shadow-sm">
           <table className="w-full border-collapse text-left">
-          <caption className="sr-only">provider, priority, signal and sample site per detector</caption>
-          <thead>
-            <tr className="border-y border-rule-strong">
-              <th scope="col" className="sheet-label py-2 pr-4 font-medium">
-                provider
-              </th>
-              <th scope="col" className="sheet-label py-2 pr-4 font-medium">
-                priority
-              </th>
-              <th scope="col" className="sheet-label py-2 pr-4 font-medium">
-                signal
-              </th>
-              <th scope="col" className="sheet-label py-2 font-medium">
-                sample site
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.id} className="border-b border-rule align-top">
-                <th scope="row" className="sheet-num py-3 pr-4 text-left font-normal text-[13px] text-ink">
-                  {row.name}
+            <caption className="sr-only">provider, priority, signal and sample site per detector</caption>
+            <thead>
+              <tr className="border-b border-rule-strong bg-bond">
+                <th scope="col" className="sheet-label py-3.5 px-4 font-medium text-ink">
+                  provider
                 </th>
-                <td className="sheet-num py-3 pr-4 text-[13px] text-ink-2">{row.detectionPriority}</td>
-                <td className="sheet-body py-3 pr-4 text-[13px]">{SIGNALS[row.id]}</td>
-                <td className="sheet-num py-3 text-[13px] text-ink-3">
-                  <a
-                    href={row.sampleUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="cursor-pointer underline-offset-4 transition-colors hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-match"
-                  >
-                    {row.sampleUrl.replace(/^https?:\/\//, '')}
-                  </a>
-                </td>
+                <th scope="col" className="sheet-label py-3.5 px-4 font-medium text-ink">
+                  priority
+                </th>
+                <th scope="col" className="sheet-label py-3.5 px-4 font-medium text-ink">
+                  signal
+                </th>
+                <th scope="col" className="sheet-label py-3.5 px-4 font-medium text-ink">
+                  sample site
+                </th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id} className="border-b border-rule align-top hover:bg-bond/30 transition-colors">
+                  <th scope="row" className="sheet-num py-3.5 px-4 text-left font-mono font-medium text-[13px] text-ink">
+                    {row.name}
+                  </th>
+                  <td className="sheet-num py-3.5 px-4 text-[13px] text-match font-mono font-medium">{row.detectionPriority}</td>
+                  <td className="sheet-body py-3.5 px-4 text-[13px] text-ink-2 leading-relaxed">{SIGNALS[row.id]}</td>
+                  <td className="sheet-num py-3.5 px-4 text-[13px] text-ink-3">
+                    <a
+                      href={row.sampleUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="cursor-pointer font-mono underline-offset-4 transition-colors hover:text-match hover:underline focus-visible:outline-2 focus-visible:outline-match"
+                    >
+                      {row.sampleUrl.replace(/^https?:\/\//, '')}
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
 
-        <div className="mt-10 border-t border-rule-strong pt-4">
-          <p className="sheet-label">one measured page</p>
+        <div className="mt-10 border-t border-rule-strong pt-8">
+          <p className="sheet-label text-match">one measured page</p>
           {measured && measured.rawHtml && measured.emitted ? (
-            <div className="sheet-num mt-3 grid gap-1 text-[13px] text-ink-2">
+            <div className="sheet-num mt-3 grid gap-2 text-[13px] text-ink-2 border border-rule-strong bg-bond-2 p-5 font-mono shadow-sm">
               <p>
-                raw HTML <span className="text-ink">{formatBytes(measured.rawHtml.bytes)}</span> ·{' '}
-                {measured.rawHtml.url}
+                raw HTML <span className="text-alert font-semibold">{formatBytes(measured.rawHtml.bytes)}</span> ·{' '}
+                <span className="text-ink">{measured.rawHtml.url}</span>
               </p>
               <p>
-                emitted Markdown <span className="text-ink">{formatBytes(measured.emitted.bytes)}</span> ·{' '}
-                {measured.emitted.path}
+                emitted Markdown <span className="text-match font-semibold">{formatBytes(measured.emitted.bytes)}</span> ·{' '}
+                <span className="text-ink">{measured.emitted.path}</span>
               </p>
-              <p className="sheet-label pt-2">command: docharvest capture {measured.sourceUrl}</p>
+              <p className="sheet-label pt-2 text-ink-3">command: docharvest capture {measured.sourceUrl}</p>
             </div>
           ) : (
-            <p className="sheet-body mt-3 text-[13px]">
+            <p className="sheet-body mt-3 text-[13px] text-ink-3">
               Raw-page comparison unavailable in this build.
             </p>
           )}

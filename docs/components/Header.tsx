@@ -42,14 +42,16 @@ export function Header({ stars, onOpenInstallModal }: HeaderProps) {
   const nextThemeLabel = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-rule bg-bond/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 border-b border-rule bg-bond/95 backdrop-blur-md transition-colors duration-200">
       <div className="flex h-14 items-center justify-between gap-6 px-6 lg:px-12">
         <a
           href="#top"
-          className="flex shrink-0 cursor-pointer items-baseline gap-2 focus-visible:outline-2 focus-visible:outline-match"
+          className="group flex shrink-0 cursor-pointer items-baseline gap-2 focus-visible:outline-2 focus-visible:outline-match"
         >
-          <span className="sheet-term text-base font-bold text-ink tracking-tight">DocHarvest</span>
-          <span className="sheet-num text-[11px] text-match font-mono">v{VERSION}</span>
+          <span className="sheet-term text-base font-bold text-ink tracking-tight group-hover:text-match transition-colors">
+            DocHarvest
+          </span>
+          <span className="sheet-num text-[11px] text-match font-mono font-medium">v{VERSION}</span>
         </a>
 
         <nav aria-label="Sections" className="hidden items-center gap-4 xl:gap-5 lg:flex">
@@ -57,7 +59,7 @@ export function Header({ stars, onOpenInstallModal }: HeaderProps) {
             <a
               key={item.href}
               href={item.href}
-              className="sheet-label cursor-pointer transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+              className="sheet-label cursor-pointer text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
               {item.label}
             </a>
@@ -75,8 +77,8 @@ export function Header({ stars, onOpenInstallModal }: HeaderProps) {
             <GithubIcon className="h-3.5 w-3.5" />
             {stars !== undefined && (
               <span className="inline-flex items-center gap-1">
-                <Star aria-hidden="true" className="h-3 w-3 text-match" />
-                {stars}
+                <Star aria-hidden="true" className="h-3 w-3 text-match fill-match/20" />
+                <span>{stars}</span>
               </span>
             )}
           </a>
@@ -85,27 +87,31 @@ export function Header({ stars, onOpenInstallModal }: HeaderProps) {
             onClick={toggleTheme}
             title={nextThemeLabel}
             aria-label={nextThemeLabel}
-            className="inline-flex cursor-pointer items-center text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match p-1"
+            className="inline-flex cursor-pointer items-center justify-center text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match p-1 rounded-none hover:bg-bond-2"
           >
-            {theme === 'dark' ? <Sun aria-hidden="true" className="h-4 w-4 text-match" /> : <Moon aria-hidden="true" className="h-4 w-4" />}
+            {theme === 'dark' ? (
+              <Sun aria-hidden="true" className="h-4 w-4 text-match" />
+            ) : (
+              <Moon aria-hidden="true" className="h-4 w-4 text-match" />
+            )}
           </button>
 
           <button
             onClick={onOpenInstallModal}
-            className="sheet-num cursor-pointer bg-match px-3.5 py-1.5 text-[12px] font-semibold text-bond transition-colors hover:bg-match-deep focus-visible:outline-2 focus-visible:outline-match"
+            className="sheet-num cursor-pointer bg-match px-3.5 py-1.5 text-[12px] font-semibold text-bond transition-all hover:bg-match-deep active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-match"
           >
             Install
           </button>
         </div>
       </div>
 
-      <nav aria-label="Sections (compact)" className="border-t border-rule lg:hidden">
+      <nav aria-label="Sections (compact)" className="border-t border-rule lg:hidden bg-bond-2/60">
         <ul className="flex gap-4 overflow-x-auto px-6 py-2">
           {COMPACT_NAV.map((item) => (
             <li key={item.href}>
               <a
                 href={item.href}
-                className="sheet-label block cursor-pointer whitespace-nowrap transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+                className="sheet-label block cursor-pointer whitespace-nowrap text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
               >
                 {item.label}
               </a>
