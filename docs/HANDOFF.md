@@ -4,7 +4,7 @@ This document serves as the canonical handoff and knowledge-transfer record for 
 
 > **Status note (2026-09-16).** This is a historical v9.0.1 record, kept for its architecture rationale — the paths and numbers in it describe that release, not the current tree. Verified current state:
 >
-> * **Latest released version:** `v11.0.10` (`pyproject.toml`, `src/gitbook_downloader/__init__.py`). [`CHANGELOG.md`](../CHANGELOG.md) — not this file — is the source of truth for what shipped.
+> * **Latest released version:** `v11.1.0` (`pyproject.toml`, `src/gitbook_downloader/__init__.py`). [`CHANGELOG.md`](../CHANGELOG.md) — not this file — is the source of truth for what shipped.
 > * **Test suite:** **765 passing**, no skipped tests — `uv run pytest`.
 > * **Standalone executable:** `dist/docharvest.exe` (~79 MB), produced by `python build_exe.py`. The release workflow attaches it as `docharvest-windows-latest.exe`.
 > * **GUI assets:** built from `frontend/` into `src/gitbook_downloader/gui/web/` (the `frontend/src/views/*.tsx` files named in §3 no longer exist; the shipped GUI is the `gui/web` bundle driven by `gui/bridge.py`).

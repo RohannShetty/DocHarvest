@@ -56,7 +56,7 @@ Goals, in priority order: (1) more qualified traffic from high-intent documentat
 | Documented AI clients | **14** | README config matrix |
 | Doc platforms | **8 dedicated + generic** | `providers/` |
 | Test suite | **765 passing** | `uv run pytest` (2026-09-16) |
-| Version | **v11.0.10** | `pyproject.toml` |
+| Version | **v11.1.0** | `pyproject.toml` |
 | License / price | **MIT / $0** | LICENSE |
 
 ---
@@ -115,7 +115,7 @@ gh repo edit RohannShetty/gitbook-downloader \
 
 | Badge | Message | Color |
 |---|---|---|
-| Version | `11.0.10` | `#06b6d4` Cyan |
+| Version | `11.1.0` | `#06b6d4` Cyan |
 | License | `MIT` | `#10b981` Emerald |
 | Python | `3.10+` | `#3b82f6` Blue |
 | Tests | `765 passing` | `#10b981` Emerald |

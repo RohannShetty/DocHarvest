@@ -5,6 +5,35 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.1.0] - 2026-09-19
+
+### 🚀 Autonomous Multi-Agent Swarm Orchestration, Universal Skill Switcher & Zero-Dependency GUI Fallback
+
+Major feature release adding interactive multi-agent autonomous swarm tools, a universal 17+ harness skill installer, empirical AST token reduction benchmarks, zero-dependency browser GUI fallback, comprehensive architectural research reports, and multi-channel developer marketing plans.
+
+### Added
+
+- **Universal Agent Skill & 17+ Harness Matrix** (`docs/components/AgentSkillSwitcher.tsx`):
+  Interactive switcher and 1-click install command generator supporting 17 AI IDEs, CLI harnesses, and extensions (Universal `.agents`, Cursor, Claude Code/Desktop, Windsurf, Oh My Pi, VS Code / Cline, Gemini CLI, Codex, OpenCode, Zed, Continue.dev, Kilo, Mistral Vibe, etc.).
+- **Autonomous Multi-Agent Simulation Engine** (`docs/components/MultiAgentSimulation.tsx`):
+  Interactive 3-stage visual swarm console demonstrating how autonomous agents (Crawler -> Synthesis -> Audit) coordinate DocHarvest MCP tools (`download_docs`, `search_docs`, `read_doc`, `query_doc_graph`) with live telemetry and verified stdio logs.
+- **AST Token Reduction Benchmark** (`docs/components/TokenBenchmark.tsx`):
+  Side-by-side visual token meter comparing raw HTML soup (42,480 tokens) vs DocHarvest AST-cleaned Markdown (7,240 tokens), empirically proving ~83% token savings.
+- **Zero-Dependency Native WebView Fallback** (`src/gitbook_downloader/gui/app.py`, `src/gitbook_downloader/cli.py`):
+  Automatic graceful fallback to the embedded HTTP/SSE browser interface when native Edge WebView2 runtime is missing or fails to initialize, eliminating OS runtime dependencies across all Windows, Linux, and macOS systems.
+- **Interactive DocGraph & Version Explorer** (`frontend/src/views/DiffView.tsx`):
+  Interactive AST concept graph visualizer for browsing pages, headings, endpoints, and code symbols with dynamic Mermaid topology diagrams and entity relationship inspector in the Desktop GUI.
+- **Multi-Agent Research Report** (`docs/RESEARCH_MULTI_AGENT.md`):
+  Comprehensive analysis of `DomainLock` lease mechanics, SQLite WAL multi-reader concurrency, asynchronous non-blocking workers, and subagent swarm topologies.
+- **Multi-Channel Skill Posting & Marketing Plan** (`docs/MARKETING_PLAN.md`):
+  Actionable go-to-market plan for agent registries, Hacker News Show HN, Reddit (`r/LocalLLaMA`), X/Twitter launch threads, and LangChain/LlamaIndex/crewAI framework connectors.
+- **Feature Audit & Strategic Roadmap** (`docs/FEATURE_AUDIT_ROADMAP.md`):
+  Complete audit of all 10 subsystems, competitive gap analysis against 6 alternatives, and a 5-phase enhancement roadmap.
+
+### Changed
+
+- **Version bump to 11.1.0** across core Python package, CLI fallbacks, Desktop GUI constants, Next.js showcase, and regression suites.
+
 ## [11.0.10] - 2026-09-18
 
 ### 🌐 Standalone Browser GUI & Real-Time Event Bridge

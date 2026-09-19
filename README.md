@@ -8,7 +8,7 @@
 
 **Universal Agent Skill · Native FastMCP v2 Server (12 Tools) · Zero-Config CLI · Desktop GUI · Pure-Python PDF Studio**
 
-[![Version: 11.0.10](https://img.shields.io/badge/version-11.0.10-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
+[![Version: 11.1.0](https://img.shields.io/badge/version-11.1.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
 [![MCP: FastMCP v2](https://img.shields.io/badge/MCP-FastMCP%20v2-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-v2-server)
