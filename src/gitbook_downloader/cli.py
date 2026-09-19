@@ -78,16 +78,25 @@ def _launch_tui() -> int:
 
 
 def _launch_gui() -> int:
-    """Launch the Desktop GUI; fall back to TUI if pywebview is unavailable."""
+    """Launch the Desktop GUI; fall back to browser server or TUI if unavailable."""
     try:
         from .gui import launch_gui
         launch_gui()
         return 0
     except ImportError:
-        return _launch_tui()
+        try:
+            from .gui.server import launch_browser_gui
+            return launch_browser_gui(browser="default")
+        except Exception:
+            return _launch_tui()
     except Exception as exc:
-        print(f"Note: Desktop GUI unavailable ({exc}). Starting TUI…", file=sys.stderr)
-        return _launch_tui()
+        print(f"Note: Desktop GUI unavailable ({exc}). Starting browser GUI…", file=sys.stderr)
+        try:
+            from .gui.server import launch_browser_gui
+            return launch_browser_gui(browser="default")
+        except Exception:
+            return _launch_tui()
+
 
 
 def _banner(title: str, char: str = "─", width: int = 60) -> tuple[str, str, str]:

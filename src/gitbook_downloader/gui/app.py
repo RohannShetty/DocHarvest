@@ -28,7 +28,7 @@ def launch_gui(
     browser: str | bool | None = None,
     port: int = 0,
 ) -> None:
-    """Open the GUI in a native Desktop window or a web browser (e.g. Zen)."""
+    """Open the GUI in a native Desktop window or fallback automatically to a web browser."""
     if browser:
         from .server import launch_browser_gui
         target_browser = "zen" if browser is True else str(browser)
@@ -37,11 +37,6 @@ def launch_gui(
 
     if title is None:
         title = f"DocHarvest v{__version__}"
-    try:
-        import webview
-    except ImportError as exc:
-        raise ImportError(f"pywebview is required for native GUI mode: {exc}") from exc
-
 
     web_dir = get_web_dir()
     index_file = web_dir / "index.html"
@@ -53,24 +48,44 @@ def launch_gui(
         )
         sys.exit(1)
 
+    try:
+        import webview
+    except ImportError:
+        print("Note: 'pywebview' is not installed. Launching zero-dependency browser interface…", file=sys.stderr)
+        from .server import launch_browser_gui
+        launch_browser_gui(browser="default", port=port)
+        return
+
     bridge = ApiBridge()
 
-    window = webview.create_window(
-        title=title,
-        url=index_file.as_uri(),
-        js_api=bridge,
-        width=1160,
-        height=780,
-        min_size=(920, 600),
-        background_color="#090d16",
-        text_select=True,
-    )
-    bridge.set_window(window)
     try:
-        window.events.closing += bridge.cleanup
-    except Exception:
-        pass
+        window = webview.create_window(
+            title=title,
+            url=index_file.as_uri(),
+            js_api=bridge,
+            width=1160,
+            height=780,
+            min_size=(920, 600),
+            background_color="#090d16",
+            text_select=True,
+        )
+        bridge.set_window(window)
+        try:
+            window.events.closing += bridge.cleanup
+        except Exception:
+            pass
 
-    # Use Edge Chromium (WebView2) on Windows for highest performance & modern web features
-    gui_engine = "edgechromium" if sys.platform == "win32" else None
-    webview.start(gui=gui_engine, debug=debug)
+        # Use Edge Chromium (WebView2) on Windows for highest performance & modern web features
+        gui_engine = "edgechromium" if sys.platform == "win32" else None
+        webview.start(gui=gui_engine, debug=debug)
+    except Exception as exc:
+        # If WebView2 runtime or native window initialization fails for ANY reason,
+        # fallback seamlessly to the built-in browser server with the PyWebView JS shim
+        print(
+            f"\n[DocHarvest GUI] Native desktop webview initialization failed ({exc}).\n"
+            f"[DocHarvest GUI] Automatically launching zero-dependency browser interface at http://127.0.0.1...\n",
+            file=sys.stderr,
+        )
+        from .server import launch_browser_gui
+        launch_browser_gui(browser="default", port=port)
+
