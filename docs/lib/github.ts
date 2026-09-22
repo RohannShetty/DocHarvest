@@ -80,7 +80,7 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
         tag: rel.tag_name,
         name: rel.name || rel.tag_name,
         publishedAt: rel.published_at ? new Date(rel.published_at).toLocaleDateString() : '2026-08-23',
-        body: rel.body || '',
+        body: (rel.body || '').replaceAll('https://github.com/RohannShetty/gitbook-downloader', 'https://github.com/RohannShetty/DocHarvest'),
         htmlUrl: rel.html_url,
         assets,
       };
