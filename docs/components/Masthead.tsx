@@ -26,25 +26,25 @@ const COMMAND_TABS = [
     id: 'cli',
     label: 'CLI Capture',
     cmd: 'docharvest capture https://docs.openalgo.in/v/v2.0 --rag --pdf',
-    desc: 'Downloads, strips noise, emits book.md, llms.txt & SQLite search.db',
+    desc: 'Captures the site, then emits book.md, llms.txt, and SQLite search.db',
   },
   {
     id: 'mcp',
     label: 'FastMCP v2',
-    cmd: 'uvx gitbook-downloader mcp',
-    desc: 'Runs standard stdio MCP server for Cursor, Claude, Codex & 14+ IDEs',
+    cmd: 'docharvest mcp',
+    desc: 'Runs the stdio server for Cursor, Claude, Codex, and other MCP clients',
   },
   {
     id: 'skill',
     label: 'Agent Skill',
-    cmd: 'gitbook-dl skill install docharvest -o .agents/skills',
-    desc: '1-click universal skill injection for autonomous coding harnesses',
+    cmd: 'docharvest skill install docharvest -o .agents/skills',
+    desc: 'Installs the bundled skill into an agent discovery root',
   },
   {
     id: 'search',
     label: 'Local Search',
     cmd: 'docharvest search "OAuth PKCE token refresh" --limit 5',
-    desc: 'Sub-15ms BM25 ranked full-text search across all local docsets',
+    desc: 'Searches local docsets with SQLite FTS5 BM25 ranking',
   },
 ];
 
@@ -59,10 +59,10 @@ export function Masthead({ onOpenInstallModal, indexData }: MastheadProps) {
   };
 
   const figures = [
-    { label: 'Token Reduction', value: `~${STATS.reductionPct}% fewer tokens`, sub: '35k+ noise stripped' },
+    { label: 'Token Reduction', value: `~${STATS.reductionPct}% fewer tokens`, sub: '35,240 tokens saved in reference benchmark' },
     { label: 'Capture Throughput', value: `${STATS.pagesCaptured} pages · ${STATS.captureTimeSec} s`, sub: `~${STATS.speedPagesPerSec} pages/sec` },
-    { label: 'Protocol Tools', value: `${STATS.mcpTools} FastMCP v2 tools`, sub: '14+ agent harnesses' },
-    { label: 'Test Suite', value: `${STATS.testsPassing} tests passing`, sub: '100% verified offline' },
+    { label: 'Protocol Tools', value: `${STATS.mcpTools} FastMCP v2 tools`, sub: `${STATS.harnesses} documented MCP clients` },
+    { label: 'Test Suite', value: `${STATS.testsPassing} tests passing`, sub: 'root suite, 2026-09-16' },
   ];
 
   return (

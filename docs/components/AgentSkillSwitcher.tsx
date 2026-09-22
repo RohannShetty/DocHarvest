@@ -63,7 +63,7 @@ export function AgentSkillSwitcher() {
 
       <p className="sheet-body mt-3 max-w-[68ch] text-ink-2">
         The canonical <code className="sheet-num text-ink font-mono text-xs bg-bond px-1 py-0.5 border border-rule">docharvest</code> skill text lives inside the installed package.
-        Run <code className="sheet-num text-ink font-mono text-xs bg-bond px-1 py-0.5 border border-rule">gitbook-dl skill install</code> to place it into any agent&rsquo;s discovery root,
+        Run <code className="sheet-num text-ink font-mono text-xs bg-bond px-1 py-0.5 border border-rule">docharvest skill install docharvest -o .agents/skills</code> to place it into any agent&rsquo;s discovery root,
         or wire the FastMCP v2 server directly over stdio.
       </p>
 

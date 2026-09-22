@@ -137,7 +137,7 @@ All of the following ship with the Next.js static export (`cd docs && npm run bu
 | **Canonical URL** | `metadataBase` + `alternates.canonical` in `app/layout.tsx` | Consolidates ranking to `rohannshetty.github.io/gitbook-downloader/` (GitHub Pages also serves the site without trailing content variants) |
 | **SoftwareApplication JSON-LD** | Injected in `layout.tsx` `<head>` | Rich result eligibility: price ($0), license, platform, feature list, author |
 | **FAQPage JSON-LD** | Generated from `data/showcaseData.ts:FAQ_ITEMS` — the same questions are visible on-page, as Google requires | FAQ rich results expand SERP real estate; the comparison answer ("vs Firecrawl/Jina") is the conversion moment |
-| **OG/Twitter image** | `public/assets/og-capture-studio.png` (1024×576, real product screenshot) wired into `openGraph.images` + `twitter.images` | Link shares render a real product visual instead of a blank card |
+| **OG/Twitter image** | `public/assets/og-sheet.png` (1280×640, branded sheet asset) wired into `openGraph.images` + `twitter.images` | Link shares render the current branded visual |
 | **llms.txt** | `public/llms.txt` — the product's own manifest standard, applied to itself | AI-agent discovery surface; on-brand linkable asset |
 
 **Title & meta (v2.0):**
@@ -153,7 +153,7 @@ cd docs && npx playwright install chromium && \
   "$(pwd)/public/assets/social-preview.svg" public/assets/social-preview.png
 ```
 
-…then swap `og-capture-studio.png` → `social-preview.png` in `layout.tsx` (both `openGraph` and `twitter`) and upload the same PNG as the GitHub social preview (Settings → General → Social preview).
+…then swap `og-sheet.png` → `social-preview.png` in `layout.tsx` (both `openGraph` and `twitter`) and upload the same PNG as the GitHub social preview (Settings → General → Social preview).
 
 ---
 
@@ -189,8 +189,8 @@ Traffic without dwell is wasted — these are the mechanics that keep the audien
 ### 7.3 Performance posture
 Static export, zero client-side data fetching, fonts self-hosted via `next/font`. Core Web Vitals headroom is large; keep it that way — any new third-party script needs the §7.4 justification bar.
 
-### 7.4 Third-party widget decision (recorded 2026-09-05)
-**`startupbar.co` widget: KEEP.** Owner decision. It loads with `async` so it cannot block first paint. Note for future audits: this is a known, accepted third-party script on a page marketing "zero telemetry" (the product is telemetry-free; the *showcase site* carries this widget by choice). Do not flag it as a defect in copy reviews — it is documented policy, and the distinction above is the approved answer if a visitor asks.
+### 7.4 Third-party widget decision (recorded 2026-09-23)
+**`startupbar.co` widget: REMOVE.** The loader creates a third-party iframe and sends page path, referrer, and a session identifier to `startupbar.co`. It also reserves viewport space and uses a maximum z-index. Removing it keeps the showcase aligned with the product's local-first, no-telemetry positioning and avoids an avoidable layout/performance dependency.
 
 ---
 
@@ -203,4 +203,4 @@ Static export, zero client-side data fetching, fonts self-hosted via `next/font`
 5. **Structured data:** validate `out/index.html` JSON-LD at `validator.schema.org` after each build; FAQPage entries must match visible FAQ text exactly.
 6. **Rich-result eligibility:** re-test after every FAQ copy change (Google invalidates mismatched FAQPage markup).
 7. **Sitemap/robots:** after `npm run build`, confirm `out/sitemap.xml`, `out/robots.txt`, `out/llms.txt` exist.
-8. **OG image:** confirm `out/assets/og-capture-studio.png` exists and `layout.tsx` references resolve against `https://rohannshetty.github.io/gitbook-downloader/`.
+8. **OG image:** confirm `out/assets/og-sheet.png` exists and `layout.tsx` references resolve against `https://rohannshetty.github.io/gitbook-downloader/`.

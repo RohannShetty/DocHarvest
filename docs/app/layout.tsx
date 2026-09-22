@@ -3,6 +3,7 @@ import { Archivo, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { VERSION } from "../lib/version";
 import { FAQ_ITEMS } from "../data/showcaseData";
+import { PRODUCT_FACTS, STATS } from "../lib/stats";
 import "./globals.css";
 
 // Archivo carries the prose at its normal width and is narrowed (font-stretch)
@@ -35,7 +36,7 @@ OWN-WORLD — Near-black bond #09090B, 1px #1F1F23 hairlines, zero radii, zinc t
 #F4F4F5 / #A1A1AA / #71717A, one accent #F59E0B reserved for the matched term and the
 active line; Archivo for prose, Geist Mono for every number, path and command; depth from
 section cuts & ambient light, never generic drop shadows.
-FIRST VIEWPORT — Masthead: "Turn Any Documentation Site into Clean Markdown for AI Coding Agents."
+FIRST VIEWPORT — Hero: "Turn any docs site into context your agent can use."
 beside the live index specimen, with the real command above the fold.
 -->`;
 
@@ -67,13 +68,13 @@ const jsonLd = {
         availability: "https://schema.org/InStock",
       },
       featureList: [
-        "8 documentation platform auto-detectors with direct markdown endpoint probing",
-        "Four-Part Output Contract: pages/, book.md, llms.txt, search index",
+        `${PRODUCT_FACTS.dedicatedProviders} dedicated documentation platform detectors plus a generic fallback`,
+        "Four-Part Output Contract: pages/, book.md, llms.txt, and a search index",
         "RAG JSONL export with SHA-256 frontmatter provenance",
         "Pure-Python PDF handbooks (fpdf2, zero C-dependencies)",
         "Embedded SQLite FTS5 BM25 search index",
-        "FastMCP v2 server with 12 stdio tools for AI coding agents",
-        "Universal 1-click Agent Skill for Cursor, Claude Code, Windsurf, Roo Code, Aider",
+        `FastMCP v2 server with ${STATS.mcpTools} stdio tools for AI coding agents`,
+        `${STATS.agentsShipped} documented Agent Skill harness paths with one installer`,
       ],
     },
     {
@@ -178,11 +179,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         <link rel="alternate" type="text/plain" href={`${SITE_PATH}llms.txt`} title="LLM Context Manifest" />
-        <script
-          async
-          src="https://startupbar.co/widget/loader.js"
-          data-startup-id="6e9a63c4-5bc5-4b8b-b297-37a9450c7f1f"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

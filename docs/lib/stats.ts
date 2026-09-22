@@ -1,7 +1,19 @@
-// Centralized marketing stats for DocHarvest.
-// Single source of truth — components import STATS from here instead of hardcoding.
-// Bump values here; consumers update automatically.
-// source: docs/SEO_GUIDE.md §3 canonical metrics
+// Centralized product facts and marketing stats for DocHarvest.
+// Keep public claims here unless they are measured from docs/data/manifest.json.
+// The reference benchmark values below are documented in docs/SEO_GUIDE.md §3.
+
+export const PRODUCT_FACTS = {
+  name: 'DocHarvest',
+  packageName: 'gitbook-downloader',
+  cli: 'docharvest',
+  cliAlias: 'gitbook-dl',
+  libraryRoot: '~/.gitbook-downloader',
+  localBookFile: 'book.md',
+  libraryBookFile: 'docs.md',
+  dedicatedProviders: 8,
+  mcpResources: 2,
+  mcpPrompts: 2,
+} as const;
 
 export const STATS = {
   agentsShipped: 17,        // harness cards rendered in the showcase
