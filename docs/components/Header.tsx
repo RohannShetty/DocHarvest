@@ -62,7 +62,7 @@ export function Header({ onOpenInstallModal }: HeaderProps) {
 
         <div className="flex shrink-0 items-center gap-3">
           <a
-            href="https://github.com/RohannShetty/gitbook-downloader"
+            href="https://github.com/RohannShetty/DocHarvest"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub repository"

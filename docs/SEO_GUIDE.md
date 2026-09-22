@@ -1,7 +1,7 @@
 # DocHarvest — Repository SEO & Discoverability Guide
 
 **Version:** 2.0.0
-**Target Repository:** `RohannShetty/gitbook-downloader` (Brand: **DocHarvest**)
+**Target Repository:** `RohannShetty/DocHarvest` (Brand: **DocHarvest**)
 **Last Updated:** 2026-09-05
 
 > **v2.0 changelog:** Resolved the "scraper keywords vs compiler positioning" tension with a two-layer keyword strategy (§2). Added the implemented on-site technical SEO layer — sitemap, robots, canonical URL, JSON-LD `SoftwareApplication` + `FAQPage` structured data, OG image, `llms.txt` (§5). Added the canonical metrics table (§3) so no SEO surface ever quotes a stale number again. Added the engagement/time-on-site playbook (§7). Refreshed all badge/version references (see §3 for the live numbers — never quote them from prose). Recorded the startupbar.co widget decision (§7.4).
@@ -99,9 +99,9 @@ desktop-app
 ### 4.3 Apply via GitHub CLI
 
 ```bash
-gh repo edit RohannShetty/gitbook-downloader \
+gh repo edit RohannShetty/DocHarvest \
   --description "Turn any documentation site into LLM-ready Markdown, RAG JSONL, llms.txt & offline PDFs. 12-tool FastMCP server, zero-config CLI, desktop GUI. 100% local & MIT." \
-  --homepage "https://rohannshetty.github.io/gitbook-downloader/" \
+  --homepage "https://rohannshetty.github.io/DocHarvest/" \
   --add-topic documentation-compiler \
   --add-topic ai-agents \
   --enable-issues=true \
@@ -134,7 +134,7 @@ All of the following ship with the Next.js static export (`cd docs && npm run bu
 |---|---|---|
 | **sitemap.xml** | `docs/app/sitemap.ts` → emits at build | Full-site crawl eligibility; auto-submitted via robots.txt |
 | **robots.txt** | `docs/app/robots.ts` → points at sitemap | Crawler directive + sitemap discovery |
-| **Canonical URL** | `metadataBase` + `alternates.canonical` in `app/layout.tsx` | Consolidates ranking to `rohannshetty.github.io/gitbook-downloader/` (GitHub Pages also serves the site without trailing content variants) |
+| **Canonical URL** | `metadataBase` + `alternates.canonical` in `app/layout.tsx` | Consolidates ranking to `rohannshetty.github.io/DocHarvest/` (GitHub Pages also serves the site without trailing content variants) |
 | **SoftwareApplication JSON-LD** | Injected in `layout.tsx` `<head>` | Rich result eligibility: price ($0), license, platform, feature list, author |
 | **FAQPage JSON-LD** | Generated from `data/showcaseData.ts:FAQ_ITEMS` — the same questions are visible on-page, as Google requires | FAQ rich results expand SERP real estate; the comparison answer ("vs Firecrawl/Jina") is the conversion moment |
 | **OG/Twitter image** | `public/assets/og-sheet.png` (1280×640, branded sheet asset) wired into `openGraph.images` + `twitter.images` | Link shares render the current branded visual |
@@ -203,4 +203,4 @@ Static export, zero client-side data fetching, fonts self-hosted via `next/font`
 5. **Structured data:** validate `out/index.html` JSON-LD at `validator.schema.org` after each build; FAQPage entries must match visible FAQ text exactly.
 6. **Rich-result eligibility:** re-test after every FAQ copy change (Google invalidates mismatched FAQPage markup).
 7. **Sitemap/robots:** after `npm run build`, confirm `out/sitemap.xml`, `out/robots.txt`, `out/llms.txt` exist.
-8. **OG image:** confirm `out/assets/og-sheet.png` exists and `layout.tsx` references resolve against `https://rohannshetty.github.io/gitbook-downloader/`.
+8. **OG image:** confirm `out/assets/og-sheet.png` exists and `layout.tsx` references resolve against `https://rohannshetty.github.io/DocHarvest/`.

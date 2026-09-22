@@ -99,7 +99,7 @@ Harvest any documentation site (GitBook, Mintlify, Docusaurus, VitePress, ReadMe
 ```markdown
 ### Add DocHarvest MCP Server
 
-**Repository:** https://github.com/RohannShetty/gitbook-downloader  
+**Repository:** https://github.com/RohannShetty/DocHarvest
 **Package:** `pip install gitbook-downloader` (or `uvx gitbook-downloader mcp`)  
 **License:** MIT  
 
@@ -117,9 +117,9 @@ DocHarvest provides 12 MCP tools for downloading, searching, reading, diffing, a
 
 Apply via GitHub CLI:
 ```bash
-gh repo edit RohannShetty/gitbook-downloader \
+gh repo edit RohannShetty/DocHarvest \
   --description "Turn any documentation site into LLM-ready Markdown, RAG JSONL, llms.txt & offline PDFs. 12-tool FastMCP server, zero-config CLI, desktop GUI. 100% local & MIT." \
-  --homepage "https://rohannshetty.github.io/gitbook-downloader/" \
+  --homepage "https://rohannshetty.github.io/DocHarvest/" \
   --add-topic "rag" \
   --add-topic "llms-txt" \
   --add-topic "documentation-compiler" \
@@ -149,7 +149,7 @@ gh repo edit RohannShetty/gitbook-downloader \
 ### 4.1 Hacker News — Show HN Launch
 
 **Title:** `Show HN: DocHarvest – Turn any doc site into clean LLM markdown, RAG JSONL and offline books`  
-**URL:** `https://github.com/RohannShetty/gitbook-downloader` (or self-post text)  
+**URL:** `https://github.com/RohannShetty/DocHarvest` (or self-post text)
 
 **Body Text:**
 ```markdown
@@ -186,8 +186,8 @@ Or connect it to Claude Desktop / Cursor:
 uvx gitbook-downloader mcp
 ```
 
-Repository: https://github.com/RohannShetty/gitbook-downloader
-Showcase & Docs: https://rohannshetty.github.io/gitbook-downloader/
+Repository: https://github.com/RohannShetty/DocHarvest
+Showcase & Docs: https://rohannshetty.github.io/DocHarvest/
 
 I'd love to hear your feedback on framework support, AST chunking, or agent integration patterns!
 ```
@@ -218,7 +218,7 @@ I built **DocHarvest** (`gitbook-downloader`) — a 100% local, zero-telemetry t
 
 Reference benchmark: Captured 673 pages in 18.2 seconds with parallel worker threads.
 
-GitHub: https://github.com/RohannShetty/gitbook-downloader  
+GitHub: https://github.com/RohannShetty/DocHarvest
 Install: `pip install gitbook-downloader` or `uvx gitbook-downloader --gui`
 ```
 
@@ -285,8 +285,8 @@ Install: `pip install gitbook-downloader` or `uvx gitbook-downloader --gui`
 > `pip install gitbook-downloader`
 > `docharvest capture https://docs.openalgo.in/ --rag --pdf`
 > 
-> ⭐ Star on GitHub: https://github.com/RohannShetty/gitbook-downloader
-> 🌐 Showcase & Docs: https://rohannshetty.github.io/gitbook-downloader/
+> ⭐ Star on GitHub: https://github.com/RohannShetty/DocHarvest
+> 🌐 Showcase & Docs: https://rohannshetty.github.io/DocHarvest/
 
 ---
 

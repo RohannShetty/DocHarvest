@@ -4,7 +4,7 @@
 export const VERSION = '11.1.0';
 
 const RELEASE_BASE =
-  `https://github.com/RohannShetty/gitbook-downloader/releases/download/v${VERSION}`;
+  `https://github.com/RohannShetty/DocHarvest/releases/download/v${VERSION}`;
 
 export const DOWNLOAD_URLS = {
   windows: `${RELEASE_BASE}/docharvest-windows-latest.exe`,

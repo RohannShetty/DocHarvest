@@ -61,5 +61,5 @@
 
   <!-- badges footer -->
   <text x="64" y="566" font-family="'JetBrains Mono',monospace" font-size="18" fill="#71717a">pip install gitbook-downloader &#183; uvx docharvest</text>
-  <text x="780" y="566" font-family="'JetBrains Mono',monospace" font-size="18" fill="#52525b">github.com/RohannShetty/gitbook-downloader</text>
+  <text x="780" y="566" font-family="'JetBrains Mono',monospace" font-size="18" fill="#52525b">github.com/RohannShetty/DocHarvest</text>
 </svg>

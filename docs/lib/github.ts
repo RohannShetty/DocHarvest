@@ -49,7 +49,7 @@ export interface DocHarvestGithubData {
 
 export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
   const owner = 'RohannShetty';
-  const repo = 'gitbook-downloader';
+  const repo = 'DocHarvest';
 
   try {
     // 1. Fetch Repository Details
@@ -133,28 +133,28 @@ export async function getDocHarvestGithubData(): Promise<DocHarvestGithubData> {
           message: 'chore(release): v11.0.3 - DocHarvest P0 bug fixes, visual polish, thread-safety hardening, and centralized marketing stats',
           date: '2026-08-23',
           author: 'Rohan Shetty',
-          url: 'https://github.com/RohannShetty/gitbook-downloader/commit/8c61e9e',
+          url: 'https://github.com/RohannShetty/DocHarvest/commit/8c61e9e',
         },
         {
           sha: 'f1e2d3c',
           message: 'feat: add FastMCP server integration for Cursor agent lookup',
           date: '2026-08-22',
           author: 'Rohan Shetty',
-          url: 'https://github.com/RohannShetty/gitbook-downloader',
+          url: 'https://github.com/RohannShetty/DocHarvest',
         },
         {
           sha: 'a5b6c7d',
           message: 'feat: SQLite FTS5 BM25 search index and local keyword query studio',
           date: '2026-08-21',
           author: 'Rohan Shetty',
-          url: 'https://github.com/RohannShetty/gitbook-downloader',
+          url: 'https://github.com/RohannShetty/DocHarvest',
         },
         {
           sha: 'd9e8f7a',
           message: 'feat: cross-platform process locks and cooperative BFS cancellation',
           date: '2026-08-20',
           author: 'Rohan Shetty',
-          url: 'https://github.com/RohannShetty/gitbook-downloader',
+          url: 'https://github.com/RohannShetty/DocHarvest',
         }
       ],
     };
@@ -178,7 +178,7 @@ function getFallbackRelease(): ReleaseInfo {
 - Universal Agent Skill & 17+ Harness Matrix: 1-click skill installer and FastMCP configurations across 17 AI IDEs, CLI harnesses, and editor extensions.
 - Zero-Dependency Browser GUI: Automatic graceful fallback to embedded HTTP/SSE browser interface when native WebView2 is missing, eliminating OS runtime dependencies.
 - Multi-Agent Autonomous Simulation & AST Token Benchmark: Live visual demonstration of autonomous agent swarm doc exploration and empirical ~83% token savings.`,
-    htmlUrl: `https://github.com/RohannShetty/gitbook-downloader/releases/tag/v${VERSION}`,
+    htmlUrl: `https://github.com/RohannShetty/DocHarvest/releases/tag/v${VERSION}`,
     assets: [
       {
         name: 'docharvest-windows-latest.exe',

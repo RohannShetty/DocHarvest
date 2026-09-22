@@ -10,8 +10,8 @@ You need **Python 3.10+**. [uv](https://docs.astral.sh/uv/) is recommended but
 optional.
 
 ```bash
-git clone https://github.com/RohannShetty/gitbook-downloader.git
-cd gitbook-downloader
+git clone https://github.com/RohannShetty/DocHarvest.git
+cd DocHarvest
 
 uv sync --extra dev --extra mcp
 # or, without uv:

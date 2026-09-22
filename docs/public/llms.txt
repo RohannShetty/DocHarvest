@@ -8,9 +8,9 @@ Measured on the canonical full-suite capture: **673 pages in 18.2 seconds at ~83
 
 ## Interfaces
 
-- [DocHarvest Showcase](https://rohannshetty.github.io/gitbook-downloader/): Product overview, output contract, agent integrations, and FAQ.
-- [GitHub Repository](https://github.com/RohannShetty/gitbook-downloader): Source code, releases, and the 14 documented AI client configs.
-- [PyPI: gitbook-downloader](https://pypi.org/project/gitbook-downloader/): `pip install gitbook-downloader`.
+- [DocHarvest Showcase](https://rohannshetty.github.io/DocHarvest/): Product overview, output contract, agent integrations, and FAQ.
+- [GitHub Repository](https://github.com/RohannShetty/DocHarvest): Source code, releases, and the 14 documented AI client configs.
+- [PyPI: DocHarvest](https://pypi.org/project/gitbook-downloader/): `pip install gitbook-downloader`.
 
 ## Use With AI Coding Agents
 
@@ -20,5 +20,5 @@ A bundled agent skill (`docharvest`) ships inside the package and installs into 
 
 ## Optional
 
-- [Changelog](https://github.com/RohannShetty/gitbook-downloader/blob/master/CHANGELOG.md): Release history and version notes.
-- [MIT License](https://github.com/RohannShetty/gitbook-downloader/blob/master/LICENSE): 100% free and open source, no API keys, no telemetry.
+- [Changelog](https://github.com/RohannShetty/DocHarvest/blob/master/CHANGELOG.md): Release history and version notes.
+- [MIT License](https://github.com/RohannShetty/DocHarvest/blob/master/LICENSE): 100% free and open source, no API keys, no telemetry.

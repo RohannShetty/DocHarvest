@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="gbdl-social-title">
-  <title id="gbdl-social-title">gitbook-downloader &#8212; Any docs site, LLM-ready Markdown</title>
-  <desc>GitHub social preview card: dark canvas, gitbook-downloader logo, tagline, and a terminal showing a real capture command.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="doch-social-title">
+  <title id="doch-social-title">DocHarvest &#8212; Any docs site, LLM-ready Markdown</title>
+  <desc>GitHub social preview card: dark canvas, DocHarvest logo, tagline, and a terminal showing a real capture command.</desc>
   <!--
-    gitbook-downloader social preview, 1280x640.
+    DocHarvest social preview, 1280x640.
     GitHub's "Social preview" upload needs a PNG. Export options:
       1) resvg with width 1280 and height 640, input this file (install Inter + JetBrains Mono first), or
       2) open this file in a browser at 1280x640 and screenshot at 2x.
@@ -30,7 +30,7 @@
     <path d="M288 206 L344 256 L288 306" fill="none" stroke="#f59e0b" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
     <line x1="374" y1="306" x2="412" y2="306" stroke="#f59e0b" stroke-width="28" stroke-linecap="round"/>
   </g>
-  <text x="172" y="96" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="30" font-weight="600" fill="#f4f4f5">gitbook-downloader</text>
+  <text x="172" y="96" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="30" font-weight="600" fill="#f4f4f5">DocHarvest</text>
   <text x="172" y="128" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="17" fill="#71717a">MIT &#183; python 3.10+ &#183; windows / linux / macOS</text>
 
   <!-- headline -->
@@ -58,5 +58,5 @@
   </g>
 
   <!-- repo footer -->
-  <text x="64" y="566" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="19" fill="#52525b">github.com/RohannShetty/gitbook-downloader</text>
+  <text x="64" y="566" font-family="'JetBrains Mono','Cascadia Code','SF Mono',Consolas,monospace" font-size="19" fill="#52525b">github.com/RohannShetty/DocHarvest</text>
 </svg>

@@ -47,7 +47,7 @@ const INSTALL_OPTIONS: InstallOption[] = [
     Icon: LinuxIcon,
     command:
       '# Run instantly with uv without installing to global Python:\nuvx gitbook-downloader --gui\n\n# Or install permanently:\nuv tool install gitbook-downloader',
-    ctaUrl: 'https://github.com/RohannShetty/gitbook-downloader',
+    ctaUrl: 'https://github.com/RohannShetty/DocHarvest',
     ctaLabel: 'View GitHub Repo',
   },
   {
@@ -56,7 +56,7 @@ const INSTALL_OPTIONS: InstallOption[] = [
     Icon: DockerIcon,
     command:
       '# Run headless capture:\ndocker run --rm -v $(pwd)/data:/app/data rohanshetty/docharvest crawl https://docs.openalgo.in',
-    ctaUrl: 'https://github.com/RohannShetty/gitbook-downloader',
+    ctaUrl: 'https://github.com/RohannShetty/DocHarvest',
     ctaLabel: 'View Dockerfile',
   },
 ];

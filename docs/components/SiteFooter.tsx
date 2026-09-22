@@ -16,8 +16,8 @@ export function SiteFooter() {
           <a href="#outputs" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">Outputs</a>
           <a href="#integrations" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">Integrations</a>
           <a href="#workflows" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">Workflows</a>
-          <a href="https://github.com/RohannShetty/gitbook-downloader" target="_blank" rel="noreferrer" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">GitHub</a>
-          <a href="https://github.com/RohannShetty/gitbook-downloader#quick-start" target="_blank" rel="noreferrer" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">Docs</a>
+          <a href="https://github.com/RohannShetty/DocHarvest" target="_blank" rel="noreferrer" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">GitHub</a>
+          <a href="https://github.com/RohannShetty/DocHarvest#quick-start" target="_blank" rel="noreferrer" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-match">Docs</a>
         </nav>
       </div>
       <div className="mx-auto mt-10 flex max-w-7xl flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">

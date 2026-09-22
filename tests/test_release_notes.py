@@ -308,7 +308,7 @@ def test_build_release_markdown_all_sections():
         categories=categories,
         table_rows=table_rows,
         prev_tag="v9.0.0",
-        repo="RohannShetty/gitbook-downloader",
+        repo="RohannShetty/DocHarvest",
     )
 
     assert doc.startswith("# DocHarvest v9.0.1")
@@ -321,7 +321,7 @@ def test_build_release_markdown_all_sections():
     assert "| `SHA256SUMS.txt` | All Platforms | < 1 KB | *(Verification Manifest)* |" in doc
     assert "sha256sum -c SHA256SUMS.txt" in doc
     assert "Get-FileHash -Algorithm SHA256 gitbook-dl-windows-latest.exe" in doc
-    assert "**Full Changelog**: https://github.com/RohannShetty/gitbook-downloader/compare/v9.0.0...v9.0.1" in doc
+    assert "**Full Changelog**: https://github.com/RohannShetty/DocHarvest/compare/v9.0.0...v9.0.1" in doc
 
 
 def test_build_release_markdown_single_compare_link():
@@ -336,12 +336,12 @@ def test_build_release_markdown_single_compare_link():
         categories=categories,
         table_rows=[],
         prev_tag="v9.0.0",
-        repo="RohannShetty/gitbook-downloader",
+        repo="RohannShetty/DocHarvest",
     )
 
     # Verify no duplicated Full Changelog links
     assert doc.count("Full Changelog") == 1
-    assert "https://github.com/RohannShetty/gitbook-downloader/compare/v9.0.0...v9.0.1" in doc
+    assert "https://github.com/RohannShetty/DocHarvest/compare/v9.0.0...v9.0.1" in doc
 
 
 # ---------------------------------------------------------------------------
@@ -371,7 +371,7 @@ Overview text.
         tag="v9.0.1",
         changelog_path=changelog,
         artifacts_dir=artifacts_dir,
-        repo="RohannShetty/gitbook-downloader",
+        repo="RohannShetty/DocHarvest",
         write_checksums=True,
     )
 

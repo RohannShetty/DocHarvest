@@ -208,7 +208,7 @@ export function Releases({ data }: ReleasesProps) {
             <p className="mt-4 flex items-baseline justify-between">
               <span className="sheet-label text-ink-3">branch: master</span>
               <a
-                href="https://github.com/RohannShetty/gitbook-downloader/commits/master"
+                href="https://github.com/RohannShetty/DocHarvest/commits/master"
                 target="_blank"
                 rel="noreferrer"
                 className="sheet-label inline-flex cursor-pointer items-center gap-1 text-ink-2 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"

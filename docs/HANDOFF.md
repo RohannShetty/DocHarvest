@@ -16,7 +16,7 @@ This document serves as the canonical handoff and knowledge-transfer record for 
 
 * **Version**: `9.0.1` (Bumped from `9.0.0`)
 * **Git Tag**: `v9.0.1`
-* **Target Branches**: `main` and `master` on `origin` (GitHub: `RohannShetty/gitbook-downloader`)
+* **Target Branches**: `main` and `master` on `origin` (GitHub: `RohannShetty/DocHarvest`)
 * **Standalone Executable**: `dist/gitbook-dl.exe` (32.9 MB, bundled with React 18 + Vite web assets)
 * **Test Suite Status**: 484 Passed, 2 Skipped (optional `mcp` library tests), 0 Failures.
 

@@ -93,14 +93,14 @@ export const GITHUB_FIXTURE: DocHarvestGithubData = {
     name: 'DocHarvest v11.1.0',
     publishedAt: '2026-09-19',
     body: '## Highlights\n\n- Native FastMCP v2 server with resources and prompts over stdio.',
-    htmlUrl: 'https://github.com/RohannShetty/gitbook-downloader/releases/tag/v11.1.0',
+    htmlUrl: 'https://github.com/RohannShetty/DocHarvest/releases/tag/v11.1.0',
     assets: [
       {
         name: 'docharvest-windows-latest.exe',
         size: 34500000,
         downloadCount: 520,
         browserDownloadUrl:
-          'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.10/docharvest-windows-latest.exe',
+          'https://github.com/RohannShetty/DocHarvest/releases/download/v11.0.10/docharvest-windows-latest.exe',
         os: 'windows',
       },
       {
@@ -108,7 +108,7 @@ export const GITHUB_FIXTURE: DocHarvestGithubData = {
         size: null,
         downloadCount: null,
         browserDownloadUrl:
-          'https://github.com/RohannShetty/gitbook-downloader/releases/download/v11.0.10/docharvest-ubuntu-latest',
+          'https://github.com/RohannShetty/DocHarvest/releases/download/v11.0.10/docharvest-ubuntu-latest',
         os: 'linux',
       },
     ],
@@ -119,7 +119,7 @@ export const GITHUB_FIXTURE: DocHarvestGithubData = {
       message: 'docs: rebuild the showcase as the index sheet',
       date: '2026-09-16',
       author: 'Rohan Shetty',
-      url: 'https://github.com/RohannShetty/gitbook-downloader/commit/8c61e9e',
+      url: 'https://github.com/RohannShetty/DocHarvest/commit/8c61e9e',
     },
   ],
   fetchedAt: '2026-09-17T00:00:00.000Z',

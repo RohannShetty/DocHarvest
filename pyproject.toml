@@ -60,10 +60,10 @@ gitbook-downloader = "gitbook_downloader.cli:main"
 gitbook-dl = "gitbook_downloader.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/RohannShetty/gitbook-downloader"
-Repository = "https://github.com/RohannShetty/gitbook-downloader"
-Issues = "https://github.com/RohannShetty/gitbook-downloader/issues"
-Changelog = "https://github.com/RohannShetty/gitbook-downloader/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/RohannShetty/DocHarvest"
+Repository = "https://github.com/RohannShetty/DocHarvest"
+Issues = "https://github.com/RohannShetty/DocHarvest/issues"
+Changelog = "https://github.com/RohannShetty/DocHarvest/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

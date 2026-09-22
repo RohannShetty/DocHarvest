@@ -1,4 +1,4 @@
-# gitbook-downloader — Brand Guidelines
+# DocHarvest — Brand Guidelines
 
 Version 1.0 · 2026-08-22
 Applies to: README, GitHub social preview, TUI/CLI output styling, website, badges.
@@ -23,11 +23,11 @@ canvas, hairline borders, one amber accent — exists to keep that idea quiet an
 |---|---|---|
 | Code, commands, package name | `gitbook-downloader` (lowercase, mono) | `pip install gitbook-downloader` |
 | Command | `gitbook-dl` (mono) | `gitbook-dl capture <url>` |
-| Formal prose (first mention) | gitbook-downloader | "gitbook-downloader is a free, MIT-licensed tool…" |
+| Formal prose | **DocHarvest** | "DocHarvest is a free, MIT-licensed documentation compiler…" |
 
-Never: "GitBook Downloader™", "GBD", or any abbreviation. Never capitalize inside
-the compound. The project is *not* affiliated with GitBook the company — the name
-describes what it downloads, so always pair first mentions with context.
+Never use "GitBook Downloader™", "GBD", or the package identifier as the
+product name. `gitbook-downloader` remains a compatibility identifier for code,
+commands, package metadata, and install instructions; formal product prose uses DocHarvest.
 
 ---
 
@@ -79,8 +79,8 @@ stroke width; cursor baseline aligns with chevron's lower vertex.
 
 ### 3.5 Wordmark rule
 
-The wordmark is **typeset, never baked into SVG**: `gitbook-downloader` in
-JetBrains Mono Medium, sitting right of the icon at ~55% of icon height, zinc-100.
+The wordmark is **typeset, never baked into SVG**: `DocHarvest` in
+Archivo SemiBold, sitting right of the icon at ~55% of icon height, zinc-100.
 No custom lettering exists; don't create any.
 
 ---
@@ -170,7 +170,7 @@ Fixed order: license → python → platform → PyPI.
 https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square&labelColor=18181b
 https://img.shields.io/badge/python-3.10%2B-3f3f46?style=flat-square&labelColor=18181b
 https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-3f3f46?style=flat-square&labelColor=18181b
-https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=18181b
+https://img.shields.io/badge/PyPI-DocHarvest-f59e0b?style=flat-square&labelColor=18181b
 ```
 
 Never: stars/downloads counters until the numbers are real and stable, `for-the-badge`,

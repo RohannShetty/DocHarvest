@@ -161,7 +161,7 @@ export function Masthead({ onOpenInstallModal, indexData }: MastheadProps) {
                 Install in 30 seconds
               </button>
               <a
-                href="https://github.com/RohannShetty/gitbook-downloader"
+                href="https://github.com/RohannShetty/DocHarvest"
                 target="_blank"
                 rel="noreferrer"
                 className="sheet-label inline-flex cursor-pointer items-center gap-1.5 border border-rule bg-bond-2 px-3.5 py-2 text-ink-2 transition-all hover:border-rule-strong hover:text-ink active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-match"

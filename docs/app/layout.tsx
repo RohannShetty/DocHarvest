@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = "https://rohannshetty.github.io";
-const SITE_PATH = "/gitbook-downloader/";
+const SITE_PATH = "/DocHarvest/";
 
 /**
  * The direction contract, emitted as a real HTML comment at the top of <body>.
@@ -52,7 +52,7 @@ const jsonLd = {
       operatingSystem: "Windows, macOS, Linux",
       softwareVersion: VERSION,
       url: `${SITE_URL}${SITE_PATH}`,
-      downloadUrl: "https://github.com/RohannShetty/gitbook-downloader/releases",
+      downloadUrl: "https://github.com/RohannShetty/DocHarvest/releases",
       description:
         "Local-first documentation compiler: turns any doc site into LLM-ready Markdown, RAG JSONL, llms.txt & offline PDFs. FastMCP v2 server for Cursor, Claude Code, Windsurf & 14+ AI coding agents. 100% local, MIT.",
       license: "https://opensource.org/licenses/MIT",

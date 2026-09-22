@@ -160,7 +160,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
         <div className="flex items-center justify-between pt-2 border-t border-border/60">
           <div className="flex items-center gap-3">
             <a
-              href="https://github.com/RohannShetty/gitbook-downloader"
+              href="https://github.com/RohannShetty/DocHarvest"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
@@ -171,7 +171,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
             </a>
 
             <a
-              href="https://rohannshetty.github.io/gitbook-downloader/"
+              href="https://rohannshetty.github.io/DocHarvest/"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"

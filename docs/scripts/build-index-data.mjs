@@ -240,7 +240,7 @@ async function rawHtmlComparison(capture, pages, pagesDir) {
     const timer = setTimeout(() => controller.abort(), 20000);
     const response = await fetch(capture.sourceUrl, {
       signal: controller.signal,
-      headers: { 'user-agent': 'docharvest-showcase-build/1.0 (+https://rohannshetty.github.io/gitbook-downloader/)' },
+      headers: { 'user-agent': 'docharvest-showcase-build/1.0 (+https://rohannshetty.github.io/DocHarvest/)' },
     });
     clearTimeout(timer);
     if (response.ok) {

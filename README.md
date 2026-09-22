@@ -15,8 +15,8 @@
 [![Agent Skill: Universal](https://img.shields.io/badge/Skill-Universal%20(14%2B%20Harnesses)-ec4899?style=flat-square&labelColor=090d16)](#-agent-skills-universal-mcp-skill-for-every-agent-harness)
 [![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
 [![Tests: 765 Passing](https://img.shields.io/badge/tests-765%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
-[![PyPI](https://img.shields.io/pypi/v/gitbook-downloader?style=flat-square&labelColor=090d16&color=f59e0b)](https://pypi.org/project/gitbook-downloader/)
-[![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/gitbook-downloader/)
+[![PyPI](https://img.shields.io/badge/PyPI-DocHarvest-f59e0b?style=flat-square&labelColor=090d16)](https://pypi.org/project/gitbook-downloader/)
+[![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/DocHarvest/)
 
 <br />
 
@@ -173,7 +173,7 @@ Every crawl produces the same standardized, deterministic directory structure:
 ## 🚀 Quick Start
 
 ### Option 1: Standalone Executable (Zero Setup)
-Download **[`docharvest-windows-latest.exe`](https://github.com/RohannShetty/gitbook-downloader/releases/latest)** from the latest release:
+Download **[`docharvest-windows-latest.exe`](https://github.com/RohannShetty/DocHarvest/releases/latest)** from the latest release:
 - **Double-click** to launch the **Desktop GUI Application**.
 - Or execute directly in your terminal:
   ```powershell
@@ -575,7 +575,7 @@ uv run pytest --cov=gitbook_downloader
 
 Created with ❤️ by **Rohan Shetty**.
 
-- 🌐 **Website**: [rohannshetty.github.io/gitbook-downloader](https://rohannshetty.github.io/gitbook-downloader/)
+- 🌐 **Website**: [rohannshetty.github.io/DocHarvest](https://rohannshetty.github.io/DocHarvest/)
 - 🐙 **GitHub**: [@RohannShetty](https://github.com/RohannShetty)
 - 💼 **LinkedIn**: [linkedin.com/in/rohan-shettyy](https://www.linkedin.com/in/rohan-shettyy/)
 - 🐦 **X (Twitter)**: [@rohan__shetty](https://x.com/rohan__shetty)

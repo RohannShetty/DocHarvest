@@ -81,7 +81,7 @@ export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
               <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
             </button>
             <a
-              href="https://github.com/RohannShetty/gitbook-downloader"
+              href="https://github.com/RohannShetty/DocHarvest"
               target="_blank"
               rel="noreferrer"
               className="inline-flex min-h-11 items-center gap-2 border border-rule px-4 text-sm font-semibold text-ink-2 transition-colors hover:border-ink-2 hover:text-ink active:translate-y-px"

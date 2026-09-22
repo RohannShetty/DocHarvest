@@ -357,7 +357,7 @@ def generate_notes(
     tag: str,
     changelog_path: Optional[Path] = None,
     artifacts_dir: Optional[Path] = None,
-    repo: str = "RohannShetty/gitbook-downloader",
+    repo: str = "RohannShetty/DocHarvest",
     write_checksums: bool = True,
 ) -> str:
     """Core functional entry point to generate release notes string."""
@@ -393,7 +393,7 @@ def main() -> int:
         help="Path to CHANGELOG.md",
     )
     parser.add_argument("--artifacts-dir", default=None, help="Directory with staged release binaries")
-    parser.add_argument("--repo", default="RohannShetty/gitbook-downloader", help="GitHub repository (owner/name)")
+    parser.add_argument("--repo", default="RohannShetty/DocHarvest", help="GitHub repository (owner/name)")
     parser.add_argument("--output", default="RELEASE_NOTES.md", help="Output file path")
     parser.add_argument("--write-checksums", action="store_true", default=True, help="Generate SHA256SUMS.txt in artifacts dir")
     args = parser.parse_args()
