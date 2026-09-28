@@ -181,11 +181,18 @@ const targets = [
 const check = process.argv.includes("--check");
 let stale = 0;
 
+// Compare with line endings normalized. Git checks the tree out with CRLF on
+// Windows runners (`core.autocrlf=true`), so a byte-exact comparison against
+// the LF-only generated string reports STALE on windows-latest while the file
+// is perfectly correct — a check that fails only on one platform is noise.
+// The written file still uses LF, which is what git stores.
+const normalizeEol = (value) => value.replace(/\r\n/g, "\n");
+
 for (const [rel, content] of targets) {
   const abs = join(root, rel);
   let current = null;
   try {
-    current = readFileSync(abs, "utf8");
+    current = normalizeEol(readFileSync(abs, "utf8"));
   } catch {
     current = null;
   }

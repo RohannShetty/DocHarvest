@@ -5,7 +5,13 @@ export function Proof() {
   // The test numbers are generated from a real run (docs/scripts/sync-stats.mjs).
   // If a run is red, the page says so — an honest "798 of 804" is worth more than
   // a tidy number nobody can reproduce.
-  const testsClean = STATS.testsFailing === 0;
+  //
+  // `STATS` is `as const`, so `testsFailing` is a literal type. Comparing a
+  // literal straight against 0 is a TS2367 error the moment a red run writes a
+  // non-zero count — i.e. the build broke precisely when the suite was failing.
+  // Widen to `number` first; the claim is about the value, not its type.
+  const testsFailing: number = STATS.testsFailing;
+  const testsClean = testsFailing === 0;
   const testsValue = testsClean
     ? `${STATS.testsPassing}`
     : `${STATS.testsPassing} of ${STATS.testsCollected}`;

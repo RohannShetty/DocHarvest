@@ -53,6 +53,12 @@ DRIFT_PATTERNS = [
 
 
 def _read_text(path: Path) -> str:
+    # Documents listed below are not all tracked: PRODUCT.md is deliberately
+    # untracked (.gitignore), so it exists in a local working copy and is
+    # absent from CI. A guard that only ever passes on one machine is not a
+    # guard, so an untracked document is skipped rather than crashing.
+    if not path.exists():
+        return ""
     return path.read_text(encoding="utf-8", errors="replace")
 
 

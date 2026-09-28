@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Local growth handoff documents for tool profiles and owner-run promotion actions.
 - External registry, directory, launch, sponsor, social, and translation publication remains owner-run; no external mutations were performed in this checkout.
 
+### Fixed
+
+- Showcase build no longer fails typecheck on a red suite: `STATS` is `as const`, so comparing `testsFailing` against `0` raised TS2367 as soon as a real run reported a non-zero count. The value is widened to `number` before comparison.
+- `sync-brand-tokens.mjs --check` normalizes line endings before comparing, so a CRLF checkout on `windows-latest` no longer reports the generated stylesheets as stale.
+- Four contract tests asserted against deliberately untracked files (`marketing/`, `PRODUCT.md`, `docs/superpowers/`), so they passed in a local working copy and failed in CI. They now guard the tracked surfaces that actually ship.
+
 ## [11.1.1] - 2026-09-28
 
 ### 🧾 Claim Integrity & Link Correction Patch

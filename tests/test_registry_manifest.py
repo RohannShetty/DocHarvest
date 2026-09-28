@@ -99,15 +99,21 @@ def test_manifest_package_matches_pyproject() -> None:
 
 
 def test_listings_use_one_canonical_name() -> None:
-    """Directory copy must use the same name, package and URLs as the manifest."""
+    """Directory copy must use the same name, package and URLs as the manifest.
+
+    The listing kit lived in `marketing/`, which is deliberately untracked
+    (.gitignore) — so asserting on it passed in a local working copy and failed
+    on every CI runner. The tracked, shipped source of that copy is
+    `docs/PROMOTION_PACKAGE.md`; the test guards it instead.
+    """
     data = _manifest()
-    listing = ROOT / "marketing" / "MCP_DIRECTORY_LISTING.md"
-    assert listing.exists(), "the directory-listing kit is the source of that copy"
+    listing = ROOT / "docs" / "PROMOTION_PACKAGE.md"
+    assert listing.exists(), "the directory-listing copy is the source of that claim"
     text = listing.read_text(encoding="utf-8")
     assert data["name"] in text, (
-        f"marketing/MCP_DIRECTORY_LISTING.md must quote the registry id {data['name']}"
+        f"docs/PROMOTION_PACKAGE.md must quote the registry id {data['name']}"
     )
-    assert REPO_URL in text, "the listing kit must point at the DocHarvest repo"
+    assert REPO_URL in text, "the listing copy must point at the DocHarvest repo"
     assert "rohannshetty.github.io/docharvest" not in text, (
-        "the listing kit still contains the retired GitHub Pages path (it 404s)"
+        "the listing copy still contains the retired GitHub Pages path (it 404s)"
     )

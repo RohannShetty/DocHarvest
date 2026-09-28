@@ -28,17 +28,24 @@ ROOT = Path(__file__).resolve().parent.parent
 
 #: Files that may legitimately contain the retired name.
 HISTORY = {"CHANGELOG.md", "docs/CONSULTANT_REVIEW.md"}
-MIGRATION = {"src/docharvest/paths.py", "tests/test_library_migration.py", "tests/test_naming_drift.py"}
-#: Documents the rename itself: it has to name what was renamed, and what to do
-#: about the package that cannot be deleted.
-RUNBOOK = {"marketing/REGISTRY_SUBMISSION.md"}
+MIGRATION = {
+    "src/docharvest/paths.py",
+    "tests/test_library_migration.py",
+    "tests/test_naming_drift.py",
+    # Asserts the retired name is ABSENT from the README. The assertion is
+    # the whole point of the file, so the literal has to be there.
+    "tests/test_readme_contract.py",
+}
+# `marketing/` is deliberately untracked (see .gitignore), so nothing under it
+# can be exempted: this guard only sees files git ships, and CI checks out a
+# tree without them. An exemption for an untracked file fails on CI, not here.
 GENERATED = {
     "uv.lock",
     "frontend/package-lock.json",
     "docs/package-lock.json",
     "repomix-architecture.xml",
 }
-EXEMPT = HISTORY | MIGRATION | RUNBOOK
+EXEMPT = HISTORY | MIGRATION
 
 SKIP_PARTS = ("node_modules", ".venv", ".git", "__pycache__", ".next", "/out/", "egg-info")
 TEXT_SUFFIXES = {".py", ".ts", ".tsx", ".mjs", ".js", ".json", ".md", ".toml", ".yml", ".yaml",
