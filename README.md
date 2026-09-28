@@ -12,7 +12,7 @@
 |---:|---:|---:|
 | reference capture | reference capture | reference measurement |
 
-[![Version: 11.1.1](https://img.shields.io/badge/version-11.1.1-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
+[![Version: 11.2.0](https://img.shields.io/badge/version-11.2.0-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-71717a?style=flat-square&labelColor=18181b)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-a1a1aa?style=flat-square&labelColor=18181b)](pyproject.toml)
 [![Tests: 882 passing](https://img.shields.io/badge/tests-882%20passing%20(2026--09--28)-f59e0b?style=flat-square&labelColor=18181b)](docs/lib/stats.ts)

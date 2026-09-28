@@ -3,7 +3,7 @@
   "name": "io.github.RohannShetty/docharvest",
   "title": "DocHarvest",
   "description": "Compile any documentation site into local, searchable, source-cited Markdown your agent can read.",
-  "version": "11.1.1",
+  "version": "11.2.0",
   "websiteUrl": "https://rohannshetty.github.io/DocHarvest/",
   "repository": {
     "url": "https://github.com/RohannShetty/DocHarvest",
@@ -15,7 +15,7 @@
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "docharvest",
-      "version": "11.1.1",
+      "version": "11.2.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"

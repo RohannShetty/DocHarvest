@@ -173,11 +173,13 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.1.1
+### What's New in v11.2.0
 
-- Claim integrity: every public number is now generated from a real run and date-stamped, replacing the stale hardcoded test count.
-- Fixed links: PyPI project URLs and the showcase link point at DocHarvest instead of the retired docharvest slug.
-- Restored the install modal's entrance animation, which had been dead since the Index Sheet redesign removed its keyframe.`,
+- Full-content \`llms-full.txt\` now ships beside \`llms.txt\` for every capture, with deterministic page order and SHA-256 content hashes.
+- \`search_docs(..., max_tokens=...)\` bounds returned snippets by an approximate response budget.
+- MCP tool profiles: a minimal schema is the default, and \`docharvest mcp --profile full\` restores all 12 tools.
+- A reproducible retrieval benchmark (\`benchmarks/run.py\`) publishes hit@k, MRR and answer-containment from a committed fixture corpus.
+- Fixed the showcase build, which failed typecheck on any red suite, and the brand-token check, which reported stale on Windows checkouts.`,
     htmlUrl: `https://github.com/RohannShetty/DocHarvest/releases/tag/v${VERSION}`,
     assets: [
       {

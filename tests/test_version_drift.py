@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_VERSION = "11.1.1"
+CANONICAL_VERSION = "11.2.0"
 
 
 # Files where the value MUST literally equal CANONICAL_VERSION (not just
@@ -182,7 +182,7 @@ _HARDCODED_VERSION_ALLOWLIST = {
     REPO_ROOT / "frontend" / "src" / "lib" / "version.ts",
 }
 
-_HARDCODED_VERSION_RE = re.compile(r"""(?<!\d)11\.1\.\d+(?!\d)""")
+_HARDCODED_VERSION_RE = re.compile(r"""(?<!\d)11\.\d+\.\d+(?!\d)""")
 
 
 @pytest.mark.parametrize(
@@ -228,7 +228,7 @@ def test_prebuilt_gui_bundle_matches_canonical_version() -> None:
         "after bumping the version"
     )
 
-    for pattern in (re.compile(r"v11\.1\.\d+"),):
+    for pattern in (re.compile(r"v11\.\d+\.\d+"),):
         found = {m for m in pattern.findall(text) if m != f"v{CANONICAL_VERSION}"}
         assert not found, (
             f"GUI bundle carries a non-canonical version reference: {sorted(found)}"

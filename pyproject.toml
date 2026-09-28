@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "docharvest"
-version = "11.1.1"
+version = "11.2.0"
 description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}

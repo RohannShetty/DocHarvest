@@ -7,7 +7,7 @@ from pathlib import Path
 
 def test_package_import():
     import docharvest
-    assert docharvest.__version__ == "11.1.1"
+    assert docharvest.__version__ == "11.2.0"
     assert docharvest.StorageManager is not None
 
 

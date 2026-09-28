@@ -2,7 +2,7 @@
 ## Strategy, Post Copy, Registry Submissions & Ecosystem Integrations
 
 **Product:** DocHarvest (`docharvest`)  
-**Version:** 11.1.1  
+**Version:** 11.2.0
 **Target Audience:** AI Engineers, Agent Developers, RAG Builders, Technical Writers, Offline Developers  
 **Author:** Marketing & Developer Relations Lead  
 **Last Updated:** September 2026  
