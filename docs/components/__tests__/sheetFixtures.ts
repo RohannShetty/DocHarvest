@@ -89,11 +89,11 @@ export const MANIFEST_FIXTURE: Manifest = {
 export const GITHUB_FIXTURE: DocHarvestGithubData = {
   stats: { stars: 128, forks: 16, openIssues: 0, watchers: 128, updatedAt: '2026-09-16T00:00:00Z' },
   latestRelease: {
-    tag: 'v11.1.0',
-    name: 'DocHarvest v11.1.0',
+    tag: 'v11.1.1',
+    name: 'DocHarvest v11.1.1',
     publishedAt: '2026-09-19',
     body: '## Highlights\n\n- Native FastMCP v2 server with resources and prompts over stdio.',
-    htmlUrl: 'https://github.com/RohannShetty/DocHarvest/releases/tag/v11.1.0',
+    htmlUrl: 'https://github.com/RohannShetty/DocHarvest/releases/tag/v11.1.1',
     assets: [
       {
         name: 'docharvest-windows-latest.exe',

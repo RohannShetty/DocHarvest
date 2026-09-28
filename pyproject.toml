@@ -3,8 +3,8 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gitbook-downloader"
-version = "11.1.0"
+name = "docharvest"
+version = "11.1.1"
 description = "DocHarvest — Turn any documentation site into LLM-ready Markdown, vector RAG JSONL, llms.txt, and styled offline PDFs. Zero-config CLI, React desktop GUI & FastMCP server."
 readme = "README.md"
 license = {text = "MIT"}
@@ -41,8 +41,8 @@ dependencies = [
 
 [project.optional-dependencies]
 # The `mcp` extra is a backward-compat no-op kept so existing
-# `pip install "gitbook-downloader[mcp]"` instructions keep resolving;
-# the SDK ships as a base dependency because `uvx gitbook-downloader mcp`
+# `pip install "docharvest[mcp]"` instructions keep resolving;
+# the SDK ships as a base dependency because `uvx docharvest mcp`
 # installs no extras.
 mcp = ["mcp>=1.2.0"]
 render = ["playwright>=1.40.0"]
@@ -55,13 +55,14 @@ dev = [
 ]
 
 [project.scripts]
-docharvest = "gitbook_downloader.cli:main"
-gitbook-downloader = "gitbook_downloader.cli:main"
-gitbook-dl = "gitbook_downloader.cli:main"
+docharvest = "docharvest.cli:main"
+gitbook-dl = "docharvest.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/RohannShetty/DocHarvest"
+Homepage = "https://rohannshetty.github.io/DocHarvest/"
+Documentation = "https://github.com/RohannShetty/DocHarvest#-quick-start"
 Repository = "https://github.com/RohannShetty/DocHarvest"
+Source = "https://github.com/RohannShetty/DocHarvest"
 Issues = "https://github.com/RohannShetty/DocHarvest/issues"
 Changelog = "https://github.com/RohannShetty/DocHarvest/blob/main/CHANGELOG.md"
 
@@ -76,7 +77,7 @@ where = ["src"]
 #   - skills/**     bundled agent skills (`docharvest skill install`)
 # tests/test_packaging.py asserts every data file in the source tree is covered.
 [tool.setuptools.package-data]
-gitbook_downloader = [
+docharvest = [
     "py.typed",
     "skills/*/SKILL.md",
     "gui/web/*.html",

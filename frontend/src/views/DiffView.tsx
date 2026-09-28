@@ -1,33 +1,26 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { 
   GitCompare, 
-  Plus, 
-  Minus, 
+
   FileCode, 
-  Check, 
-  Layers, 
-  ArrowRight, 
+
   Clock, 
   Network, 
   Search, 
-  Globe, 
-  Hash, 
-  Terminal, 
+
   Sparkles, 
-  Copy, 
+
   BookOpen, 
   Share2, 
-  Code,
-  ChevronRight,
-  ExternalLink,
+
   Filter
 } from "lucide-react"
+import { brandTokens } from "@/lib/brand"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger, } from "@/components/ui/tabs"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
 import mermaid from "mermaid"
@@ -125,9 +118,12 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
       }
     }
 
-    lines.push("  classDef endpoint fill:#f59e0b20,stroke:#f59e0b,stroke-width:2px,color:#f59e0b;")
-    lines.push("  classDef heading fill:#0ea5e920,stroke:#0ea5e9,stroke-width:1px,color:#0ea5e9;")
-    lines.push("  classDef page fill:#10b98120,stroke:#10b981,stroke-width:1.5px,color:#10b981;")
+    // One amber accent per diagram (endpoints); everything else sits on the
+    // neutral sheet palette. Colours come from the live brand tokens.
+    const b = brandTokens()
+    lines.push(`  classDef endpoint fill:${b.match}20,stroke:${b.match},stroke-width:2px,color:${b.match};`)
+    lines.push(`  classDef heading fill:${b.bond3},stroke:${b.rule},stroke-width:1px,color:${b.ink2};`)
+    lines.push(`  classDef page fill:${b.bond2},stroke:${b.rule},stroke-width:1.5px,color:${b.ink2};`)
 
     return lines.join("\n")
   }, [graphData])
@@ -195,13 +191,13 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
   const getNodeTypeBadge = (type: string) => {
     switch (type) {
       case "endpoint":
-        return "border-amber-500/40 text-amber-600 bg-amber-500/10 dark:text-amber-400"
+        return "border-primary/40 text-primary bg-primary/10"
       case "heading":
-        return "border-cyan-500/40 text-cyan-600 bg-cyan-500/10 dark:text-cyan-400"
+        return "border-primary/40 text-muted-foreground bg-primary/10"
       case "code_symbol":
-        return "border-purple-500/40 text-purple-600 bg-purple-500/10 dark:text-purple-400"
+        return "border-primary/40 text-muted-foreground bg-primary/10"
       default:
-        return "border-emerald-500/40 text-emerald-600 bg-emerald-500/10 dark:text-emerald-400"
+        return "border-border text-muted-foreground bg-muted"
     }
   }
 
@@ -239,7 +235,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
       </div>
 
       {/* Domain Selection Bar */}
-      <Card className="glass-card shadow-sm border-border/70">
+      <Card className="sheet-card shadow-sm border-border/70">
         <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0 font-mono">
@@ -291,7 +287,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
               <Filter className="h-3.5 w-3.5 text-muted-foreground ml-1" />
               <button
                 onClick={() => setSelectedNodeType("all")}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                   selectedNodeType === "all" ? "bg-primary text-primary-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -299,24 +295,24 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
               </button>
               <button
                 onClick={() => setSelectedNodeType("endpoint")}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                  selectedNodeType === "endpoint" ? "bg-amber-500 text-white font-semibold" : "text-muted-foreground hover:text-amber-500"
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  selectedNodeType === "endpoint" ? "bg-primary text-primary-foreground font-semibold" : "text-muted-foreground hover:text-primary"
                 }`}
               >
                 Endpoints
               </button>
               <button
                 onClick={() => setSelectedNodeType("page")}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                  selectedNodeType === "page" ? "bg-emerald-600 text-white font-semibold" : "text-muted-foreground hover:text-emerald-500"
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  selectedNodeType === "page" ? "bg-primary text-primary-foreground font-semibold" : "text-muted-foreground hover:text-muted-foreground"
                 }`}
               >
                 Pages
               </button>
               <button
                 onClick={() => setSelectedNodeType("heading")}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                  selectedNodeType === "heading" ? "bg-cyan-600 text-white font-semibold" : "text-muted-foreground hover:text-cyan-500"
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  selectedNodeType === "heading" ? "bg-primary text-primary-foreground font-semibold" : "text-muted-foreground hover:text-primary"
                 }`}
               >
                 Headings
@@ -326,7 +322,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
 
           {/* Visual Architecture Diagram */}
           {mermaidGraphCode && (
-            <Card className="glass-card shadow-sm overflow-hidden border-border/70">
+            <Card className="sheet-card shadow-sm overflow-hidden border-border/70">
               <CardHeader className="p-4 pb-2 border-b border-border/40 bg-muted/20 flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -334,7 +330,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                     Concept Relationship Topology (AST Subgraph)
                   </CardTitle>
                 </div>
-                <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                <Badge variant="outline" className="text-xs font-mono border-primary/30 text-primary">
                   Interactive Node Map
                 </Badge>
               </CardHeader>
@@ -358,7 +354,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                   Synthesizing AST Concept Graph...
                 </div>
               ) : filteredNodes.length === 0 ? (
-                <Card className="glass-card p-8 text-center border-dashed border-border/80">
+                <Card className="sheet-card p-8 text-center border-dashed border-border/80">
                   <p className="text-xs text-muted-foreground font-mono">
                     No concept nodes match the filter. Capture a docset or clear your query to view the full graph.
                   </p>
@@ -371,16 +367,16 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                       <Card
                         key={node.id}
                         onClick={() => setSelectedNode(node)}
-                        className={`cursor-pointer p-3.5 transition-all glass-card hover:border-primary/50 interactive-scale ${
+                        className={`cursor-pointer p-3.5 transition-all sheet-card hover:border-primary/50 interactive-scale ${
                           isSelected ? "border-primary bg-primary/10 shadow-sm shadow-primary/20" : "border-border/60"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline" className={`text-[9px] uppercase font-mono tracking-wider h-4 px-1.5 py-0 ${getNodeTypeBadge(node.type)}`}>
+                          <Badge variant="outline" className={`text-xs uppercase font-mono tracking-wider h-4 px-1.5 py-0 ${getNodeTypeBadge(node.type)}`}>
                             {node.type || "concept"}
                           </Badge>
                           {node.file && (
-                            <span className="text-[10px] font-mono text-muted-foreground truncate max-w-[120px]">
+                            <span className="text-xs font-mono text-muted-foreground truncate max-w-[120px]">
                               {node.file}
                             </span>
                           )}
@@ -391,13 +387,13 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                         </h4>
 
                         {node.snippet && (
-                          <p className="text-[11px] text-muted-foreground font-sans line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-muted-foreground font-sans line-clamp-2 leading-relaxed">
                             {node.snippet}
                           </p>
                         )}
 
                         {node.connected_entities && node.connected_entities.length > 0 && (
-                          <div className="flex items-center gap-1 mt-2.5 pt-2 border-t border-border/40 text-[10px] text-muted-foreground font-mono">
+                          <div className="flex items-center gap-1 mt-2.5 pt-2 border-t border-border/40 text-xs text-muted-foreground font-mono">
                             <Share2 className="h-3 w-3 text-primary shrink-0" />
                             <span>{node.connected_entities.length} connected context link{node.connected_entities.length > 1 ? "s" : ""}</span>
                           </div>
@@ -416,9 +412,9 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
               </div>
 
               {selectedNode ? (
-                <Card className="glass-card p-4 space-y-3.5 border-border/80 sticky top-4">
+                <Card className="sheet-card p-4 space-y-3.5 border-border/80 sticky top-4">
                   <div className="flex items-start justify-between gap-2">
-                    <Badge variant="outline" className={`text-[9px] uppercase font-mono ${getNodeTypeBadge(selectedNode.type)}`}>
+                    <Badge variant="outline" className={`text-xs uppercase font-mono ${getNodeTypeBadge(selectedNode.type)}`}>
                       {selectedNode.type || "concept"}
                     </Badge>
                     {onOpenDocReader && (
@@ -439,7 +435,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                       {selectedNode.label || selectedNode.id}
                     </h3>
                     {selectedNode.file && (
-                      <p className="text-[11px] text-muted-foreground font-mono mt-1">
+                      <p className="text-xs text-muted-foreground font-mono mt-1">
                         File: <code>{selectedNode.file}</code>
                       </p>
                     )}
@@ -447,7 +443,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
 
                   {selectedNode.snippet && (
                     <div className="space-y-1">
-                      <span className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider font-mono">
+                      <span className="text-xs font-semibold uppercase text-muted-foreground tracking-wider font-mono">
                         Context Snippet:
                       </span>
                       <p className="text-xs text-foreground/90 font-mono bg-muted/40 p-2.5 rounded-lg border border-border/40 leading-relaxed select-text">
@@ -458,19 +454,19 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
 
                   {selectedNode.connected_entities && selectedNode.connected_entities.length > 0 && (
                     <div className="space-y-2 pt-2 border-t border-border/40">
-                      <span className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider font-mono">
+                      <span className="text-xs font-semibold uppercase text-muted-foreground tracking-wider font-mono">
                         Related Graph Entities:
                       </span>
                       <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
                         {selectedNode.connected_entities.map((conn: any, i: number) => (
                           <div
                             key={i}
-                            className="p-2 rounded-md bg-background/80 border border-border/60 text-[11px] flex items-center justify-between"
+                            className="p-2 rounded-md bg-background/80 border border-border/60 text-xs flex items-center justify-between"
                           >
                             <span className="font-mono font-medium truncate max-w-[140px] text-foreground">
                               {conn.label || conn.id}
                             </span>
-                            <Badge variant="secondary" className="text-[9px] font-mono py-0 h-4">
+                            <Badge variant="secondary" className="text-xs font-mono py-0 h-4">
                               {conn.relation || "links"}
                             </Badge>
                           </div>
@@ -480,7 +476,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                   )}
                 </Card>
               ) : (
-                <Card className="glass-card p-6 text-center text-xs text-muted-foreground font-mono border-dashed">
+                <Card className="sheet-card p-6 text-center text-xs text-muted-foreground font-mono border-dashed">
                   Select an entity node to inspect AST links and snippet context.
                 </Card>
               )}
@@ -493,7 +489,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
       {activeSubTab === "diff" && (
         <div className="space-y-6 animate-in fade-in-50 duration-300">
           {/* Selector Bar */}
-          <Card className="glass-card shadow-sm border-border/70">
+          <Card className="sheet-card shadow-sm border-border/70">
             <CardContent className="p-5">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-end">
                 <div>
@@ -556,21 +552,21 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                   </Badge>
                 </div>
                 <div className="flex items-center gap-3 font-mono text-xs">
-                  <span className="text-emerald-700 dark:text-emerald-500 font-semibold">+{diffResult.lines_added || 0} added</span>
+                  <span className="text-muted-foreground font-semibold">+{diffResult.lines_added || 0} added</span>
                   <span className="text-destructive font-semibold">-{diffResult.lines_removed || 0} removed</span>
                 </div>
               </div>
 
               <div className="space-y-3">
                 {diffResult.changes?.map((c: any, idx: number) => (
-                  <Card key={idx} className="glass-card overflow-hidden shadow-sm">
+                  <Card key={idx} className="sheet-card overflow-hidden shadow-sm">
                     <div className="flex items-center justify-between border-b border-border/50 bg-muted/30 px-4 py-2.5">
                       <div className="flex items-center gap-2 font-mono text-xs text-foreground font-semibold">
                         <FileCode className="h-4 w-4 text-primary" />
                         <span>{c.url || c.file || "docs.md"}</span>
                       </div>
                       <div className="flex items-center gap-2 font-mono text-xs">
-                        <span className="text-emerald-700 dark:text-emerald-500 font-semibold">+{c.lines_added || 0}</span>
+                        <span className="text-muted-foreground font-semibold">+{c.lines_added || 0}</span>
                         <span className="text-destructive font-semibold">-{c.lines_removed || 0}</span>
                       </div>
                     </div>
@@ -586,7 +582,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                               <div
                                 key={lIdx}
                                 className={`px-1.5 py-0.5 rounded font-mono ${
-                                  isAdd ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" :
+                                  isAdd ? "bg-muted text-muted-foreground" :
                                   isDel ? "bg-destructive/15 text-destructive" :
                                   isHdr ? "text-primary/80 font-bold bg-primary/5" :
                                   "text-muted-foreground"
@@ -608,7 +604,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
           )}
 
           {!diffResult && snapshots.length <= 1 && (
-            <Card className="glass-card p-8 text-center border-dashed border-border/80">
+            <Card className="sheet-card p-8 text-center border-dashed border-border/80">
               <Clock className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
               <h4 className="text-sm font-semibold text-foreground">Single Snapshot Available</h4>
               <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1">

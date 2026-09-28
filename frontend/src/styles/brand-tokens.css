@@ -1,0 +1,101 @@
+/* GENERATED FILE - DO NOT EDIT.
+   Source: brand/tokens.json   Regenerate: node scripts/sync-brand-tokens.mjs
+   tests/test_brand_tokens.py fails if this file and the source disagree. */
+/* Loaded by src/index.css. Brand primitives (shared with the website) first,
+   then the shadcn/ui semantic layer derived from them, so every primitive in
+   src/components/ui reads the brand without a single component edit. */
+
+:root,
+.dark {
+  /* --- brand primitives (identical values to docs/app/brand-tokens.css) --- */
+  --bond: #09090B;
+  --bond-2: #101013;
+  --bond-3: #18181B;
+  --rule: #27272A;
+  --rule-strong: #3F3F46;
+  --rule-subtle: #1F1F23;
+  --ink: #F4F4F5;
+  --ink-2: #A1A1AA;
+  --ink-3: #8A8A93;
+  --match: #F59E0B;
+  --match-deep: #D97706;
+  --match-subtle: rgba(245, 158, 11, 0.08);
+  --alert: #EF4444;
+  --ok: #34D399;
+  --paper: #FAFAFA;
+
+  /* --- shadcn/ui semantic layer (HSL triplets: support bg-primary/10) --- */
+  --background: 240 10% 3.92%;
+  --foreground: 240 4.76% 95.88%;
+  --card: 240 8.57% 6.86%;
+  --card-foreground: 240 4.76% 95.88%;
+  --popover: 240 8.57% 6.86%;
+  --popover-foreground: 240 4.76% 95.88%;
+  --primary: 37.69 92.13% 50.2%;
+  --primary-foreground: 240 10% 3.92%;
+  --secondary: 240 5.88% 10%;
+  --secondary-foreground: 240 4.76% 95.88%;
+  --muted: 240 8.57% 6.86%;
+  --muted-foreground: 240 5.03% 64.9%;
+  --accent: 240 5.88% 10%;
+  --accent-foreground: 240 4.76% 95.88%;
+  --destructive: 0 84.24% 60.2%;
+  --destructive-foreground: 0 0% 98.04%;
+  --success: 158.11 64.37% 51.57%;
+  --success-foreground: 240 10% 3.92%;
+  --info: 37.69 92.13% 50.2%;
+  --info-foreground: 240 10% 3.92%;
+  --border: 240 3.7% 15.88%;
+  --input: 240 3.7% 15.88%;
+  --ring: 37.69 92.13% 50.2%;
+
+  --radius: 0px;
+  --font-sans: Archivo, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: Geist Mono, ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Consolas, monospace;
+}
+
+.light {
+  --bond: #FBFBFA;
+  --bond-2: #F4F4F5;
+  --bond-3: #ECECEF;
+  --rule: #E4E4E7;
+  --rule-strong: #A1A1AA;
+  --rule-subtle: #EDEDF0;
+  --ink: #18181B;
+  --ink-2: #52525B;
+  --ink-3: #6B6B74;
+  --match: #B45309;
+  --match-deep: #92400E;
+  --match-subtle: rgba(180, 83, 9, 0.06);
+  --alert: #B91C1C;
+  --ok: #047857;
+  --paper: #FAFAFA;
+
+  --background: 60 11.11% 98.24%;
+  --foreground: 240 5.88% 10%;
+  --card: 240 4.76% 95.88%;
+  --card-foreground: 240 5.88% 10%;
+  --popover: 240 4.76% 95.88%;
+  --popover-foreground: 240 5.88% 10%;
+  --primary: 25.96 90.48% 37.06%;
+  --primary-foreground: 0 0% 98.04%;
+  --secondary: 240 8.57% 93.14%;
+  --secondary-foreground: 240 5.88% 10%;
+  --muted: 240 4.76% 95.88%;
+  --muted-foreground: 240 5.2% 33.92%;
+  --accent: 240 8.57% 93.14%;
+  --accent-foreground: 240 5.88% 10%;
+  --destructive: 0 73.71% 41.76%;
+  --destructive-foreground: 0 0% 98.04%;
+  --success: 162.93 93.55% 24.31%;
+  --success-foreground: 0 0% 98.04%;
+  --info: 25.96 90.48% 37.06%;
+  --info-foreground: 0 0% 98.04%;
+  --border: 240 5.88% 90%;
+  --input: 240 5.88% 90%;
+  --ring: 25.96 90.48% 37.06%;
+
+  --radius: 0px;
+  --font-sans: Archivo, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: Geist Mono, ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Consolas, monospace;
+}

@@ -11,7 +11,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../src/gitbook_downloader/gui/web',
+    outDir: '../src/docharvest/gui/web',
     emptyOutDir: true,
     chunkSizeWarningLimit: 2000,
     rollupOptions: {

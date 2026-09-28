@@ -19,7 +19,7 @@ import pytest
 
 pytest.importorskip("mcp")
 
-from gitbook_downloader.mcp import server
+from docharvest.mcp import server
 
 
 # ── Fakes ────────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ def test_download_docs_surfaces_invalid_output_mode(monkeypatch, no_search):
 
 
 def test_facade_unavailable_is_reported_not_raised(monkeypatch, no_search):
-    """If gitbook_downloader.api can't be imported, the tool reports it instead
+    """If docharvest.api can't be imported, the tool reports it instead
     of crashing the server."""
     monkeypatch.setattr(server, "_default_capture", None)
 
@@ -244,6 +244,29 @@ def test_search_docs_success(monkeypatch):
     assert res[0]["title"] == "Doc"
 
 
+def test_search_docs_bounds_total_snippet_budget(monkeypatch):
+    mock_search = MagicMock()
+    mock_search.search.return_value = [
+        {"title": "One", "snippet": "123456789"},
+        {"title": "Two", "snippet": "abcdef"},
+    ]
+    monkeypatch.setattr(server, "_search", mock_search)
+
+    res = call_tool(server.search_docs, query="test", max_tokens=2)
+
+    assert len(res) == 1
+    assert res[0]["snippet"] == "12345678"
+
+
+def test_search_docs_rejects_non_positive_budget(monkeypatch):
+    mock_search = MagicMock()
+    monkeypatch.setattr(server, "_search", mock_search)
+
+    res = call_tool(server.search_docs, query="test", max_tokens=0)
+
+    assert res == [{"error": "max_tokens must be greater than zero"}]
+
+
 def test_list_domains_success(monkeypatch):
     mock_storage = MagicMock()
     mock_storage.list_domains.return_value = [{"name": "example.com", "pages": 10}]
@@ -264,8 +287,8 @@ def test_list_domains_omits_domains_without_storage(tmp_path, monkeypatch):
     Mirrors the live data: the search index holds a domain (6,963 rows) whose
     ``docs/<domain>/`` directory no longer exists.
     """
-    from gitbook_downloader.search import SearchIndex
-    from gitbook_downloader.storage import StorageManager
+    from docharvest.search import SearchIndex
+    from docharvest.storage import StorageManager
 
     library = tmp_path / "library"
     storage = StorageManager(base_dir=library)
@@ -405,8 +428,8 @@ def test_export_docs_jsonl_writes_parseable_file(tmp_path, monkeypatch):
     same adapter the CLI uses), so the JSONL lands on disk with one parseable
     record per stored page and frontmatter stripped from the payloads.
     """
-    from gitbook_downloader.storage import StorageManager
-    from gitbook_downloader.utils.export import StoragePageSource
+    from docharvest.storage import StorageManager
+    from docharvest.utils.export import StoragePageSource
 
     domain = "docs.example.com"
     storage = StorageManager(base_dir=tmp_path)
@@ -533,8 +556,8 @@ _BOOK_CONTENT = (
 
 def _seed_book_library(tmp_path, monkeypatch):
     """Real storage + real search index holding _BOOK_CONTENT for a domain."""
-    from gitbook_downloader.search import SearchIndex
-    from gitbook_downloader.storage import StorageManager
+    from docharvest.search import SearchIndex
+    from docharvest.storage import StorageManager
 
     domain = "docs.openalgo.test"
     storage = StorageManager(base_dir=tmp_path)
@@ -586,7 +609,7 @@ def test_read_doc_topic_prefers_exact_heading_section(tmp_path, monkeypatch):
 
 def test_read_doc_topic_matching_nothing_returns_bounded_full_book(tmp_path, monkeypatch):
     """No-match topics keep today's contract: the whole (bounded) book."""
-    from gitbook_downloader.storage import StorageManager
+    from docharvest.storage import StorageManager
 
     domain = "docs.small.test"
     storage = StorageManager(base_dir=tmp_path)
@@ -656,7 +679,7 @@ def test_export_docs_jsonl_empty_page_tree_returns_error_and_writes_no_file(tmp_
     """Legacy library shape: docs.md exists but pages/ is empty (captured
     before granular storage). The tool must report an explicit error and
     leave no 0-byte export on disk (ISSUE-3)."""
-    from gitbook_downloader.storage import StorageManager
+    from docharvest.storage import StorageManager
 
     domain = "legacy.example.com"
     storage = StorageManager(base_dir=tmp_path)
@@ -689,7 +712,7 @@ def test_export_docs_jsonl_empty_page_tree_returns_error_and_writes_no_file(tmp_
 def test_export_to_jsonl_zero_records_returns_zero_without_creating_file(tmp_path):
     """``export_to_jsonl`` returns 0 for an empty page source and does not
     create the output file (the caller decides how to surface it)."""
-    from gitbook_downloader.utils.export import export_to_jsonl
+    from docharvest.utils.export import export_to_jsonl
 
     class EmptyPageSource:
         def get_pages(self, domain):

@@ -3,17 +3,13 @@ import {
   FileUp, 
   FileText, 
   FileSpreadsheet, 
-  BookOpen, 
-  Sparkles, 
+
   FolderOpen, 
   CheckCircle2, 
   ArrowRight,
   Database,
   ExternalLink,
-  Folder,
-  Layers,
-  FileCode,
-  Check,
+
   Sliders
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -74,7 +70,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       icon: FileSpreadsheet,
       desc: "Compiled single-file printable documentation handbook with structured headings, code syntax highlighting, and clean typography.",
       badge: "Handbook / Print",
-      badgeColor: "border-emerald-500/40 text-emerald-700 bg-emerald-500/10 dark:text-emerald-400",
+      badgeColor: "border-border text-muted-foreground bg-muted",
     },
     {
       id: "md" as const,
@@ -82,7 +78,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       icon: FileText,
       desc: "Concatenated Markdown handbook with relative internal link rewriting, preserved code blocks, and structured table of contents.",
       badge: "Unified Markdown",
-      badgeColor: "border-purple-500/40 text-purple-700 bg-purple-500/10 dark:text-purple-400",
+      badgeColor: "border-border text-muted-foreground bg-primary/10",
     },
   ]
 
@@ -105,7 +101,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       </div>
 
       {/* Domain Selector */}
-      <Card className="glass-card shadow-sm border-border/70">
+      <Card className="sheet-card shadow-sm border-border/70">
         <CardHeader className="p-5 pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <span className="flex h-5 w-5 rounded-full bg-primary/10 text-primary items-center justify-center text-xs font-bold font-mono">1</span>
@@ -137,7 +133,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       </Card>
 
       {/* Format Chooser */}
-      <Card className="glass-card shadow-sm border-border/70">
+      <Card className="sheet-card shadow-sm border-border/70">
         <CardHeader className="p-5 pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <span className="flex h-5 w-5 rounded-full bg-primary/10 text-primary items-center justify-center text-xs font-bold font-mono">2</span>
@@ -163,12 +159,12 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
                     <div className={`p-2.5 rounded-lg ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted/60 text-muted-foreground"}`}>
                       <Icon className="h-5 w-5" />
                     </div>
-                    <Badge variant="outline" className={`text-[10px] font-mono ${f.badgeColor}`}>
+                    <Badge variant="outline" className={`text-xs font-mono ${f.badgeColor}`}>
                       {f.badge}
                     </Badge>
                   </div>
                   <h4 className="font-semibold text-xs text-foreground mb-1.5">{f.title}</h4>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">{f.desc}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             )
@@ -177,7 +173,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       </Card>
 
       {/* Custom Output Directory Options */}
-      <Card className="glass-card shadow-sm border-border/70">
+      <Card className="sheet-card shadow-sm border-border/70">
         <CardContent className="p-4 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-medium text-foreground">
@@ -186,7 +182,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
             </div>
             <button
               onClick={() => setShowCustomPath(!showCustomPath)}
-              className="text-[11px] font-mono text-primary hover:underline"
+              className="text-xs font-mono text-primary hover:underline"
             >
               {showCustomPath ? "Use Default Folder (exports/)" : "Customize Destination Path"}
             </button>
@@ -206,7 +202,7 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
       </Card>
 
       {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4.5 rounded-xl border border-border/70 bg-card/60 backdrop-blur-md shadow-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4.5 rounded-xl border border-border/70 bg-card shadow-sm">
         <div className="text-xs text-muted-foreground">
           Target output: <span className="font-mono text-foreground font-semibold">{customPath.trim() || "exports/"}</span>
         </div>
@@ -228,15 +224,15 @@ export const ExportView: React.FC<ExportViewProps> = ({ library, selectedDomain:
 
       {/* Output Feedback */}
       {lastExport && (
-        <Card className="border-emerald-500/40 bg-emerald-500/10 backdrop-blur-md shadow-sm p-4.5 animate-in fade-in-50 duration-300">
+        <Card className="border-border bg-muted shadow-sm p-4.5 animate-in fade-in-50 duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
+              <div className="h-10 w-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center shrink-0 border border-border">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div className="overflow-hidden">
                 <h4 className="text-xs font-semibold text-foreground">Export Generated Successfully</h4>
-                <p className="text-[11px] text-muted-foreground font-mono truncate max-w-lg mt-0.5" title={lastExport.path}>
+                <p className="text-xs text-muted-foreground font-mono truncate max-w-lg mt-0.5" title={lastExport.path}>
                   {lastExport.path}
                 </p>
               </div>

@@ -6,9 +6,9 @@ import json
 from pathlib import Path
 import pytest
 
-from gitbook_downloader.gui.bridge import ApiBridge
-from gitbook_downloader.storage.manager import StorageManager
-from gitbook_downloader.utils.export import export_to_pdf
+from docharvest.gui.bridge import ApiBridge
+from docharvest.storage.manager import StorageManager
+from docharvest.utils.export import export_to_pdf
 
 
 def test_export_to_pdf_generates_real_pdf(tmp_path: Path):
@@ -42,7 +42,7 @@ def test_bridge_export_doc_all_formats(tmp_path: Path, monkeypatch):
     """Verify that ApiBridge.export_doc exports real files for md, pdf, and jsonl."""
     # Setup test domain in storage
     storage_dir = tmp_path / "library"
-    monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path))
+    monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path))
     storage = StorageManager(storage_dir)
 
     domain = "test.example.com"

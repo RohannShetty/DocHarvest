@@ -1,0 +1,66 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.RohannShetty/docharvest",
+  "title": "DocHarvest",
+  "description": "Compile any documentation site into local, searchable, source-cited Markdown your agent can read.",
+  "version": "11.1.1",
+  "websiteUrl": "https://rohannshetty.github.io/DocHarvest/",
+  "repository": {
+    "url": "https://github.com/RohannShetty/DocHarvest",
+    "source": "github",
+    "id": "1276106848"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "docharvest",
+      "version": "11.1.1",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp",
+          "valueHint": "command"
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "categories": [
+        "documentation",
+        "search",
+        "knowledge-base",
+        "developer-tools"
+      ],
+      "tags": [
+        "documentation",
+        "scraper",
+        "rag",
+        "llms-txt",
+        "markdown",
+        "local-first",
+        "offline",
+        "gitbook",
+        "mintlify",
+        "docusaurus",
+        "mkdocs",
+        "readthedocs",
+        "sqlite-fts5",
+        "pdf"
+      ],
+      "license": "MIT",
+      "install": {
+        "pip": "pip install docharvest",
+        "uvx": "uvx docharvest mcp",
+        "gui": "docharvest --gui"
+      },
+      "toolCount": 12,
+      "firstParty": true
+    }
+  }
+}

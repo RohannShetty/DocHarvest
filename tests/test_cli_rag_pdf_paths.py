@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CLI = REPO_ROOT / "src" / "gitbook_downloader" / "cli.py"
+CLI = REPO_ROOT / "src" / "docharvest" / "cli.py"
 
 
 def _read_cli() -> str:

@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   X,
   CheckCircle2,
-  Layers,
+
   Search
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -148,11 +148,11 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-200 select-none">
-      <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-cyan-500/30 bg-card/95 shadow-2xl backdrop-blur-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200 select-none">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
         {/* Glow accent */}
-        <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-blue-600/20 blur-3xl" />
+        <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
 
         {/* Header */}
         <div className="relative flex items-center justify-between border-b border-border/80 px-6 py-4">
@@ -175,7 +175,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
         {/* Content Body */}
         <div className="relative p-6 sm:p-8 space-y-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-700 shadow-md dark:text-cyan-400">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/40 text-muted-foreground">
               <Icon className="h-6 w-6" />
             </div>
             <div className="space-y-1">
@@ -183,7 +183,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
                 <h3 className="text-lg font-bold tracking-tight text-foreground font-mono">
                   {step.title}
                 </h3>
-                <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-700 dark:text-cyan-400 font-mono">
+                <Badge variant="outline" className="text-xs border-primary/30 text-muted-foreground font-mono">
                   {step.badge}
                 </Badge>
               </div>
@@ -199,13 +199,13 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
 
           {/* Key Tips */}
           <div className="space-y-2">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider font-mono">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider font-mono">
               Key Highlights:
             </span>
             <div className="space-y-1.5">
               {step.tips.map((tip, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-xs text-foreground/90">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
                   <span>{tip}</span>
                 </div>
               ))}
@@ -220,7 +220,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
                 onClick={() => setCurrentStep(idx)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   idx === currentStep
-                    ? "w-8 bg-cyan-400"
+                    ? "w-8 bg-muted"
                     : idx < currentStep
                     ? "w-2.5 bg-primary/40"
                     : "w-2.5 bg-muted"

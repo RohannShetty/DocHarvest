@@ -18,8 +18,8 @@ pytestmark = pytest.mark.skipif(
     not HAS_TEXTUAL, reason="textual is not installed in this environment"
 )
 
-from gitbook_downloader.tui.testing import FakeEngine  # noqa: E402
-from gitbook_downloader.tui.widgets import NavBar  # noqa: E402
+from docharvest.tui.testing import FakeEngine  # noqa: E402
+from docharvest.tui.widgets import NavBar  # noqa: E402
 
 
 def run_async(coro):
@@ -27,7 +27,7 @@ def run_async(coro):
 
 
 def make_app(engine=None):
-    from gitbook_downloader.tui.app import GitbookDownloaderApp
+    from docharvest.tui.app import GitbookDownloaderApp
 
     engine = engine or FakeEngine()
     opened: list[str] = []
@@ -143,7 +143,7 @@ def test_nav_bar_brand_shows_real_version():
     ``v7`` predates the modular rewrite and never moved."""
 
     async def scenario():
-        from gitbook_downloader import __version__
+        from docharvest import __version__
 
         app, _engine, _opened = make_app()
         async with app.run_test(size=(120, 42)) as pilot:
@@ -170,7 +170,7 @@ def test_show_surface_refreshes_diagnostics_from_state():
             assert not diag.query_one("#diag-empty").has_class("hidden")
 
             # Fabricate a run, switch away and back; report must appear.
-            from gitbook_downloader.tui.engine_protocol import (
+            from docharvest.tui.engine_protocol import (
                 CaptureOptions,
                 CaptureResult,
                 Detection,

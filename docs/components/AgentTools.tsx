@@ -13,7 +13,7 @@ import { AgentSkillSwitcher } from './AgentSkillSwitcher';
  * 12 stdio tools, 2 resources, 2 prompts, and verified transcript.
  */
 
-/** Registration order in `src/gitbook_downloader/mcp/server.py`. */
+/** Registration order in `src/docharvest/mcp/server.py`. */
 const MCP_TOOLS: { name: string; purpose: string }[] = [
   { name: 'download_docs', purpose: 'Download documentation from a URL and write the output contract.' },
   { name: 'search_docs', purpose: 'Full-text search across downloaded documentation (SQLite FTS5, BM25).' },
@@ -77,7 +77,7 @@ export function AgentTools() {
               </h3>
             </div>
             <p className="sheet-num text-[12px] text-ink-3">
-              Registration order in src/gitbook_downloader/mcp/server.py
+              Registration order in src/docharvest/mcp/server.py
             </p>
           </div>
 

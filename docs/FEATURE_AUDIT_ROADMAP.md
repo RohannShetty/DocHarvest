@@ -1,7 +1,7 @@
 # DocHarvest — Complete Feature Audit, Gap Analysis & Strategic Roadmap
 ## Architectural Assessment, Competitive Matrix & Next-Gen Implementation Plan
 
-**Product:** DocHarvest (`gitbook-downloader`)  
+**Product:** DocHarvest (`docharvest`)  
 **Version:** 11.0.10  
 **Status:** Production / Stable (765 Passing Tests)  
 **Author:** Research, Documentation & Architecture Lead  
@@ -38,41 +38,41 @@ This document delivers:
 └───────────────────┴───────────────────┴────────────────────────┴───────────────────────┘
 ```
 
-### 2.1 Core Crawl Engine & Network Layer ([`engine.py`](file:///D:/gd-new/src/gitbook_downloader/engine.py))
+### 2.1 Core Crawl Engine & Network Layer ([`engine.py`](file:///D:/gd-new/src/docharvest/engine.py))
 - **BFS Crawl with Subpath Scoping**: Breadth-first crawl bounds traversal strictly to the target documentation path scope (e.g. `/docs/`), preventing spider crawls across unrelated marketing domains.
 - **Language Code Filtering**: Automatically discards redundant multi-language path prefixes (`/de/`, `/fr/`, `/es/`, `/zh/`, `/ja/`) to avoid duplicating documentation corpus.
 - **Parallel Worker Pool**: Configurable multi-threaded downloading (`ThreadPoolExecutor` with default `workers=8`) achieving **673 pages in 18.2 seconds** (~37 pages/sec).
 - **Headless Playwright Fallback**: Optional `--render` mode for dynamic, client-side JavaScript Single Page Applications (SPAs) such as `omp.sh/docs`.
-- **Resilient Network Adapter**: Exponential backoff retry strategy with `TimeoutHTTPAdapter` ([`utils/retry.py`](file:///D:/gd-new/src/gitbook_downloader/utils/retry.py)).
+- **Resilient Network Adapter**: Exponential backoff retry strategy with `TimeoutHTTPAdapter` ([`utils/retry.py`](file:///D:/gd-new/src/docharvest/utils/retry.py)).
 
-### 2.2 Provider Strategy Layer ([`providers/`](file:///D:/gd-new/src/gitbook_downloader/providers/))
-DocHarvest implements a priority-ordered Provider Registry ([`providers/base.py`](file:///D:/gd-new/src/gitbook_downloader/providers/base.py)) with dedicated, AST-level DOM cleaning:
+### 2.2 Provider Strategy Layer ([`providers/`](file:///D:/gd-new/src/docharvest/providers/))
+DocHarvest implements a priority-ordered Provider Registry ([`providers/base.py`](file:///D:/gd-new/src/docharvest/providers/base.py)) with dedicated, AST-level DOM cleaning:
 
 | Provider Module | Priority | Detection & Strategy | Clean Target Selector |
 | :--- | :---: | :--- | :--- |
-| [`gitbook.py`](file:///D:/gd-new/src/gitbook_downloader/providers/gitbook.py) | `100` | Probes native `.md` endpoints, space discovery | Native markdown or `.page-inner`, `article` |
-| [`mintlify.py`](file:///D:/gd-new/src/gitbook_downloader/providers/mintlify.py) | `90` | `mintlify.json`, OpenAPI specs, CDN asset anchors | `#content`, `#main-content`, `article` |
-| [`docusaurus.py`](file:///D:/gd-new/src/gitbook_downloader/providers/docusaurus.py) | `80` | `sitemap.xml`, `docusaurus.config.js`, sidebars | `article`, `.markdown`, `main .theme-doc-markdown` |
-| [`nextra.py`](file:///D:/gd-new/src/gitbook_downloader/providers/nextra.py) | `75` | `sitemap.xml`, Next.js app routes, nextra scripts | `main.nextra-content`, `article` |
-| [`vitepress.py`](file:///D:/gd-new/src/gitbook_downloader/providers/vitepress.py) | `72` | Sitemap, VitePress theme anchors, route index | `div.vp-doc`, `div.VPContent`, `main.VPDoc` |
-| [`mkdocs.py`](file:///D:/gd-new/src/gitbook_downloader/providers/mkdocs.py) | `70` | `search/search_index.json`, sitemap | `article.md-content__inner`, `div.md-typeset` |
-| [`readme.py`](file:///D:/gd-new/src/gitbook_downloader/providers/readme.py) | `65` | `sitemap.xml`, `/llms.txt`, developer hub routes | `div.rm-Article`, `div.rm-Markdown`, `#content` |
-| [`readthedocs.py`](file:///D:/gd-new/src/gitbook_downloader/providers/readthedocs.py) | `60` | Sphinx `sitemap.xml`, `div.sphinxsidebar` | `div.document[role="main"]`, `div.body` |
-| [`generic.py`](file:///D:/gd-new/src/gitbook_downloader/providers/generic.py) | `0` | BFS link crawl, `llms.txt`, `sitemap.xml` | `main`, `article`, `[role="main"]`, `#content` |
+| [`gitbook.py`](file:///D:/gd-new/src/docharvest/providers/gitbook.py) | `100` | Probes native `.md` endpoints, space discovery | Native markdown or `.page-inner`, `article` |
+| [`mintlify.py`](file:///D:/gd-new/src/docharvest/providers/mintlify.py) | `90` | `mintlify.json`, OpenAPI specs, CDN asset anchors | `#content`, `#main-content`, `article` |
+| [`docusaurus.py`](file:///D:/gd-new/src/docharvest/providers/docusaurus.py) | `80` | `sitemap.xml`, `docusaurus.config.js`, sidebars | `article`, `.markdown`, `main .theme-doc-markdown` |
+| [`nextra.py`](file:///D:/gd-new/src/docharvest/providers/nextra.py) | `75` | `sitemap.xml`, Next.js app routes, nextra scripts | `main.nextra-content`, `article` |
+| [`vitepress.py`](file:///D:/gd-new/src/docharvest/providers/vitepress.py) | `72` | Sitemap, VitePress theme anchors, route index | `div.vp-doc`, `div.VPContent`, `main.VPDoc` |
+| [`mkdocs.py`](file:///D:/gd-new/src/docharvest/providers/mkdocs.py) | `70` | `search/search_index.json`, sitemap | `article.md-content__inner`, `div.md-typeset` |
+| [`readme.py`](file:///D:/gd-new/src/docharvest/providers/readme.py) | `65` | `sitemap.xml`, `/llms.txt`, developer hub routes | `div.rm-Article`, `div.rm-Markdown`, `#content` |
+| [`readthedocs.py`](file:///D:/gd-new/src/docharvest/providers/readthedocs.py) | `60` | Sphinx `sitemap.xml`, `div.sphinxsidebar` | `div.document[role="main"]`, `div.body` |
+| [`generic.py`](file:///D:/gd-new/src/docharvest/providers/generic.py) | `0` | BFS link crawl, `llms.txt`, `sitemap.xml` | `main`, `article`, `[role="main"]`, `#content` |
 
-### 2.3 Storage, Versioning & Locking ([`storage/`](file:///D:/gd-new/src/gitbook_downloader/storage/))
+### 2.3 Storage, Versioning & Locking ([`storage/`](file:///D:/gd-new/src/docharvest/storage/))
 - **`DomainLock` Lease Protocol**: Per-domain file lock (`.lock`) with 15-minute stale-lock automatic expiration preventing corrupted state under concurrent subagent access.
 - **Atomic File Mutations (`atomic_write_text`)**: Writes to temporary staging files on the same filesystem before executing atomic `os.replace`, guaranteeing crash safety on POSIX and Windows NTFS.
 - **Idempotent Windows Path Normalizer (`domain_to_path_name`)**: Converts Windows-illegal characters (`<>:"/\|?*`) and reserved device names (`CON`, `PRN`, `AUX`, `NUL`), seamlessly supporting `host:port` patterns like `localhost:3000`.
-- **Semver Snapshotting & Unified Diffing ([`versioning.py`](file:///D:/gd-new/src/gitbook_downloader/storage/versioning.py))**: Automatically snapshots captures into `versions/v<major>.<minor>.<patch>.md`, skips identical re-captures, computes unified diffs, and auto-generates changelogs.
+- **Semver Snapshotting & Unified Diffing ([`versioning.py`](file:///D:/gd-new/src/docharvest/storage/versioning.py))**: Automatically snapshots captures into `versions/v<major>.<minor>.<patch>.md`, skips identical re-captures, computes unified diffs, and auto-generates changelogs.
 
-### 2.4 Search & Semantic Concept Graph ([`search/`](file:///D:/gd-new/src/gitbook_downloader/search/))
-- **SQLite FTS5 Full-Text Search in WAL Mode ([`index.py`](file:///D:/gd-new/src/gitbook_downloader/search/index.py))**: SQLite Write-Ahead Logging allows hundreds of concurrent subagent readers without locking. Porter Unicode61 tokenizer and BM25 ranking provide sub-2ms lookups.
+### 2.4 Search & Semantic Concept Graph ([`search/`](file:///D:/gd-new/src/docharvest/search/))
+- **SQLite FTS5 Full-Text Search in WAL Mode ([`index.py`](file:///D:/gd-new/src/docharvest/search/index.py))**: SQLite Write-Ahead Logging allows hundreds of concurrent subagent readers without locking. Porter Unicode61 tokenizer and BM25 ranking provide sub-2ms lookups.
 - **Exact Source URL Anchoring**: Every indexed section points directly to its real `source_url` with precise heading anchors rather than generic domain roots.
 - **Punctuation-Safe Query Escaping (`_fts_escape`)**: Transparently handles dotted versions (`2.0.2.1`), slashes, and complex operators without raising SQLite syntax errors.
-- **Topological DocGraph ([`graph.py`](file:///D:/gd-new/src/gitbook_downloader/search/graph.py))**: Extracts entities (pages, sections, endpoints, code symbols) and relations (`contains`, `links_to`, `references`, `prerequisite_of`), enabling 1-hop and 2-hop dependency exploration.
+- **Topological DocGraph ([`graph.py`](file:///D:/gd-new/src/docharvest/search/graph.py))**: Extracts entities (pages, sections, endpoints, code symbols) and relations (`contains`, `links_to`, `references`, `prerequisite_of`), enabling 1-hop and 2-hop dependency exploration.
 
-### 2.5 FastMCP v2 Native Server ([`mcp/server.py`](file:///D:/gd-new/src/gitbook_downloader/mcp/server.py))
+### 2.5 FastMCP v2 Native Server ([`mcp/server.py`](file:///D:/gd-new/src/docharvest/mcp/server.py))
 - **12 High-Level Agent Tools**: `download_docs`, `search_docs`, `find_docs`, `read_doc`, `get_doc`, `list_domains`, `query_doc_graph`, `get_related_concepts`, `diff_versions`, `list_versions`, `export_docs`, `get_changelog`.
 - **MCP Resources**: `docs://{domain}/book` and `docs://{domain}/manifest`.
 - **MCP Prompts**: `prompt://search-docset` and `prompt://summarize-library`.
@@ -80,10 +80,10 @@ DocHarvest implements a priority-ordered Provider Registry ([`providers/base.py`
 - **Zero-Dependency SDK**: FastMCP ships directly in the core package.
 
 ### 2.6 User Interfaces & Developer Tooling
-- **Desktop GUI ([`gui/`](file:///D:/gd-new/src/gitbook_downloader/gui/))**: Modern React + shadcn/ui interface launched via PyWebView (Edge WebView2 on Windows) or in-browser mode (`docharvest gui --browser [browser]`). Features 60fps animations, radial gauges, and real-time Server-Sent Events (SSE) live progress logs.
-- **Terminal UI (TUI) ([`tui/`](file:///D:/gd-new/src/gitbook_downloader/tui/))**: Textual 5-surface application (Wizard, Library, Search, Diff, Diagnostics) adhering to the strict `EngineProtocol` seam.
-- **Pure-Python PDF Studio ([`utils/export.py`](file:///D:/gd-new/src/gitbook_downloader/utils/export.py))**: Compiles publication-grade PDF handbooks locally using `fpdf2` with zero C-library dependencies (no wkhtmltopdf or weasyprint).
-- **Universal Agent Skill (`SKILL.md`) ([`skills/`](file:///D:/gd-new/src/gitbook_downloader/skills/))**: Packaged, harness-neutral intelligence for 14+ coding agents installable via `docharvest skill install docharvest -o <dir>`.
+- **Desktop GUI ([`gui/`](file:///D:/gd-new/src/docharvest/gui/))**: Modern React + shadcn/ui interface launched via PyWebView (Edge WebView2 on Windows) or in-browser mode (`docharvest gui --browser [browser]`). Features 60fps animations, radial gauges, and real-time Server-Sent Events (SSE) live progress logs.
+- **Terminal UI (TUI) ([`tui/`](file:///D:/gd-new/src/docharvest/tui/))**: Textual 5-surface application (Wizard, Library, Search, Diff, Diagnostics) adhering to the strict `EngineProtocol` seam.
+- **Pure-Python PDF Studio ([`utils/export.py`](file:///D:/gd-new/src/docharvest/utils/export.py))**: Compiles publication-grade PDF handbooks locally using `fpdf2` with zero C-library dependencies (no wkhtmltopdf or weasyprint).
+- **Universal Agent Skill (`SKILL.md`) ([`skills/`](file:///D:/gd-new/src/docharvest/skills/))**: Packaged, harness-neutral intelligence for 14+ coding agents installable via `docharvest skill install docharvest -o <dir>`.
 
 ---
 
@@ -141,7 +141,7 @@ Phase A: Remote SSE Transport   Phase B: Embedded Hybrid Vector   Phase C: Doc W
 3. Provide Docker compose deployment templates for team-shared documentation servers.
 
 ```python
-# Architecture Blueprint in src/gitbook_downloader/mcp/server.py
+# Architecture Blueprint in src/docharvest/mcp/server.py
 def serve_mcp(transport: str = "stdio", host: str = "127.0.0.1", port: int = 8000):
     if transport == "sse":
         logger.info(f"Starting DocHarvest FastMCP SSE server on http://{host}:{port}/sse")
@@ -224,3 +224,13 @@ def hybrid_search(query: str, domain: Optional[str] = None, limit: int = 10) -> 
 
 ---
 *Roadmap curated and maintained by the DocHarvest Core Engineering Group.*
+
+
+---
+
+## 11.1.1 patch note (2026-09-28)
+
+v11.1.1 is a patch release that did **not** implement any phase below. It corrects public
+claims and links only: generated/dated marketing stats, DocHarvest URLs in place of the
+retired `docharvest` slug, a restored install-modal keyframe, and reconciled docs.
+The phase labels in this roadmap still describe future work.

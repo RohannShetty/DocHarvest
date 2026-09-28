@@ -16,7 +16,7 @@ export interface DocFramework {
   name: string;
   /** Real site the detector handles; the table links to it. */
   sampleUrl: string;
-  /** `Provider.priority` from src/gitbook_downloader/providers/<id>.py */
+  /** `Provider.priority` from src/docharvest/providers/<id>.py */
   detectionPriority: number;
 }
 
@@ -61,7 +61,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -95,7 +95,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "python",
-      "args": ["-m", "gitbook_downloader.mcp"]
+      "args": ["-m", "docharvest.mcp"]
     }
   }
 }`,
@@ -114,7 +114,7 @@ export const AI_AGENTS: AgentHarness[] = [
     "docharvest": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"],
+      "args": ["docharvest", "mcp"],
       "timeout": 0
     }
   }
@@ -133,7 +133,7 @@ export const AI_AGENTS: AgentHarness[] = [
     "docharvest": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -150,7 +150,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "python",
-      "args": ["-m", "gitbook_downloader.mcp"]
+      "args": ["-m", "docharvest.mcp"]
     }
   }
 }`,
@@ -201,7 +201,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -218,7 +218,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -235,7 +235,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "context_servers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -253,7 +253,7 @@ export const AI_AGENTS: AgentHarness[] = [
     {
       "name": "docharvest",
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   ]
 }`,
@@ -270,7 +270,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -304,7 +304,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }`,
@@ -321,7 +321,7 @@ export const AI_AGENTS: AgentHarness[] = [
   "mcpServers": {
     "docharvest": {
       "command": "python",
-      "args": ["-m", "gitbook_downloader.mcp"]
+      "args": ["-m", "docharvest.mcp"]
     }
   }
 }`,
@@ -399,13 +399,13 @@ export const MULTI_AGENT_SIMULATION_STEPS: AgentSimulationStep[] = [
     outputLog: `[download_docs] Provider detected: GitBook (priority: 100)
 [crawl:bfs] Discovered 251 routes under /developers/ & /api-reference/
 [ast_cleaner] Stripped 48.2 KB cookie DOMs, sidebars, inline JSX hydrators
-[output_contract] Emitted 251 pages -> ~/.gitbook-downloader/docs/docs.openalgo.in/
+[output_contract] Emitted 251 pages -> ~/.docharvest/docs/docs.openalgo.in/
 [output_contract] Wrote combined book.md (4.2 MB) + llms.txt manifest (2.4 KB)
 [search_index] Indexed 1,420 sections into SQLite FTS5 database (search.db)
 [doc_graph] Built semantic concept graph (640 nodes, 1,180 edges)
 [snapshot] Created baseline snapshot v1.0.0 (SHA-256 verified)`,
     artifactsProduced: [
-      '~/.gitbook-downloader/docs/docs.openalgo.in/pages/',
+      '~/.docharvest/docs/docs.openalgo.in/pages/',
       'docs.md (unified book)',
       'llms.txt (agent manifest)',
       'search.db (SQLite FTS5 BM25)',
@@ -574,7 +574,7 @@ export const TOKEN_BENCHMARK = {
 
 /**
  * Detector names, real sample sites and the priority values compiled into
- * `src/gitbook_downloader/providers/*.py` (100 → 60; `generic` is 0 and lives
+ * `src/docharvest/providers/*.py` (100 → 60; `generic` is 0 and lives
  * in the provider table itself). Signal prose lives in ProviderTable, quoted
  * from each `detect()` docstring.
  */

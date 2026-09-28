@@ -10,9 +10,9 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.gui.app import get_web_dir
-from gitbook_downloader.gui.bridge import ApiBridge
-from gitbook_downloader.gui.server import (
+from docharvest.gui.app import get_web_dir
+from docharvest.gui.bridge import ApiBridge
+from docharvest.gui.server import (
     GuiServer,
     find_zen_browser,
     open_browser,
@@ -114,7 +114,7 @@ def test_gui_server_sse_stream():
 
 
 def test_cli_parser_gui_browser_option():
-    from gitbook_downloader.cli import build_parser
+    from docharvest.cli import build_parser
 
     parser = build_parser()
     args = parser.parse_args(["gui", "--browser", "zen", "--port", "9000"])

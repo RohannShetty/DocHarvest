@@ -11,10 +11,10 @@ from pathlib import Path
 
 import pytest
 
-import gitbook_downloader.engine as engine
-from gitbook_downloader.providers import GitBookProvider
-from gitbook_downloader.storage import StorageManager
-from gitbook_downloader.utils import create_session
+import docharvest.engine as engine
+from docharvest.providers import GitBookProvider
+from docharvest.storage import StorageManager
+from docharvest.utils import create_session
 
 
 # ── Stub storage/search so engine tests never touch the library ──
@@ -65,7 +65,7 @@ class TestSoft200Hardening:
         assert "Real Content" in content
 
     def test_looks_like_html_flags_shells(self):
-        from gitbook_downloader.providers.base import looks_like_html
+        from docharvest.providers.base import looks_like_html
 
         assert looks_like_html("<html><head></head></html>")
         assert looks_like_html("<!DOCTYPE html><div id=root></div>")
@@ -171,7 +171,7 @@ class TestDeterministicOrder:
 
 class TestLinkRewriting:
     def test_relative_links_absolutized_against_page_url(self):
-        from gitbook_downloader.engine import rewrite_markdown_links
+        from docharvest.engine import rewrite_markdown_links
 
         md_text = (
             "See [Guide](./guide) and [Self](/docs/intro) and "
@@ -261,7 +261,7 @@ class TestLanguageFilterAndBfs:
         self, fixture_server, session, fake_storage, monkeypatch
     ):
         """Force BFS by disabling every discovery path."""
-        import gitbook_downloader.utils.discovery as disc
+        import docharvest.utils.discovery as disc
 
         provider = GitBookProvider()
         monkeypatch.setattr(provider, "discover_urls", lambda b, s: set())

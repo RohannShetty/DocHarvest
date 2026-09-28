@@ -1,9 +1,9 @@
 import React, { useState } from "react"
-import { Search, Sparkles, BookOpen, ExternalLink, Hash, Copy, Check, Filter, X, ArrowRight, CornerDownLeft } from "lucide-react"
+import { Search, BookOpen, Hash, Copy, Check, X, } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, } from "@/components/ui/card"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
 
@@ -60,7 +60,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
     const parts = text.split(new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
     return parts.map((part, i) => 
       part.toLowerCase() === highlight.toLowerCase() ? (
-        <mark key={i} className="bg-amber-500/30 text-foreground font-semibold px-0.5 rounded">
+        <mark key={i} className="bg-primary/30 text-foreground font-semibold px-0.5 rounded">
           {part}
         </mark>
       ) : part
@@ -86,7 +86,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
       </div>
 
       {/* Search Input Bar */}
-      <Card className="glass-card shadow-sm border-border/70">
+      <Card className="sheet-card shadow-sm border-border/70">
         <CardContent className="p-5 space-y-3.5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -136,7 +136,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
 
           {/* Sample Query Suggestions */}
           <div className="flex items-center gap-1.5 flex-wrap pt-1 text-xs">
-            <span className="text-muted-foreground text-[11px] font-mono mr-1">Try:</span>
+            <span className="text-muted-foreground text-xs font-mono mr-1">Try:</span>
             {SAMPLE_QUERIES.map((sq) => (
               <button
                 key={sq}
@@ -144,7 +144,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                   setQuery(sq)
                   handleSearch(sq)
                 }}
-                className="text-[11px] px-2.5 py-0.5 rounded-full border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors font-mono"
+                className="text-xs px-2.5 py-0.5 rounded-full border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors font-mono"
               >
                 {sq}
               </button>
@@ -159,7 +159,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
           Querying full-text search index...
         </div>
       ) : hasSearched && results.length === 0 ? (
-        <Card className="glass-card p-10 text-center border-dashed border-border/80">
+        <Card className="sheet-card p-10 text-center border-dashed border-border/80">
           <p className="text-sm text-muted-foreground">No matches found for &quot;{query}&quot;. Try a different keyword or search across all domains.</p>
         </Card>
       ) : results.length > 0 ? (
@@ -171,22 +171,22 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
 
           <div className="flex flex-col gap-3">
             {results.map((r, idx) => (
-              <Card key={idx} className="glass-card p-4.5 hover:border-primary/50 transition-all shadow-sm">
+              <Card key={idx} className="sheet-card p-4.5 hover:border-primary/50 transition-all shadow-sm">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2 overflow-hidden flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-foreground truncate font-mono">{r.title || r.domain}</span>
                       {r.section_heading && (
-                        <Badge variant="outline" className="text-[10px] font-mono py-0 h-4 border-primary/30 text-primary bg-primary/5">
+                        <Badge variant="outline" className="text-xs font-mono py-0 h-4 border-primary/30 text-primary bg-primary/5">
                           <Hash className="h-3 w-3 mr-0.5" />
                           {r.section_heading}
                         </Badge>
                       )}
-                      <Badge variant="outline" className="text-[10px] font-mono py-0 h-4 border-border text-muted-foreground">
+                      <Badge variant="outline" className="text-xs font-mono py-0 h-4 border-border text-muted-foreground">
                         {r.domain}
                       </Badge>
                       {r.rank !== undefined && (
-                        <Badge variant="secondary" className="text-[9px] font-mono py-0 h-4 bg-muted/60 text-muted-foreground">
+                        <Badge variant="secondary" className="text-xs font-mono py-0 h-4 bg-muted/60 text-muted-foreground">
                           score: {r.rank}
                         </Badge>
                       )}
@@ -215,11 +215,11 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                         variant="ghost"
                         size="sm"
                         onClick={() => handleCopySnippet(r.snippet, idx)}
-                        className="h-7 text-[11px] px-2 text-muted-foreground hover:text-foreground"
+                        className="h-7 text-xs px-2 text-muted-foreground hover:text-foreground"
                         title="Copy text snippet"
                       >
                         {copiedIndex === idx ? (
-                          <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                          <Check className="h-3 w-3 text-success mr-1" />
                         ) : (
                           <Copy className="h-3 w-3 mr-1" />
                         )}

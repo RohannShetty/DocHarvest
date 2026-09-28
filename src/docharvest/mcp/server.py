@@ -1,0 +1,826 @@
+"""MCP server for docharvest — exposes tools for LLMs to download, search, and manage documentation.
+
+Transport: stdio (for Claude Desktop, Cursor, Windsurf, etc.)
+
+Tools (in registration order):
+    download_docs        – Download a documentation site (via the capture facade)
+    search_docs          – Full-text search across downloaded docs
+    list_domains         – List all downloaded documentation domains
+    find_docs            – Find documentation domains matching a query
+    read_doc             – Read a page or topic excerpt with token bounding
+    get_doc              – Get doc content (length + preview) for a domain
+    diff_versions        – Diff two versions of a domain
+    list_versions        – List all available versions
+    export_docs          – Export in markdown / JSONL / RAG format
+    get_changelog        – Auto-generate changelog from version diffs
+    query_doc_graph      – Query the semantic concept graph of a domain
+    get_related_concepts – Retrieve concepts related to a given concept
+
+``download_docs`` delegates the entire capture lifecycle (provider detection,
+snapshotting, page-tree + book + manifest writing, library storage) to
+``docharvest.api.capture``. This module owns no download logic: it maps
+tool parameters onto ``CaptureOptions`` and reports ``CaptureResult`` fields.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import inspect
+import logging
+import re
+from pathlib import Path
+from typing import Any, Callable, Optional
+from urllib.parse import urlparse
+
+from docharvest import __version__
+
+try:
+    from mcp.server.fastmcp import FastMCP
+except (ImportError, ModuleNotFoundError):
+    try:
+        from mcp.server.mcpserver import MCPServer as FastMCP
+    except (ImportError, ModuleNotFoundError):
+        try:
+            from mcp.server.fastmcp.server import FastMCP
+        except (ImportError, ModuleNotFoundError):
+            FastMCP = None  # type: ignore[assignment,misc]
+
+# ── Capture facade (the ONLY entry into the engine) ──────────────────
+#
+# Imported lazily-tolerantly so this module stays importable if the facade
+# is missing (broken install); download_docs then reports the problem
+# instead of crashing the whole server at import time.
+
+try:
+    from docharvest.api import CaptureOptions, capture as _default_capture
+except ImportError:  # pragma: no cover - api.py ships with the v7 shell
+    CaptureOptions = None  # type: ignore[assignment,misc]
+    _default_capture = None  # type: ignore[assignment]
+
+# ── Search import (graceful fallback if module not yet built) ────────
+
+try:
+    from docharvest.search import SearchIndex
+
+    _search = SearchIndex()
+except Exception:
+    _search = None  # type: ignore[assignment]
+
+# ── Logger ───────────────────────────────────────────────────────────
+
+logger = logging.getLogger("docharvest.mcp")
+
+# ── MCP server instance ─────────────────────────────────────────────
+
+_INSTRUCTIONS = (
+    "Download documentation sites (GitBook, Docusaurus, ReadTheDocs, "
+    "Mintlify, or generic), search across downloaded docs, manage "
+    "versions, and export in multiple formats."
+)
+
+# ``version`` is a keyword parameter on the mcp 2.x MCPServer and the second
+# positional parameter on the FastMCP 1.x fallback. Sending it only when the
+# resolved class accepts it keeps both generations working and stops the
+# server advertising an empty ``serverInfo.version``.
+_FASTMCP_PARAMS = (
+    inspect.signature(FastMCP.__init__).parameters if FastMCP is not None else {}
+)
+_MCP_KWARGS: dict = {"instructions": _INSTRUCTIONS}
+if "version" in _FASTMCP_PARAMS:
+    _MCP_KWARGS["version"] = __version__
+
+mcp = FastMCP("docharvest", **_MCP_KWARGS)
+
+# ── Shared singletons ───────────────────────────────────────────────
+
+from docharvest.storage import StorageManager, VersionManager, domain_to_path_name  # noqa: E402
+
+_storage = StorageManager()
+_versioning = VersionManager(_storage)
+
+
+# ── Helpers ──────────────────────────────────────────────────────────
+
+
+def _domain_from_url(url: str) -> str:
+    """Extract the domain from *url*, stripping ``www.``."""
+    parsed = urlparse(url)
+    return parsed.netloc.replace("www.", "")
+
+
+def _run_capture(url: str, options_kwargs: dict) -> Any:
+    """Single seam between MCP tools and the capture facade.
+
+    Builds ``CaptureOptions`` from already-validated keyword arguments and
+    invokes ``capture`` with a logging progress callback. Returns a
+    ``CaptureResult`` (contract in docs/superpowers/plans/ §2). Tests replace
+    this function (monkeypatch ``docharvest.mcp.server._run_capture``)
+    to inject a fake facade; nothing else in this module talks to the engine.
+    """
+    if _default_capture is None or CaptureOptions is None:
+        raise RuntimeError(
+            "Capture facade not available: docharvest.api could not be "
+            "imported. Reinstall the package: pip install --force-reinstall docharvest"
+        )
+
+    options = CaptureOptions(**options_kwargs)
+
+    def _log_progress(event: object) -> None:
+        logger.debug("capture %s: %s", url, event)
+
+    return _default_capture(url, options, progress=_log_progress)
+
+
+def _path_or_none(p: Optional[Path]) -> Optional[str]:
+    return str(p) if p is not None else None
+
+
+# ── Topic extraction (ISSUE-2: exact-heading match wins) ─────────────
+
+
+def _normalize_topic_text(text: str) -> str:
+    """Normalize a heading or topic for comparison.
+
+    Lower-cases, strips leading markdown heading markers (``#``), and
+    collapses all whitespace runs to single spaces so a topic matches the
+    heading it names regardless of casing, markers, or spacing.
+    """
+    normalized = (text or "").strip().lower()
+    normalized = re.sub(r"^#{1,6}\s*", "", normalized)
+    return " ".join(normalized.split())
+
+
+def _extract_topic_bounded(content: str, topic: Optional[str], max_tokens: int = 4000) -> str:
+    """Extract a topic's context from *content*, best heading match first.
+
+    Wraps :func:`docharvest.splitter.extract_topic_context` with a
+    three-tier ranking. Sections are selected in this order:
+
+    1. normalized heading **equals** the normalized topic,
+    2. normalized heading **contains** the normalized topic,
+    3. section **body** merely contains the phrase.
+
+    Tiers 1–2 are what keep a specific section ahead of an incidental
+    mention: asking for ``OAuth`` used to return a changelog bullet ("* OAuth
+    broker redirect improvements") that appears earlier in the book than the
+    ``## OAuth Model`` section itself, because body-containment ranked by
+    document order alone. Without the ranking, a section whose body lists the
+    topic crowds out the section that actually documents it.
+
+    The section split, token budgeting, and no-match fallback (return the
+    whole bounded document) are identical to the splitter's behaviour.
+
+    Args:
+        content: Raw markdown text.
+        topic: Optional topic or section title to filter by.
+        max_tokens: Approximate token budget (1 token ≈ 4 characters).
+
+    Returns:
+        Bounded, clean markdown string.
+    """
+    from docharvest.splitter import extract_topic_context
+
+    if not content:
+        return ""
+    if not topic or not topic.strip():
+        return extract_topic_context(content, topic=None, max_tokens=max_tokens)
+
+    # Split into sections exactly like splitter.extract_topic_context does,
+    # so the ranking here lines up with its downstream budget assembly.
+    raw_sections = content.split("\n#")
+    sections: list[str] = []
+    for i, sec in enumerate(raw_sections):
+        if i > 0:
+            sec = "#" + sec
+        sections.append(sec)
+
+    topic_norm = _normalize_topic_text(topic)
+    # Containment keeps the splitter's raw-substring semantics; only the
+    # heading comparisons are normalized.
+    topic_lower = topic.strip().lower()
+
+    exact: list[str] = []
+    heading: list[str] = []
+    contains: list[str] = []
+    for sec in sections:
+        first_line = sec.split("\n", 1)[0]
+        heading_norm = _normalize_topic_text(first_line)
+        if heading_norm == topic_norm:
+            exact.append(sec)
+        elif topic_norm and topic_norm in heading_norm:
+            heading.append(sec)
+        elif topic_lower in sec.lower():
+            contains.append(sec)
+
+    if not exact and not heading and not contains:
+        # No match at all: preserve the splitter's fallback of returning the
+        # whole (bounded) document.
+        return extract_topic_context(content, topic=None, max_tokens=max_tokens)
+
+    # Inside the heading tier, a heading that names the topic as a whole word
+    # and little else ("## OAuth Model") is a better answer than a long
+    # sentence that happens to embed it ("# update.sh runs … for the OAuth +
+    # 2FA columns"). Sort is stable, so equally-ranked sections keep document
+    # order and the previous behaviour for short quotes/titles.
+    def _focus(sec: str) -> tuple[int, int]:
+        first_line = sec.split("\n", 1)[0]
+        heading_norm = _normalize_topic_text(first_line)
+        whole_word = re.search(rf"(?<![0-9a-z]){re.escape(topic_norm)}(?![0-9a-z])", heading_norm)
+        return (0 if whole_word else 1, len(heading_norm))
+
+    heading.sort(key=_focus)
+
+    # Ranked by tier; sections start with '#' and contain no interior '\n#'
+    # (the split consumed those), so re-joining with '\n' restores the exact
+    # boundaries the splitter re-splits on.
+    ranked = exact + heading + contains
+    return extract_topic_context("\n".join(ranked), topic=None, max_tokens=max_tokens)
+
+
+def _bound_search_results(results: list[dict], max_tokens: int) -> list[dict]:
+    """Keep search snippets within one approximate response-token budget."""
+    if max_tokens <= 0:
+        raise ValueError("max_tokens must be greater than zero")
+
+    remaining_chars = max_tokens * 4
+    bounded: list[dict] = []
+    for result in results:
+        if remaining_chars <= 0:
+            break
+        item = dict(result)
+        snippet = str(item.get("snippet") or "")
+        if len(snippet) > remaining_chars:
+            item["snippet"] = snippet[:remaining_chars]
+            remaining_chars = 0
+        else:
+            remaining_chars -= len(snippet)
+        bounded.append(item)
+    return bounded
+
+
+# ── Tools ────────────────────────────────────────────────────────────
+
+
+@mcp.tool()
+async def download_docs(
+    url: str,
+    max_pages: Optional[int] = None,
+    workers: int = 8,
+    path_scope: Optional[list[str]] = None,
+    exclude_paths: Optional[list[str]] = None,
+    site_versions: Optional[list[str]] = None,
+    output_mode: str = "both",
+) -> dict:
+    """Download documentation from a URL.
+
+    Auto-detects the platform (GitBook, Docusaurus, ReadTheDocs, Mintlify,
+    or generic), crawls the pages, writes the output contract (page tree +
+    book file + llms.txt and llms-full.txt manifests, with YAML frontmatter),
+    stores it in the Library, and indexes it for search.
+
+    Args:
+        url: Documentation site root URL (e.g. https://docs.example.com).
+        max_pages: Maximum pages to crawl. Omit for unlimited (0 is invalid).
+        workers: Parallel fetch workers (default 8).
+        path_scope: URL path prefixes to include (e.g. ["/api/"]). Empty = whole site.
+        exclude_paths: Path patterns to skip even inside the path scope.
+        site_versions: Site versions to capture (e.g. ["v1", "v2"]).
+                       Omit to capture all detected versions.
+        output_mode: Where output goes — "both" (Library + project-local),
+                     "library", or "local".
+
+    Returns:
+        Summary dict with provider, pages captured, skipped count, warnings,
+        site versions found, and the paths written (library/local/book/manifest).
+    """
+    try:
+        options_kwargs: dict = {
+            "workers": workers,
+            "max_pages": max_pages,
+            "path_scope": tuple(path_scope or ()),
+            "exclude_paths": tuple(exclude_paths or ()),
+            "site_versions": tuple(site_versions) if site_versions is not None else None,
+            "output_mode": output_mode,
+        }
+
+        # The capture facade is synchronous (requests + ThreadPoolExecutor).
+        # Running it inline would block this server's event loop for the whole
+        # crawl, stalling every other MCP request — including the client's own
+        # startup tools/list — until the download finished.
+        result = await asyncio.to_thread(_run_capture, url, options_kwargs)
+
+        domain = _domain_from_url(url)
+        capture_warnings = list(result.warnings)
+
+        # Best-effort re-index from storage for full-text search. A silent
+        # failure here leaves search returning stale hits, so the reason is
+        # surfaced alongside the capture warnings.
+        if _search is not None:
+            try:
+                _search.index_domain_from_storage(domain, _storage, domain_url=url)
+            except Exception as exc:
+                logger.warning("Search indexing failed for %s: %s", domain, exc)
+                capture_warnings.append(f"Search indexing failed: {exc}")
+
+        return {
+            "url": result.source_url,
+            "domain": domain,
+            "provider": result.provider,
+            "site_versions_found": list(result.site_versions_found),
+            "pages_captured": result.pages_captured,
+            "skipped": result.skipped,
+            "warnings": capture_warnings,
+            "output_mode": output_mode,
+            "library_path": _path_or_none(result.library_path),
+            "local_path": _path_or_none(result.local_path),
+            "book_file": _path_or_none(result.book_file),
+            "manifest_file": _path_or_none(result.manifest_file),
+            "version_id": result.version_id,
+        }
+    except Exception as exc:
+        logger.exception("download_docs failed")
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def search_docs(
+    query: str,
+    domain: Optional[str] = None,
+    limit: int = 10,
+    max_tokens: int = 2000,
+) -> list[dict]:
+    """Full-text search across downloaded documentation.
+
+    Uses SQLite FTS5 with BM25 ranking when the search index is available.
+    Supports AND, OR, NOT, and prefix* syntax; tokens containing punctuation
+    (e.g. version numbers like 2.0.0.9) are escaped and matched as literal
+    phrases instead of raising an FTS5 syntax error.
+
+    Args:
+        query: Search query (e.g. "authentication" or "api rate limit").
+        domain: Optional domain to restrict search (e.g. "docs.example.com").
+        limit: Maximum results to return (default 10, max 50).
+        max_tokens: Approximate total token budget for returned snippets (default 2000).
+    Returns:
+        List of matching sections with title, url, snippet, domain, and rank.
+    """
+    if _search is None:
+        # FTS5 ships in Python's stdlib sqlite3 on all supported platforms;
+        # reaching this means the installed package itself is broken/incomplete.
+        return [
+            {
+                "error": (
+                    "Search index not available. The search module failed to "
+                    "import — reinstall the package: "
+                    "pip install --force-reinstall docharvest "
+                    "(no extra needed; FTS5 is stdlib SQLite)"
+                )
+            }
+        ]
+    try:
+        results = _search.search(query, domain=domain, limit=min(limit, 50))
+        return _bound_search_results(results, max_tokens)
+    except Exception as exc:
+        return [{"error": str(exc)}]
+
+
+@mcp.tool()
+async def list_domains() -> list[dict]:
+    """List all downloaded documentation domains.
+
+    Returns metadata for each domain including name, url, pages, size,
+    provider, last scraped timestamp, and available versions.
+
+    Domains whose storage no longer exists on disk (e.g. the library was
+    moved or partially deleted while the search index kept their rows) are
+    omitted so agents never surface phantom docsets.
+    """
+    try:
+        domains = _storage.list_domains()
+        return [d for d in domains if _storage.domain_exists(d.get("domain", ""))]
+    except Exception as exc:
+        return [{"error": str(exc)}]
+
+
+@mcp.tool()
+async def find_docs(query: str, limit: int = 10) -> list[dict]:
+    """Find documentation libraries or domains matching a query.
+
+    Resolves library/framework names (e.g. "react", "nextjs", "zustand")
+    to indexed domains stored in the local library.
+
+    Args:
+        query: Name, keyword, or domain to find (e.g. "zustand" or "tailwind").
+        limit: Maximum results to return (default 10).
+
+    Returns:
+        List of matching domain metadata dicts (domain, title, pages, last_crawled).
+    """
+    try:
+        domains = _storage.list_domains()
+        q = query.strip().lower()
+        matches = []
+        for d in domains:
+            domain_name = d.get("domain", "").lower()
+            title = d.get("title", "").lower()
+            if q in domain_name or q in title or any(q in str(v).lower() for v in d.values()):
+                matches.append(d)
+        return matches[:limit]
+    except Exception as exc:
+        return [{"error": str(exc)}]
+
+
+@mcp.tool()
+async def read_doc(
+    domain: str,
+    path: Optional[str] = None,
+    topic: Optional[str] = None,
+    max_tokens: int = 4000,
+    version: Optional[str] = None,
+) -> dict:
+    """Read documentation content for an agent with AST-safe token bounding.
+
+    Retrieves either a specific page file (via `path`), or extracts a topic
+    section from the documentation without breaking code blocks or tables.
+
+    Args:
+        domain: Domain name (e.g. "react.dev" or "docs.example.com").
+        path: Optional specific page path within pages/ (e.g. "hooks/useState.md").
+        topic: Optional topic or section title to extract (e.g. "Quickstart" or "useState").
+        max_tokens: Maximum token budget to return (default 4000).
+        version: Optional version tag (e.g. "v1.0.0").
+
+    Returns:
+        Dict with domain, path/topic, token_estimate, content, and found status.
+    """
+    try:
+        # 1. If path is provided, attempt to load that specific page
+        if path:
+            clean_p = path.replace("\\", "/")
+            page_content = _storage.load_page(domain, clean_p)
+            if page_content is None and not clean_p.endswith(".md"):
+                page_content = _storage.load_page(domain, f"{clean_p}.md")
+            if page_content is not None:
+                bounded = _extract_topic_bounded(page_content, topic, max_tokens)
+                return {
+                    "domain": domain,
+                    "path": path,
+                    "topic": topic,
+                    "found": True,
+                    "token_estimate": len(bounded) // 4,
+                    "content": bounded,
+                }
+
+        # 2. Load the combined book or versioned content
+        if version:
+            raw_content = _versioning.get_version_content(domain, version)
+        else:
+            raw_content = _storage.load_doc(domain)
+
+        if raw_content is None:
+            return {
+                "domain": domain,
+                "found": False,
+                "error": f"Documentation not found for domain '{domain}'",
+            }
+
+        bounded = _extract_topic_bounded(raw_content, topic, max_tokens)
+        return {
+            "domain": domain,
+            "path": path,
+            "topic": topic,
+            "found": True,
+            "token_estimate": len(bounded) // 4,
+            "content": bounded,
+        }
+    except Exception as exc:
+        return {
+            "domain": domain,
+            "found": False,
+            "error": str(exc),
+        }
+
+
+
+@mcp.tool()
+async def get_doc(
+    domain: str,
+    version: Optional[str] = None,
+) -> dict:
+    """Get documentation content for a domain.
+
+    Args:
+        domain: Domain name (e.g. "docs.example.com").
+        version: Optional version string (e.g. "1.0.0" or "v1.0.1").
+                 If omitted, returns the latest version.
+
+    Returns:
+        Dict with domain, version, content length, and a 2 000-char preview.
+    """
+    try:
+        if version:
+            content = _versioning.get_version_content(domain, version)
+            v = version
+        else:
+            content = _storage.load_doc(domain)
+            meta = _storage.get_metadata(domain)
+            v = meta.get("latest_version", "latest") if meta else "latest"
+
+        if content is None:
+            msg = f"No content found for {domain}"
+            if version:
+                msg += f" version {version}"
+            return {"error": msg}
+
+        return {
+            "domain": domain,
+            "version": v,
+            "length": len(content),
+            "preview": content[:2000],
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def diff_versions(
+    domain: str,
+    v1: str,
+    v2: str,
+) -> dict:
+    """Show the unified diff between two versions of downloaded documentation.
+
+    Args:
+        domain: Domain name.
+        v1: First (older) version (e.g. "1.0.0").
+        v2: Second (newer) version (e.g. "1.0.1").
+
+    Returns:
+        Dict with diff text, added lines count, and removed lines count.
+    """
+    try:
+        diff_text = _versioning.diff(domain, v1, v2)
+        added = sum(
+            1 for l in diff_text.split("\n") if l.startswith("+") and not l.startswith("+++")
+        )
+        removed = sum(
+            1 for l in diff_text.split("\n") if l.startswith("-") and not l.startswith("---")
+        )
+        return {
+            "domain": domain,
+            "v1": v1,
+            "v2": v2,
+            "diff": diff_text,
+            "added_lines": added,
+            "removed_lines": removed,
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def list_versions(domain: str) -> list[dict]:
+    """List all available versions for a domain.
+
+    Args:
+        domain: Domain name.
+
+    Returns:
+        List of version dicts with version, timestamp, pages, size, and is_latest.
+    """
+    try:
+        versions = _versioning.get_versions(domain)
+        if not versions:
+            meta = _storage.get_metadata(domain)
+            if meta:
+                versions = meta.get("versions", [])
+        return versions
+    except Exception as exc:
+        return [{"error": str(exc)}]
+
+
+@mcp.tool()
+async def export_docs(
+    domain: str,
+    format: str = "markdown",
+) -> dict:
+    """Export downloaded documentation in different formats.
+
+    Args:
+        domain: Domain name.
+        format: Export format — "markdown", "jsonl", or "rag".
+
+    Returns:
+        Dict with export path (if applicable), format, and content preview.
+    """
+    try:
+        content = _storage.load_doc(domain)
+        if content is None:
+            return {"error": f"No content found for {domain}"}
+
+        if format == "jsonl":
+            export_path = _storage._domain_dir(domain) / f"{domain_to_path_name(domain)}_export.jsonl"
+            from docharvest.utils.export import StoragePageSource, export_to_jsonl
+
+            # export_to_jsonl needs a get_pages() provider; wrap the raw
+            # StorageManager (same adapter the CLI uses) so the file is
+            # actually written instead of silently logging an error.
+            count = export_to_jsonl(domain, StoragePageSource(_storage, domain), str(export_path))
+            if count == 0:
+                # Legacy libraries (captured before granular page storage)
+                # have an empty pages/ tree. Never leave a 0-byte export
+                # behind or report silent success — tell the user to
+                # re-capture instead.
+                try:
+                    export_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+                return {
+                    "error": (
+                        f"No page data for '{domain}'. The page tree is empty "
+                        "(captured before granular storage). Re-capture the domain "
+                        "to populate pages/, then export."
+                    )
+                }
+            preview = ""
+            try:
+                with open(export_path, encoding="utf-8") as fh:
+                    preview = fh.read()[:1000]
+            except OSError:
+                pass
+            return {
+                "path": str(export_path),
+                "format": "jsonl",
+                "preview": preview,
+            }
+
+        if format == "rag":
+            from docharvest.utils.export import wrap_with_rag_metadata
+
+            rag_content = wrap_with_rag_metadata(
+                content,
+                domain,
+                url=domain,
+                headings=[],
+                chunk_num=1,
+                total_chunks=1,
+            )
+            return {
+                "format": "rag",
+                "content": rag_content[:2000],
+                "length": len(rag_content),
+            }
+
+        # Default: markdown
+        return {
+            "path": str(_storage.latest_path(domain)),
+            "format": "markdown",
+            "length": len(content),
+            "preview": content[:2000],
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def get_changelog(domain: str) -> dict:
+    """Auto-generate a changelog from all version diffs of a domain.
+
+    Iterates over consecutive version pairs (newest first) and counts
+    added / removed lines to produce a concise change summary.
+
+    Args:
+        domain: Domain name.
+
+    Returns:
+        Dict with domain and a list of changelog entries, each containing
+        version, timestamp, added_lines, removed_lines, and diff text.
+    """
+    try:
+        entries = _versioning.changelog(domain)
+        return {
+            "domain": domain,
+            "entries": entries,
+            "total_versions": len(entries) + 1,
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def query_doc_graph(
+    domain: str,
+    query: str,
+    limit: int = 10,
+) -> dict:
+    """Query semantic entity & concept graph for a documentation domain.
+
+    Navigates non-linear relationships between pages, sections, API endpoints,
+    and code symbols to find connected concepts with minimal token overhead.
+
+    Args:
+        domain: Domain name (e.g. "docs.example.com").
+        query: Concept, keyword, or endpoint to search in graph.
+        limit: Maximum results to return (default 10).
+
+    Returns:
+        Dict with domain, matches count, and node results with 1-hop connected neighbors.
+    """
+    try:
+        from docharvest.search.graph import build_graph_from_pages
+
+        domain_dir = _storage._domain_dir(domain)
+        pages_dir = domain_dir / "pages"
+        graph = build_graph_from_pages(domain, pages_dir)
+        return graph.query(query, limit=limit)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+@mcp.tool()
+async def get_related_concepts(
+    domain: str,
+    concept: str,
+) -> dict:
+    """Retrieve semantic associations and connected entities for a concept.
+
+    Args:
+        domain: Domain name.
+        concept: Concept keyword or symbol name.
+
+    Returns:
+        Dict with primary matches and related graph nodes.
+    """
+    try:
+        from docharvest.search.graph import build_graph_from_pages
+
+        domain_dir = _storage._domain_dir(domain)
+        pages_dir = domain_dir / "pages"
+        graph = build_graph_from_pages(domain, pages_dir)
+        return graph.get_related_concepts(concept)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+# ── MCP v2 Resources ─────────────────────────────────────────────────
+
+if hasattr(mcp, "resource"):
+    @mcp.resource("docs://{domain}/book")
+    async def get_book_resource(domain: str) -> str:
+        """Read the full unified markdown handbook for a documentation domain."""
+        content = _storage.load_doc(domain)
+        if content is None:
+            return f"No documentation found for domain: {domain}"
+        return content
+
+    @mcp.resource("docs://{domain}/manifest")
+    async def get_manifest_resource(domain: str) -> str:
+        """Read the llms.txt discovery manifest for a documentation domain."""
+        manifest_path = _storage._domain_dir(domain) / "llms.txt"
+        if manifest_path.exists():
+            try:
+                return manifest_path.read_text(encoding="utf-8")
+            except Exception as exc:
+                return f"Error reading manifest: {exc}"
+        return f"No llms.txt manifest found for domain: {domain}"
+
+
+# ── MCP v2 Prompts ───────────────────────────────────────────────────
+
+if hasattr(mcp, "prompt"):
+    @mcp.prompt()
+    def search_docset(domain: str, query: str) -> str:
+        """Prompt to guide an agent in searching and synthesizing documentation."""
+        return (
+            f"Search the local documentation for '{domain}' with query '{query}'. "
+            f"Use `search_docs` or `query_doc_graph` to find relevant sections, "
+            f"quote key code examples, and summarize the steps concisely."
+        )
+
+    @mcp.prompt()
+    def summarize_library() -> str:
+        """Prompt to inspect all harvested documentation in local library."""
+        return (
+            "Inspect the local documentation library using `list_domains`. "
+            "Provide an overview of indexed docsets, page counts, and last captured dates."
+        )
+
+
+# ── Entry point ──────────────────────────────────────────────────────
+
+
+def main(profile: str = "minimal") -> None:
+    """Run the MCP server over stdio with a named tool profile."""
+    from docharvest.tool_profiles import disabled_tools, get_profile
+
+    selected = get_profile(profile)
+    manager = getattr(mcp, "_tool_manager", None)
+    if manager is None:
+        raise RuntimeError("MCP SDK does not expose a tool manager")
+    registered = tuple(tool.name for tool in manager.list_tools())
+    for name in disabled_tools(selected, registered):
+        manager.remove_tool(name)
+    mcp.run(transport="stdio")
+
+if __name__ == "__main__":
+    main()

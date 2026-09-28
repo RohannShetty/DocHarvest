@@ -86,7 +86,7 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
           Sizes are bytes measured on disk from{' '}
           <span className="sheet-num text-ink font-mono font-medium">{capture.id}</span> ({isoDate(capture.captured)}, provider{' '}
           <span className="text-ink font-mono font-medium">{capture.provider}</span>). Two roots hold the same corpus: the library at{' '}
-          <span className="sheet-num text-ink font-mono">~/.gitbook-downloader/docs/{domain}/</span> and the local copy at{' '}
+          <span className="sheet-num text-ink font-mono">~/.docharvest/docs/{domain}/</span> and the local copy at{' '}
           <span className="sheet-num text-ink font-mono">./{domain}-docs/</span>.
         </p>
 
@@ -126,7 +126,7 @@ export function ManifestTree({ manifest }: { manifest: Manifest }) {
           </ul>
 
           <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 border-t border-rule-strong pt-3.5">
-            <span className="sheet-num text-[13px] text-ink-3 font-mono">~/.gitbook-downloader/search.db</span>
+            <span className="sheet-num text-[13px] text-ink-3 font-mono">~/.docharvest/search.db</span>
             <span className="sheet-label text-match">one index, all domains · FTS5</span>
           </div>
         </div>

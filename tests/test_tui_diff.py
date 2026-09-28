@@ -20,7 +20,7 @@ pytestmark = pytest.mark.skipif(
 
 from textual.widgets import DataTable, Select, Static  # noqa: E402
 
-from gitbook_downloader.tui.testing import FakeEngine  # noqa: E402
+from docharvest.tui.testing import FakeEngine  # noqa: E402
 
 
 def run_async(coro):
@@ -28,7 +28,7 @@ def run_async(coro):
 
 
 def make_app(engine=None):
-    from gitbook_downloader.tui.app import GitbookDownloaderApp
+    from docharvest.tui.app import GitbookDownloaderApp
 
     engine = engine or FakeEngine()
     opened: list[str] = []
@@ -128,7 +128,7 @@ def test_selecting_a_change_shows_before_after_excerpts():
 
 def test_identical_snapshots_show_quiet_state():
     async def scenario():
-        from gitbook_downloader.tui.engine_protocol import DiffReport
+        from docharvest.tui.engine_protocol import DiffReport
 
         empty_report = DiffReport(
             domain="docs.example.com",

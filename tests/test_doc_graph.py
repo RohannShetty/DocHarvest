@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from gitbook_downloader.search.graph import build_graph_from_pages
+from docharvest.search.graph import build_graph_from_pages
 
 
 def _write_page(pages_dir: Path, relpath: str, title: str, body: str) -> None:

@@ -4,7 +4,7 @@
     "docharvest": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"],
+      "args": ["docharvest", "mcp"],
       "timeout": 0
     }
   }

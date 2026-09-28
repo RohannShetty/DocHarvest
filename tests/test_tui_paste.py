@@ -8,8 +8,8 @@ not drag their scrollbar away from the screen edge.
 
 import pytest
 
-from gitbook_downloader.tui.app import GitbookDownloaderApp
-from gitbook_downloader.tui.testing import FakeEngine
+from docharvest.tui.app import GitbookDownloaderApp
+from docharvest.tui.testing import FakeEngine
 
 
 @pytest.fixture()
@@ -50,9 +50,9 @@ async def test_paste_without_clipboard_notifies_but_does_not_crash(app):
 def test_capped_surfaces_are_full_width_with_capped_children():
     """The scrollable surface itself must NOT be width-capped — a capped
     scroll widget drags its scrollbar to mid-screen on wide terminals."""
-    from gitbook_downloader.tui.screens.diagnostics import DiagnosticsSurface
-    from gitbook_downloader.tui.screens.search import SearchSurface
-    from gitbook_downloader.tui.screens.wizard import WizardSurface
+    from docharvest.tui.screens.diagnostics import DiagnosticsSurface
+    from docharvest.tui.screens.search import SearchSurface
+    from docharvest.tui.screens.wizard import WizardSurface
 
     for surface in (WizardSurface, SearchSurface, DiagnosticsSurface):
         assert "max-width" not in surface.DEFAULT_CSS, (

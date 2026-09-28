@@ -78,7 +78,7 @@ export function FeatureBento() {
 
             <div className="mt-7 border-t border-rule pt-4">
               <code className="sheet-num text-[11px] text-ink-3 block truncate font-mono">
-                uvx gitbook-downloader mcp · stdio transport
+                uvx docharvest mcp · stdio transport
               </code>
             </div>
           </div>
@@ -156,7 +156,7 @@ export function FeatureBento() {
 
             <div className="mt-7 border-t border-rule pt-4">
               <code className="sheet-num text-[11px] text-ink-3 block truncate font-mono">
-                ~/.gitbook-downloader/search.db (WAL mode)
+                ~/.docharvest/search.db (WAL mode)
               </code>
             </div>
           </div>

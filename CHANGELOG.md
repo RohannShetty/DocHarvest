@@ -5,6 +5,126 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Full-content `llms-full.txt` is emitted beside `llms.txt` for every local and library capture, with deterministic page order and SHA-256 content hashes.
+- `search_docs(..., max_tokens=...)` bounds returned snippets by an approximate response budget.
+- MCP tool profiles: the default `minimal` schema and explicit `docharvest mcp --profile full` compatibility mode.
+- Local growth handoff documents for tool profiles and owner-run promotion actions.
+- External registry, directory, launch, sponsor, social, and translation publication remains owner-run; no external mutations were performed in this checkout.
+
+## [11.1.1] - 2026-09-28
+
+### 🧾 Claim Integrity & Link Correction Patch
+
+No new features. This release exists because several public numbers and links had drifted away
+from reality, and a developer tool that overstates itself has no credibility to spend.
+
+### Fixed
+
+- **Test count is now generated, not typed.** The showcase advertised "765 tests passing"
+  (`docs/lib/stats.ts`, README badge) while the real suite had grown past 800 — with four
+  failures. README body said 686, `docs/HANDOFF.md` said 740. `docs/scripts/sync-stats.mjs` now
+  produces those numbers from a real pytest run, `docs/lib/stats.ts` carries the collection date,
+  the Pages workflow regenerates them on every deploy, and the site publishes failures as failures
+  rather than rounding them away. `tests/test_stats_drift.py` guards the contract.
+- **Four failing tests fixed, CI green again.** The Index Sheet redesign removed the hero's tab
+  panels and its `@keyframes fadeIn`, but left three tests asserting the removed component — and
+  `InstallModal.tsx` still used `animate-fadeIn`, so the install modal's entrance animation had
+  been dead. The keyframe and utility are restored in `docs/app/globals.css`, the stale contract
+  tests are rewritten against the current architecture, and `tests/test_animation_contract.py` now
+  fails any custom `animate-*` class that has no definition.
+- **Links point at DocHarvest.** `pyproject.toml` `[project.urls]` advertised the retired
+  `RohannShetty/gitbook-downloader` repository and the PyPI description linked to
+  `rohannshetty.github.io/gitbook-downloader/`, which 404s. Homepage is now the showcase,
+  Repository/Source/Issues/Changelog are the DocHarvest repo, and `PROFILE_README.md`,
+  `PRODUCT.md`, `docs/HANDOFF.md` and `marketing/MCP_DIRECTORY_LISTING.md` were corrected too.
+- **Docs reconciled**: removed the duplicated "No API key" paragraph in the README, corrected
+  `PRODUCT.md` (10 → 12 MCP tools, GitHub Pages path), and replaced the undated coverage claim
+  with the command that measures it.
+
+### Added
+
+- **`server.json`** — the official MCP registry manifest (`io.github.RohannShetty/docharvest`,
+  PyPI `gitbook-downloader`, stdio), validated against the published registry schema by
+  `scripts/check-registry-manifest.py`, plus the `mcp-name:` ownership token in `README.md` that
+  the registry requires before it accepts a publish. `tests/test_registry_manifest.py` keeps the
+  manifest, package, README token and directory copy in agreement.
+- **`marketing/REGISTRY_SUBMISSION.md`** — where DocHarvest is (and is not) listed, the canonical
+  name/package/URL fields, the publish sequence, and the identifiers that must *not* be renamed.
+- **A footer that answers "what next?"** on the showcase: docs, changelog, license, issues, PyPI,
+  releases, star and contact, with the previously broken README anchor corrected.
+
+### Changed
+
+- **The distribution is now `docharvest`.** `pip install docharvest`, `uvx docharvest mcp`.
+  `gitbook-downloader` is retired: it keeps its published versions, but no new release will
+  appear under that name, and the last one there says so. This is a rename of the *package*, not a
+  rewrite — the CLI (`docharvest`), the flags, the output formats and the library layout are
+  otherwise unchanged.
+- **Version bump to 11.1.1** across the Python package, CLI fallback, Desktop GUI bundle
+  (rebuilt), Frontend/Showcase constants, lockfiles and regression suites.
+
+### ⚠️ Breaking changes (11.1.1)
+
+Renaming a package reaches further than the name on the box. Four identifiers changed, and four
+deliberately did not:
+
+| | Change | Impact |
+| :--- | :--- | :--- |
+| PyPI distribution | `gitbook-downloader` → **`docharvest`** | Update `pip install` / `uvx` / requirements pins. The old name's final release points here. |
+| Import path | `gitbook_downloader` → **`docharvest`** | `from docharvest.api import capture`. No shim: update imports. |
+| Library directory | `~/.gitbook-downloader/` → **`~/.docharvest/`** | Moved automatically on first use, contents intact (`docharvest/paths.py`). Nothing is deleted; if both locations hold captures, both are left alone and the tool says so. |
+| Environment variable | `GITBOOK_DOWNLOADER_HOME` → **`DOCHARVEST_HOME`** | The old variable is no longer read. If it is still set, a warning is printed instead of silently using a different library. |
+| Config file | `./gitbook-downloader.toml` → **`./docharvest.toml`** | Rename the file in repositories that carry one. |
+| CLI | `docharvest` (unchanged) | `gitbook-dl` still works. The `gitbook-downloader` console script is gone with the package name. |
+
+`docs/CHANGELOG.md` entries before this release keep the names that were true when they were
+written — rewriting history would make them unreadable.
+
+- **Version bump to 11.1.1** across the Python package, CLI fallback, Desktop GUI bundle
+  (rebuilt), Frontend/Showcase constants, lockfiles and regression suites.
+
+### 🎨 One brand, two surfaces (desktop GUI + website)
+
+The desktop GUI and the showcase site had no design language in common. The site spoke
+`--bond` / `--rule` / `--ink` / `--match` on Tailwind v4 with square corners; the GUI spoke
+shadcn's slate defaults on Tailwind v3 with `0.625rem` corners, a cyan text selection,
+gradient buttons, emerald glows and glassmorphism panels. Neither surface could have been
+mistaken for the same product.
+
+- **`brand/tokens.json` is now the single source of truth.** `scripts/sync-brand-tokens.mjs`
+  generates `docs/app/brand-tokens.css` (website) and `frontend/src/styles/brand-tokens.css`
+  (GUI — including the shadcn semantic layer as HSL triplets, so `bg-primary/10` keeps its
+  opacity). `tests/test_brand_tokens.py` fails if either surface stops consuming the tokens,
+  hard-codes a palette colour or a raw hex, drops below the type floor, or if the two surfaces
+  disagree on a value.
+- **The desktop GUI is themed from the brand, not from slate.** Neutral zinc ramp, amber
+  `--primary`, `--radius: 0px`, flat hairline surfaces. 313 hard-coded palette utilities (cyan,
+  emerald, purple, sky, rose, slate, amber) became semantic tokens; the one-colour-per-icon
+  habit, the emerald `pulse-glow`, two duplicated glass blocks and the cyan selection colour are
+  gone. No component names a colour any more.
+- **Type is shared.** The GUI now bundles Archivo + Geist Mono — the two families the website
+  self-hosts — instead of loading Plus Jakarta Sans from a Google CDN it never actually applied,
+  so the desktop app renders identically with no network.
+- **Two real bugs surfaced while unifying:** Tailwind was silently discarding the opacity half of
+  every `bg-primary/10`-style utility (the config had no `<alpha-value>` placeholder, so
+  translucent panels rendered solid), and `rounded-xl` / `rounded-2xl` were still drawing real
+  12px corners even though the brand is square.
+- **The GUI has a linter for the first time.** ESLint 10 flat config with typescript-eslint and
+  react-hooks. It found 119 problems on first run: 60 dead imports and unused state were removed,
+  5 pre-existing errors fixed, and the remaining pre-existing debt (`no-explicit-any`,
+  cascading-render effects) is tracked as warnings with the reasons written down. `npm run lint`
+  and `npm run typecheck` pass, and CI now runs both plus the GUI build in a new `gui` job, with a
+  separate `brand-tokens` job that fails if the generated stylesheets are stale.
+- **Mermaid diagrams follow the live theme** (neutral surfaces, one amber accent) instead of a
+  hard-coded cyan/blue/indigo palette, and diagrams now switch correctly with light/dark.
+- **`docs/brand/BRAND.md` → v2.0**: real token names and values, the application status-colour
+  layer, the desktop-GUI rules (roles not hues, square corners, flat surfaces, functional motion,
+  visible focus), the shared type scale and the 12px minimum.
+
 ## [11.1.0] - 2026-09-19
 
 ### 🚀 Autonomous Multi-Agent Swarm Orchestration, Universal Skill Switcher & Zero-Dependency GUI Fallback
@@ -31,6 +151,8 @@ Major feature release adding interactive multi-agent autonomous swarm tools, a u
   Complete audit of all 10 subsystems, competitive gap analysis against 6 alternatives, and a 5-phase enhancement roadmap.
 
 ### Changed
+
+
 
 - **Version bump to 11.1.0** across core Python package, CLI fallbacks, Desktop GUI constants, Next.js showcase, and regression suites.
 

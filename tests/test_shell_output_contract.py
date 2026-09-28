@@ -9,9 +9,10 @@ import re
 
 import pytest
 
-from gitbook_downloader.output_contract import (
+from docharvest.output_contract import (
     CapturedPage,
     assemble_book,
+    build_full_manifest,
     build_manifest,
     content_hash,
     page_relpath,
@@ -201,6 +202,19 @@ class TestBuildManifest:
         b = build_manifest(list(reversed(make_pages())), site_title="S",
                            source_url="u", provider="p", crawl_date="D")
         assert a == b
+
+    def test_full_manifest_contains_every_page_body_and_hash(self):
+        full = build_full_manifest(
+            make_pages(),
+            site_title="S",
+            source_url="u",
+            provider="p",
+            crawl_date="D",
+        )
+        assert "Full Markdown capture of u" in full
+        assert "Source: https://docs.example.com/api/auth" in full
+        auth_hash = content_hash("# Auth\n\nTokens.")
+        assert f"Content hash: {auth_hash}" in full
 
 
 # ── Routing ─────────────────────────────────────────────────────────────

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import pytest
 
-from gitbook_downloader.tui.engine_protocol import (
+from docharvest.tui.engine_protocol import (
     CaptureOptions,
     Detection,
     SearchHit,
 )
-from gitbook_downloader.tui.testing import FakeEngine
+from docharvest.tui.testing import FakeEngine
 
 
 def test_capture_records_call_and_returns_canned_result():

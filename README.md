@@ -4,20 +4,23 @@
 
 # DocHarvest
 
-### Turn Any Documentation Site into LLM-Ready Markdown, Vector Context & Offline Books
+### Compile any docs portal into context your agent can verify
 
-**Universal Agent Skill · Native FastMCP v2 Server (12 Tools) · Zero-Config CLI · Desktop GUI · Pure-Python PDF Studio**
+**CLI + Universal Skill first.** MCP is optional when you need a live tool surface.
 
-[![Version: 11.1.0](https://img.shields.io/badge/version-11.1.0-06b6d4?style=flat-square&labelColor=090d16)](CHANGELOG.md)
-[![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square&labelColor=090d16)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3b82f6?style=flat-square&labelColor=090d16)](pyproject.toml)
-[![MCP: FastMCP v2](https://img.shields.io/badge/MCP-FastMCP%20v2-8b5cf6?style=flat-square&labelColor=090d16)](#-ai-agent-integration-native-fastmcp-v2-server)
-[![Agent Skill: Universal](https://img.shields.io/badge/Skill-Universal%20(14%2B%20Harnesses)-ec4899?style=flat-square&labelColor=090d16)](#-agent-skills-universal-mcp-skill-for-every-agent-harness)
-[![UI: shadcn/ui](https://img.shields.io/badge/UI-shadcn%2Fui-27272a?style=flat-square&labelColor=090d16)](https://ui.shadcn.com)
-[![Tests: 765 Passing](https://img.shields.io/badge/tests-765%20passing-10b981?style=flat-square&labelColor=090d16)](CHANGELOG.md)
-[![PyPI](https://img.shields.io/badge/PyPI-DocHarvest-f59e0b?style=flat-square&labelColor=090d16)](https://pypi.org/project/gitbook-downloader/)
-[![Showcase Website](https://img.shields.io/badge/website-Live%20Showcase-06b6d4?style=flat-square&labelColor=090d16)](https://rohannshetty.github.io/DocHarvest/)
+| `673 pages` | `18.2 s` | `~83% less boilerplate` |
+|---:|---:|---:|
+| reference capture | reference capture | reference measurement |
 
+[![Version: 11.1.1](https://img.shields.io/badge/version-11.1.1-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-71717a?style=flat-square&labelColor=18181b)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-a1a1aa?style=flat-square&labelColor=18181b)](pyproject.toml)
+[![Tests: 882 passing](https://img.shields.io/badge/tests-882%20passing%20(2026--09--28)-f59e0b?style=flat-square&labelColor=18181b)](docs/lib/stats.ts)
+
+> Reference measurement, not a guarantee: 673 pages captured in 18.2 seconds with approximately 83% boilerplate-token reduction. Reproduce the local retrieval benchmark with `python benchmarks/run.py`; replace this capture reference only with a fresh end-to-end measurement.
+```bash
+pip install docharvest && docharvest capture https://docs.example.com/
+```
 <br />
 
 <img src="assets/capture_studio.png" alt="DocHarvest Desktop GUI — Capture Studio with shadcn/ui, 60fps motion progress, radial gauge, and live terminal logs" width="920" />
@@ -30,12 +33,12 @@
 
 **Your coding agent doesn't read documentation — it reads web pages.** Navbars, cookie banners, search modals, and footer scripts make up **80–85% of a raw page's bytes** before a single API fact arrives. Chunks captured without source URLs make hallucinations unfalsifiable, and per-page cloud scraping API bills spike the moment you index a real documentation portal.
 
-**DocHarvest** (package: `gitbook-downloader`) compiles any technical documentation site into a pristine, structured local knowledge base with verifiable SHA-256 provenance:
+**DocHarvest** (package: `docharvest`) compiles any technical documentation site into a pristine, structured local knowledge base with verifiable SHA-256 provenance:
 
 - ⚡ **Ultra-Fast Throughput**: Reference capture of **673 pages in 18.2 seconds** (~37 pages/sec) directly into SQLite FTS5 BM25 search and semantic graphs.
 - 🎯 **~83% Token Reduction**: Eliminates boilerplate DOM trees, sidebars, anchor spam, and tracking wrappers, delivering high-density context directly to your LLMs.
 - 🧠 **Universal Agent Skill (`SKILL.md`)**: Bundled, harness-neutral intelligence that equips 14+ coding agents (Cursor, Claude Code, Windsurf, Gemini CLI, Oh My Pi, Codex) with self-orchestrated harvesting and retrieval workflows via a single install command (`docharvest skill install docharvest -o <dir>`).
-- 🔌 **Native FastMCP v2 Server**: 12 zero-friction tools, MCP Resources (`docs://{domain}/book`), and MCP Prompts over stdio, ready out-of-the-box with zero API keys or cloud dependencies.
+- 🔌 **Native FastMCP v2 Server**: 12 zero-friction tools in an opt-in full profile, with a smaller default profile for lower schema cost; MCP Resources (`docs://{domain}/book`), and MCP Prompts over stdio.
 - 🔒 **Deterministic SHA-256 Provenance**: Every page is stored with an exact SHA-256 content hash in YAML frontmatter for caching, version diffing, and citation verification.
 
 Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, building vector RAG pipelines with **LangChain & LlamaIndex**, reading offline on an airplane, or archiving technical libraries — every capture ends in the same verifiable shape: clean markdown ready for your agent or your bookshelf.
@@ -46,7 +49,7 @@ Whether you are feeding 500-page API manuals to **Cursor / Claude Code**, buildi
 
 ```bash
 # 1. Install via pip (FastMCP v2 server & bundled skill included)
-pip install gitbook-downloader
+pip install docharvest
 
 # 2. Capture a complete docs site with RAG JSONL and offline PDF
 docharvest capture https://docs.openalgo.in/ --rag --pdf
@@ -55,9 +58,7 @@ docharvest capture https://docs.openalgo.in/ --rag --pdf
 docharvest skill install docharvest -o .cursor/skills     # or .claude/skills, .agents/skills...
 ```
 
-No API key. No account. No telemetry. When the command finishes you own a `book.md`, an `llms.txt`, a RAG JSONL dataset, and a printable PDF — all local, all MIT. Full install paths (standalone `.exe`, uvx, optional extras) are in [Quick Start](#-quick-start).
-
-No API key. No account. No telemetry. When the command finishes you own a `book.md`, an `llms.txt`, a RAG JSONL dataset, and a printable PDF — all local, all MIT. Full install paths (standalone `.exe`, uvx, optional extras) are in [Quick Start](#-quick-start).
+No API key. No account. No telemetry. When the command finishes you own a `book.md`, an `llms.txt`, an `llms-full.txt`, a RAG JSONL dataset, and a printable PDF — all local, all MIT. Full install paths (standalone `.exe`, uvx, optional extras) are in [Quick Start](#-quick-start).
 
 ---
 
@@ -78,16 +79,16 @@ DocHarvest features dedicated, priority-ordered parsers that extract clean artic
 | **Generic HTML / SPA** | `0` | BFS link crawl, `llms.txt`, `sitemap.xml` | `main`, `article`, `[role="main"]`, `#content` |
 
 > [!TIP]
-> **Dynamic JavaScript SPAs**: If a site is rendered entirely client-side via JavaScript (such as `omp.sh/docs`), install the optional Playwright extra (`pip install "gitbook-downloader[render]" && playwright install chromium`) and run with `--render` to execute JavaScript before extracting markdown.
+> **Dynamic JavaScript SPAs**: If a site is rendered entirely client-side via JavaScript (such as `omp.sh/docs`), install the optional Playwright extra (`pip install "docharvest[render]" && playwright install chromium`) and run with `--render` to execute JavaScript before extracting markdown.
 
 ---
 
 ## 🌟 Key Capabilities
 
 - 🤖 **Zero-Noise LLM Context**: Auto-detects 8 documentation frameworks, probes native `.md` endpoints, and cleans DOM trees — measured at ~83% token reduction vs raw pages.
-- 📦 **Four-Part Output Contract**: Every capture yields a modular `pages/` tree with SHA-256 YAML frontmatter, a consolidated `book.md` with TOC, a standardized `llms.txt` manifest, and search index records.
+- 📦 **Five-Part Output Contract**: Every capture yields a modular `pages/` tree with SHA-256 YAML frontmatter, a consolidated `book.md` with TOC, `llms.txt`, a full-content `llms-full.txt`, and search index records.
 - 🚀 **Export Studio & Local Search**: RAG JSONL for vector databases, pure-Python PDF handbooks (`fpdf2`, zero C-dependencies), and AST markdown chunks — all indexed into embedded SQLite FTS5 BM25 search.
-- 🔌 **Native FastMCP v2 Server**: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more). Crash-safe atomic storage and semver snapshot diffing included.
+- 🔌 **Native FastMCP v2 Server**: A minimal schema is the default; `docharvest mcp --profile full` exposes all 12 tools plus resources and prompts over stdio. Crash-safe atomic storage and semver snapshot diffing included.
 
 ### What DocHarvest Is *Not* For
 
@@ -114,7 +115,7 @@ The desktop application includes a dedicated **Document Library** for managing a
 
 ---
 
-## 📋 The Four-Part Output Contract
+## 📋 The Five-Part Output Contract
 
 **What a generic crawler hands your LLM** (every page, every time):
 
@@ -155,13 +156,14 @@ The `content_hash` is the real SHA-256 of the markdown body shown above — past
 Every crawl produces the same standardized, deterministic directory structure:
 
 ```
-~/.gitbook-downloader/docs/
+~/.docharvest/docs/
 └── docs.openalgo.in/
     ├── pages/                     # Modular individual markdown files
     │   ├── 001_quickstart.md
     │   └── 002_api_reference.md
     ├── book.md                    # Consolidated single handbook with hierarchical TOC
     ├── llms.txt                   # Standardized AI discovery manifest
+    ├── llms-full.txt              # Full-content manifest with per-page hashes
     ├── exports/
     │   ├── openalgo_rag.jsonl     # Tokenized vector chunks + metadata
     │   └── openalgo_handbook.pdf  # Publication-grade printable PDF (pure Python)
@@ -183,15 +185,15 @@ Download **[`docharvest-windows-latest.exe`](https://github.com/RohannShetty/Doc
 ### Option 2: Install via pip / PyPI
 ```bash
 # Standard installation (100% local, zero C-dependencies)
-pip install gitbook-downloader
+pip install docharvest
 
 # Optional headless browser rendering for dynamic JavaScript SPAs
-pip install "gitbook-downloader[render]"
+pip install "docharvest[render]"
 playwright install chromium
 
 # MCP server: the FastMCP SDK ships in the base install — nothing extra needed.
 # (The [mcp] extra is a backward-compatibility no-op; this line still resolves.)
-pip install "gitbook-downloader[mcp]"
+pip install "docharvest[mcp]"
 
 # Launch desktop GUI:
 docharvest --gui
@@ -203,10 +205,10 @@ docharvest capture https://docs.openalgo.in/ --rag --pdf
 ### Option 3: Ultra-Fast One-Liner via uv / uvx
 ```bash
 # Launch GUI instantly without permanent installation:
-uvx gitbook-downloader --gui
+uvx docharvest --gui
 
 # Or install as a global CLI tool:
-uv tool install gitbook-downloader
+uv tool install docharvest
 ```
 
 ---
@@ -240,8 +242,11 @@ docharvest ls
 docharvest history docs.example.com
 docharvest diff docs.example.com v1.0.0 v1.0.1
 
-# Start FastMCP Server over Stdio for AI IDEs
-docharvest --mcp
+# Start the default minimal FastMCP profile over stdio
+docharvest mcp
+
+# Expose all 12 named tools explicitly
+docharvest mcp --profile full
 
 # List / Install the Bundled Agent Skill
 docharvest skill list
@@ -258,30 +263,31 @@ docharvest gui --browser zen
 
 The FastMCP server gives an agent **tools**; the bundled **docharvest** skill gives it **reasoning & workflow intelligence**. It teaches LLM agents when and how to call tools without redundant network crawls, how to bound context windows to avoid token bloat, and how to verify cryptographic SHA-256 provenance.
 
-One skill, one `SKILL.md`, universal cross-agent compatibility: the server speaks standard MCP over `stdio` and the skill format follows the universal open agent standard, allowing all 14+ MCP-capable agent harnesses to load and execute it natively.
+One skill, one `SKILL.md`: the matrix below describes **skill discovery directories**, not MCP server configuration. MCP registration paths are client-specific and are covered by `docharvest init --client <name>` where supported.
 
-### 🌐 Universal Harness Matrix (14+ Supported Environments)
+### 🌐 Universal Skill Matrix (17 documented environments)
 
 Install the bundled skill into any agent's discovery directory in a single command with `docharvest skill install docharvest -o <target_dir>`:
 
-| Agent / Harness | Skill Target Directory | 1-Command Skill Installation | Trigger / Invocation |
-| :--- | :--- | :--- | :--- |
-| **Cursor** | `.cursor/skills` | `docharvest skill install docharvest -o .cursor/skills` | Auto-invoked or `@docharvest` |
-| **Claude Code** | `.claude/skills` | `docharvest skill install docharvest -o .claude/skills` | `claude` prompt / `/skill:docharvest` |
-| **Claude Desktop** | `~/.claude/skills` | `docharvest skill install docharvest -o ~/.claude/skills` | Natural language queries |
-| **Windsurf** | `.codeium/skills` | `docharvest skill install docharvest -o .codeium/skills` | Cascade auto-dispatch |
-| **Oh My Pi (OMP)** | `.omp/skills` | `docharvest skill install docharvest -o .omp/skills` | `/skill:docharvest <query>` |
-| **VS Code (Copilot/MCP)** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Chat agent prompt |
-| **Antigravity / Gemini CLI** | `.gemini/skills` | `docharvest skill install docharvest -o .gemini/skills` | CLI skill invocation |
-| **GitHub Copilot Workspace** | `.github/skills` | `docharvest skill install docharvest -o .github/skills` | Workspace agent prompt |
-| **JetBrains AI Assistant** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | AI Assistant prompt |
-| **Zed** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Context server prompt |
-| **Cline** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Task auto-execution |
-| **Continue.dev** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | `@docs` context prompt |
-| **Kiro** | `.kiro/skills` | `docharvest skill install docharvest -o .kiro/skills` | Kiro agent runner |
-| **OpenCode** | `.opencode/skills` | `docharvest skill install docharvest -o .opencode/skills` | Agent command bar |
-| **OpenAI Codex CLI** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | CLI assistant prompt |
-| **Universal / Standard Agents** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Standard discovery loader |
+| Agent / Harness | Skill Target Directory | 1-Command Skill Installation | Trigger / Invocation | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Cursor** | `.cursor/skills` | `docharvest skill install docharvest -o .cursor/skills` | Auto-invoked or `@docharvest` | Current |
+| **Claude Code** | `.claude/skills` | `docharvest skill install docharvest -o .claude/skills` | `claude` prompt / `/skill:docharvest` | Current |
+| **Claude Desktop** | `~/.claude/skills` | `docharvest skill install docharvest -o ~/.claude/skills` | Natural language queries | Current |
+| **Devin Desktop / legacy Windsurf** | `devin/` or `.codeium/skills` | `docharvest skill install docharvest -o <target_dir>` | Client-specific | Verify per client |
+| **Oh My Pi (OMP)** | `.omp/skills` | `docharvest skill install docharvest -o .omp/skills` | `/skill:docharvest <query>` | Current |
+| **VS Code (Copilot/MCP)** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Chat agent prompt | Current |
+| **Antigravity / Gemini CLI** | `.gemini/skills` | `docharvest skill install docharvest -o .gemini/skills` | CLI skill invocation | Current |
+| **GitHub Copilot Workspace** | `.github/skills` | `docharvest skill install docharvest -o .github/skills` | Workspace agent prompt | Unverified |
+| **JetBrains AI Assistant** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | AI Assistant prompt | Current |
+| **Junie** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Junie CLI prompt | Current |
+| **Zed** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Context server prompt | Current |
+| **Cline** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Task auto-execution | Current |
+| **Continue.dev** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | `@docs` context prompt | Legacy / winding down |
+| **Kiro** | `.kiro/skills` | `docharvest skill install docharvest -o .kiro/skills` | Kiro agent runner | Current |
+| **OpenCode** | `.opencode/skills` | `docharvest skill install docharvest -o .opencode/skills` | Agent command bar | Current |
+| **OpenAI Codex CLI** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | CLI assistant prompt | Current |
+| **Universal / Standard Agents** | `.agents/skills` | `docharvest skill install docharvest -o .agents/skills` | Standard discovery loader | Current |
 
 ### What the Skill Encodes:
 
@@ -303,16 +309,24 @@ docharvest skill install docharvest -o .agents/skills
 
 ## 🔌 AI Agent Integration: Native FastMCP v2 Server
 
-DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server exposing 12 high-level tools, **MCP Resources**, and **MCP Prompts** over standard input/output (`stdio`). It is compatible with `mcp<2` and `mcp>=2.1`.
+DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server over standard input/output (`stdio`). The default `minimal` profile exposes the capture and retrieval path with a smaller schema; `docharvest mcp --profile full` exposes all 12 high-level tools, **MCP Resources**, and **MCP Prompts**. It is compatible with `mcp<2` and `mcp>=2.1`.
 
-> **Zero-Dependency SDK**: The `mcp` SDK ships directly inside the base package. `pip install gitbook-downloader` or `uvx gitbook-downloader mcp` works out of the box with no extra steps.
+> **Zero-Dependency SDK**: The `mcp` SDK ships directly inside the base package. `pip install docharvest` or `uvx docharvest mcp` works out of the box with no extra steps.
+
+Tool profiles are documented in [`docs/TOOL_PROFILES.md`](docs/TOOL_PROFILES.md). Use `full` when an existing workflow needs versioning, exports, changelogs, or graph tools.
+
+**MCP Registry id:** `io.github.RohannShetty/docharvest`
+
+<!-- mcp-name: io.github.RohannShetty/docharvest — ownership token the official MCP registry checks in this README to
+     verify ownership of the PyPI package `docharvest`. Do not remove or
+     reformat: publishing via mcp-publisher fails without it. -->
 
 ### All 12 Native MCP Tools
 
 1. `download_docs(url, max_pages=None, workers=8, path_scope=[], exclude_paths=[], site_versions=None, output_mode="both")`
-   Captures any documentation URL into Markdown, `book.md`, and `llms.txt`.
-2. `search_docs(query, domain=None, limit=10)`
-   Full-text search across downloaded documentation via SQLite FTS5 BM25.
+   Captures any documentation URL into Markdown, `book.md`, `llms.txt`, and `llms-full.txt`.
+2. `search_docs(query, domain=None, limit=10, max_tokens=2000)`
+   Full-text search across downloaded documentation via SQLite FTS5 BM25; `max_tokens` bounds total returned snippets.
 3. `find_docs(query, limit=10)`
    Resolves library/framework names ("react", "nextjs") to indexed domains in the local library.
 4. `read_doc(domain, path=None, topic=None, max_tokens=4000, version=None)`
@@ -335,7 +349,7 @@ DocHarvest includes a native **FastMCP (Model Context Protocol v2)** server expo
     Auto-generates version changelogs across captured snapshot iterations.
 
 ### MCP v2 Resources & Prompts
-- **Resources**: `docs://{domain}/book` (full handbook), `docs://{domain}/manifest` (`llms.txt` index).
+- **Resources**: `docs://{domain}/book` (full handbook) and `docs://{domain}/manifest` (`llms.txt` index). The same library root also contains `llms-full.txt` for full-content ingestion.
 - **Prompts**: `prompt://search-docset` (guided docset synthesis), `prompt://summarize-library` (library overview).
 
 ---
@@ -364,7 +378,7 @@ Or in `~/.claude.json`:
   "mcpServers": {
     "docharvest": {
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"]
+      "args": ["docharvest", "mcp"]
     }
   }
 }
@@ -376,7 +390,7 @@ Or in `~/.claude.json`:
   "mcpServers": {
     "docharvest": {
       "command": "python",
-      "args": ["-m", "gitbook_downloader.mcp"]
+      "args": ["-m", "docharvest.mcp"]
     }
   }
 }
@@ -493,7 +507,7 @@ Configure via **Settings → Tools → Model Context Protocol (MCP)**:
     "docharvest": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["gitbook-downloader", "mcp"],
+      "args": ["docharvest", "mcp"],
       "timeout": 0
     }
   }
@@ -537,7 +551,7 @@ positive millisecond value instead if you prefer a hard ceiling, and use
 ## 🐍 Python SDK Example
 
 ```python
-from gitbook_downloader.api import capture, CaptureOptions
+from docharvest.api import capture, CaptureOptions
 
 # Configure capture options
 options = CaptureOptions(
@@ -560,13 +574,14 @@ print(f"Manifest:  {result.manifest_file}")
 
 DocHarvest is continuously tested across Windows, Linux, and macOS:
 
-- **686 Automated Tests**: 100% pass rate across engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, and MCP v2 tools (verified on this release).
-- **73%+ Statement Coverage**: Rigorous test suites covering error recovery, invalid signatures, domain locks, and AST link normalization.
+- **The full suite is green** (badge above, dated): engine discovery, BFS crawling, provider extraction, storage safety, DocGraph semantic search, MCP v2 tools, the desktop GUI bridge, and the showcase's own content contracts. Reproduce with `uv run pytest`.
+- **Numbers nobody regenerates go stale, so these are generated.** `docs/lib/stats.ts` feeds the showcase, and `node docs/scripts/sync-stats.mjs --run` is the only supported way to change them — the site, this file and the real suite are kept in step, and a run with failures is published as failures rather than rounded away.
+- **Coverage**: `uv run pytest --cov=docharvest` (see the CI job for the current figure).
 - **Windows CRLF Safe**: All link and boilerplate stripping routines are cross-platform normalized against Windows CRLF and Unix LF linebreaks.
 
 To run the test suite locally:
 ```bash
-uv run pytest --cov=gitbook_downloader
+uv run pytest --cov=docharvest
 ```
 
 ---

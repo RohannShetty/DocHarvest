@@ -3,16 +3,14 @@ import { APP_VERSION } from "@/lib/version"
 import { 
   Activity, 
   Cpu, 
-  HardDrive, 
-  Folder, 
-  AlertTriangle, 
+
   CheckCircle2, 
   RefreshCw, 
-  ShieldCheck, 
+
   Terminal,
   Lock,
   Unlock,
-  Zap,
+
   Info
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -97,7 +95,7 @@ export const DiagnosticsView: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* System Info */}
-        <Card className="glass-card shadow-sm">
+        <Card className="sheet-card shadow-sm">
           <CardHeader className="p-5 pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <Cpu className="h-4 w-4 text-primary" />
@@ -120,17 +118,17 @@ export const DiagnosticsView: React.FC = () => {
             <div className="flex items-center justify-between py-1.5">
               <span className="text-muted-foreground">Storage Root</span>
               <span className="font-mono text-foreground truncate max-w-[220px]" title={sysInfo?.library_dir}>
-                {sysInfo?.library_dir || "~/.gitbook-downloader"}
+                {sysInfo?.library_dir || "~/.docharvest"}
               </span>
             </div>
           </CardContent>
         </Card>
 
         {/* Lock Inspector */}
-        <Card className="glass-card shadow-sm">
+        <Card className="sheet-card shadow-sm">
           <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Lock className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+              <Lock className="h-4 w-4 text-primary" />
               <span>Storage Locks Inspector</span>
             </CardTitle>
             {activeLocks.length > 0 && (
@@ -138,7 +136,7 @@ export const DiagnosticsView: React.FC = () => {
                 variant="destructive"
                 size="sm"
                 onClick={handleClearLocks}
-                className="h-7 text-[11px] px-2.5 gap-1 interactive-scale"
+                className="h-7 text-xs px-2.5 gap-1 interactive-scale"
               >
                 <Unlock className="h-3 w-3" />
                 Clear All Locks
@@ -147,21 +145,21 @@ export const DiagnosticsView: React.FC = () => {
           </CardHeader>
           <CardContent className="p-5 pt-0 space-y-2 text-xs">
             {activeLocks.length === 0 ? (
-              <div className="flex items-center gap-2 py-4 text-emerald-700 dark:text-emerald-500 justify-center font-medium bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <div className="flex items-center gap-2 py-4 text-muted-foreground justify-center font-medium bg-muted rounded-lg border border-border">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>All storage domains unlocked and healthy</span>
               </div>
             ) : (
               <div className="space-y-2">
                 {activeLocks.map((l: any, i: number) => (
-                  <div key={i} className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+                  <div key={i} className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between">
                     <div>
                       <div className="font-mono font-semibold text-foreground">{l.domain}</div>
-                      <div className="text-[11px] text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         PID: {l.pid || "?"} | Age: {l.age_seconds || 0}s | {l.is_stale ? "Stale / Orphaned" : "Active Lock"}
                       </div>
                     </div>
-                    <Badge variant="outline" className={`text-[10px] ${l.is_stale ? "text-destructive border-destructive/40" : "text-amber-700 border-amber-500/40 dark:text-amber-500"}`}>
+                    <Badge variant="outline" className={`text-xs ${l.is_stale ? "text-destructive border-destructive/40" : "text-primary border-primary/40"}`}>
                       {l.is_stale ? "Stale" : "Active"}
                     </Badge>
                   </div>
@@ -173,7 +171,7 @@ export const DiagnosticsView: React.FC = () => {
       </div>
 
       {/* Last Run Diagnostics */}
-      <Card className="glass-card shadow-sm">
+      <Card className="sheet-card shadow-sm">
         <CardHeader className="p-5 pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <Terminal className="h-4 w-4 text-primary" />
@@ -191,16 +189,16 @@ export const DiagnosticsView: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
               <div className="p-3 rounded-lg bg-background/60 border border-border/50">
-                <span className="text-muted-foreground block text-[11px] mb-1">Target URL</span>
+                <span className="text-muted-foreground block text-xs mb-1">Target URL</span>
                 <span className="font-mono text-foreground font-semibold break-all">{diagnostics.url || "N/A"}</span>
               </div>
               <div className="p-3 rounded-lg bg-background/60 border border-border/50">
-                <span className="text-muted-foreground block text-[11px] mb-1">Detected Provider</span>
+                <span className="text-muted-foreground block text-xs mb-1">Detected Provider</span>
                 <span className="font-mono text-primary font-semibold capitalize">{diagnostics.provider || "N/A"}</span>
               </div>
               <div className="p-3 rounded-lg bg-background/60 border border-border/50">
-                <span className="text-muted-foreground block text-[11px] mb-1">Pages Captured</span>
-                <span className="font-mono text-emerald-700 dark:text-emerald-500 font-semibold">{diagnostics.pages_captured || 0} pages ({diagnostics.duration_s || 0}s)</span>
+                <span className="text-muted-foreground block text-xs mb-1">Pages Captured</span>
+                <span className="font-mono text-muted-foreground font-semibold">{diagnostics.pages_captured || 0} pages ({diagnostics.duration_s || 0}s)</span>
               </div>
             </div>
           )}

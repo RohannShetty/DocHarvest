@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.splitter import split_markdown, split_file
+from docharvest.splitter import split_markdown, split_file
 
 
 class TestSplitMarkdownBasic:

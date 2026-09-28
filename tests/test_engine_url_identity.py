@@ -6,8 +6,8 @@ trailing slashes, slash-runs and .md suffixes are not. Content probes
 (<url>.md) must never carry a query string.
 """
 
-from gitbook_downloader.providers import base as provider_base
-from gitbook_downloader.utils import discovery
+from docharvest.providers import base as provider_base
+from docharvest.utils import discovery
 
 
 def test_single_source_of_truth():

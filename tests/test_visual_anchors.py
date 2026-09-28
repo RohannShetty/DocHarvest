@@ -5,7 +5,9 @@ NOT spin up Playwright (the test infra uses static text inspection so it
 runs on plain pytest without browser dependencies).
 
 After Phase 3:
-- Hero.tsx: STATUS: and TIME: are collapsed into a single line.
+- Hero.tsx: the visual anchor is the data-backed capture specimen panel (real
+  rows from docs/data/index-data.json plus its provenance row count); the old
+  fake terminal, and with it the STATUS:/TIME: footer line, is gone.
 - InstallModal.tsx: install command renders via the token-driven code island
   (``.light``-aware ``--code-bg``/``--code-fg`` in docs/app/globals.css,
   >= 7:1 contrast in both themes); the known-broken dim cyan opacities
@@ -38,20 +40,26 @@ def _read_text(path: Path) -> str:
 # ── Hero.tsx ────────────────────────────────────────────────────────────
 
 
-def test_hero_uses_stats_for_status_line() -> None:
-    """The collapsed terminal footer line should reference STATS, not literals."""
+def test_hero_specimen_panel_is_data_backed() -> None:
+    """The hero's visual anchor is the real capture specimen, not a terminal.
+
+    Replaces the old assertion that the hero's collapsed terminal footer line
+    read from STATS: that terminal no longer exists. The panel must render the
+    committed capture rows plus its provenance row count, and must not regress
+    into a mock terminal.
+    """
     if not HERO.exists():
         pytest.skip("Hero.tsx replaced by Masthead.tsx in The Index Sheet architecture")
     text = _read_text(HERO)
-    # The collapsed line should mention pages, time, and pgs/sec via STATS.
-    assert "STATS.pagesCaptured" in text, (
-        "Hero.tsx must read the page count from STATS"
+    assert "IndexSheet" in text, (
+        "Hero.tsx must render the capture specimen through IndexSheet"
     )
-    assert "STATS.captureTimeSec" in text, (
-        "Hero.tsx must read the capture time from STATS"
+    assert "indexData.provenance.totalRows" in text, (
+        "Hero.tsx must show the specimen's row count from the capture provenance"
     )
-    assert "STATS.speedPagesPerSec" in text, (
-        "Hero.tsx must read the speed from STATS"
+    assert "not a mock terminal" in text, (
+        "Hero.tsx must keep the honesty caption — the rows are real capture "
+        "data, and the page says so"
     )
 
 

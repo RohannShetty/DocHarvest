@@ -6,7 +6,7 @@ This test fails if any of these tokens reappear in `docs/components/*.tsx`:
   by `test_install_modal_opacity.py` but included here for the typography
   sweep)
 
-`animate-fadeIn` is ALLOWED in component files (Hero.tsx uses it 4x); the
+`animate-fadeIn` is ALLOWED in component files (`InstallModal.tsx` uses it); the
 test only ensures the keyframe is actually defined in globals.css.
 """
 
@@ -67,15 +67,28 @@ def test_globals_css_defines_fadein_keyframe() -> None:
     )
 
 
-def test_hero_uses_animate_fadeIn_with_real_keyframe() -> None:
-    """The 4 `animate-fadeIn` references in Hero.tsx must work because the keyframe exists."""
-    hero = REPO_ROOT / "docs" / "components" / "Hero.tsx"
-    if not hero.exists():
-        pytest.skip("Hero.tsx replaced by Masthead.tsx in The Index Sheet architecture")
-    text = hero.read_text(encoding="utf-8")
-    assert text.count("animate-fadeIn") >= 4, (
-        "Hero.tsx should reference `animate-fadeIn` at least 4 times (one per tab panel)"
+def test_animate_fadein_users_have_the_keyframe() -> None:
+    """Any component using `animate-fadeIn` must be backed by the keyframe.
+
+    `animate-fadeIn` was originally used 4x by the old hero tab panels. Those
+    panels are gone; `InstallModal.tsx` is the surviving user. The contract is
+    now usage-driven rather than a fixed count: if a component animates with
+    this class, `globals.css` must define it (see
+    `tests/test_animation_contract.py` for the general rule).
+    """
+    users = [
+        path
+        for path in sorted(COMPONENTS.glob("*.tsx"))
+        if "animate-fadeIn" in _read_text(path)
+    ]
+    if not users:
+        pytest.skip("no component uses animate-fadeIn any more")
+    globals_text = _read_text(GLOBALS_CSS)
+    assert "@keyframes fadeIn" in globals_text, (
+        "globals.css must define `@keyframes fadeIn` while "
+        f"{[p.name for p in users]} animate with `animate-fadeIn`"
     )
-    # The keyframe is defined in globals.css (asserted above); this test
-    # additionally checks that the cross-file contract holds: the keyframe
-    # is defined and Hero uses it. No runtime check (CSS is not Python-importable).
+    assert ".animate-fadeIn" in globals_text, (
+        "globals.css must define the `.animate-fadeIn` utility class"
+    )
+

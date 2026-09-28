@@ -595,6 +595,78 @@ wheels = [
 ]
 
 [[package]]
+name = "docharvest"
+version = "11.1.1"
+source = { editable = "." }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "fpdf2" },
+    { name = "lxml" },
+    { name = "markdownify" },
+    { name = "mcp" },
+    { name = "pyperclip" },
+    { name = "pywebview" },
+    { name = "requests" },
+    { name = "textual" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+]
+js = [
+    { name = "playwright" },
+]
+mcp = [
+    { name = "mcp" },
+]
+render = [
+    { name = "playwright" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pyinstaller" },
+    { name = "pyinstaller-hooks-contrib" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-timeout" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.11.0" },
+    { name = "fpdf2", specifier = ">=2.8.8" },
+    { name = "lxml", specifier = ">=4.9.0" },
+    { name = "markdownify", specifier = ">=0.11.0" },
+    { name = "mcp", specifier = ">=1.2.0" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.2.0" },
+    { name = "playwright", marker = "extra == 'js'", specifier = ">=1.40.0" },
+    { name = "playwright", marker = "extra == 'render'", specifier = ">=1.40.0" },
+    { name = "pyperclip", specifier = ">=1.8.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
+    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
+    { name = "pywebview", specifier = ">=6.2.1" },
+    { name = "requests", specifier = ">=2.28.0" },
+    { name = "textual", specifier = ">=0.60" },
+]
+provides-extras = ["mcp", "render", "js", "dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pyinstaller", specifier = ">=6.22.2" },
+    { name = "pyinstaller-hooks-contrib", specifier = ">=2026.6" },
+    { name = "pytest", specifier = ">=9.1.1" },
+    { name = "pytest-asyncio", specifier = ">=1.4.0" },
+    { name = "pytest-timeout", specifier = ">=2.4.0" },
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -675,78 +747,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/1e/bc/8fd4321aed40cadadddc8f311c65b6082346b252bca048f7b476d8f35d72/fpdf2-2.8.8.tar.gz", hash = "sha256:9e94e155e85e8053329a9a1fce8b566fd7a7c5bb79e98a1a3952d379b947c5b9", size = 374689, upload-time = "2026-08-09T23:32:45.334Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f5/be/af012eda9507494f28b99b077423806c43a11573eb6225dd46f19ae2d263/fpdf2-2.8.8-py3-none-any.whl", hash = "sha256:3557a478fc577a929c94aace9666aed4dcc432b5ab6764232e6a59f1ccd75f17", size = 337000, upload-time = "2026-08-09T23:32:43.728Z" },
-]
-
-[[package]]
-name = "gitbook-downloader"
-version = "11.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "fpdf2" },
-    { name = "lxml" },
-    { name = "markdownify" },
-    { name = "mcp" },
-    { name = "pyperclip" },
-    { name = "pywebview" },
-    { name = "requests" },
-    { name = "textual" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-]
-js = [
-    { name = "playwright" },
-]
-mcp = [
-    { name = "mcp" },
-]
-render = [
-    { name = "playwright" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pyinstaller" },
-    { name = "pyinstaller-hooks-contrib" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-timeout" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "beautifulsoup4", specifier = ">=4.11.0" },
-    { name = "fpdf2", specifier = ">=2.8.8" },
-    { name = "lxml", specifier = ">=4.9.0" },
-    { name = "markdownify", specifier = ">=0.11.0" },
-    { name = "mcp", specifier = ">=1.2.0" },
-    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.2.0" },
-    { name = "playwright", marker = "extra == 'js'", specifier = ">=1.40.0" },
-    { name = "playwright", marker = "extra == 'render'", specifier = ">=1.40.0" },
-    { name = "pyperclip", specifier = ">=1.8.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
-    { name = "pywebview", specifier = ">=6.2.1" },
-    { name = "requests", specifier = ">=2.28.0" },
-    { name = "textual", specifier = ">=0.60" },
-]
-provides-extras = ["mcp", "render", "js", "dev"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pyinstaller", specifier = ">=6.22.2" },
-    { name = "pyinstaller-hooks-contrib", specifier = ">=2026.6" },
-    { name = "pytest", specifier = ">=9.1.1" },
-    { name = "pytest-asyncio", specifier = ">=1.4.0" },
-    { name = "pytest-timeout", specifier = ">=2.4.0" },
 ]
 
 [[package]]

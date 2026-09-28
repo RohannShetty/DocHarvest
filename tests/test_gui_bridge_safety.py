@@ -8,8 +8,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from gitbook_downloader.gui.bridge import ApiBridge
-from gitbook_downloader.output_contract import CapturedPage
+from docharvest.gui.bridge import ApiBridge
+from docharvest.output_contract import CapturedPage
 
 
 def test_bridge_start_capture_payload_contract():
@@ -87,7 +87,7 @@ def test_bridge_defaults_to_library_output_mode(monkeypatch):
         mock_result.version_id = "v1"
         return mock_result
 
-    monkeypatch.setattr("gitbook_downloader.gui.bridge.capture", fake_capture)
+    monkeypatch.setattr("docharvest.gui.bridge.capture", fake_capture)
 
     bridge = ApiBridge()
     res = bridge.start_capture("https://docs.example.com", {})
@@ -122,7 +122,7 @@ def test_bridge_handles_none_options(monkeypatch):
         mock_result.version_id = "v1"
         return mock_result
 
-    monkeypatch.setattr("gitbook_downloader.gui.bridge.capture", fake_capture)
+    monkeypatch.setattr("docharvest.gui.bridge.capture", fake_capture)
 
     bridge = ApiBridge()
     # Options with explicit None from JS

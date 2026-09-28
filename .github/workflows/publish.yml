@@ -4,13 +4,21 @@ name: Publish to PyPI
 #
 # ONE-TIME SETUP on PyPI (as account owner):
 #   pypi.org → Account settings → Publishing → "Add a pending publisher":
-#     PyPI project name:  gitbook-downloader
+#     PyPI project name:  docharvest
 #     Owner:              RohannShetty
-#     Repository:         gitbook-downloader
+#     Repository:         DocHarvest        (the repo was renamed from
+#                                          `docharvest`; if the stored
+#                                          publisher still says the old name,
+#                                          OIDC publishing will fail — update it)
 #     Workflow filename:  publish.yml
 #     Environment:        pypi
 # After that, run this workflow (Actions → Publish to PyPI → Run workflow)
 # or publish any GitHub release — uploads authenticate via OIDC.
+#
+# The published metadata comes from pyproject.toml [project.urls] + README.md, so
+# both must point at the DocHarvest repo/showcase before a release. 11.1.1 exists
+# to correct exactly that: earlier releases advertised the retired
+# `docharvest` slug and a GitHub Pages path that 404s.
 
 on:
   release:
@@ -45,10 +53,10 @@ jobs:
           uv venv .venv-smoke
           uv pip install --python .venv-smoke --no-cache dist/*.whl
           .venv-smoke/bin/gitbook-dl --version
-          uv run --no-project --python .venv-smoke/bin/python python -c "from gitbook_downloader.mcp import server; print('mcp server import OK')"
+          uv run --no-project --python .venv-smoke/bin/python python -c "from docharvest.mcp import server; print('mcp server import OK')"
           uv run --no-project --python .venv-smoke/bin/python python -c "
           from importlib.metadata import requires
-          deps = requires('gitbook-downloader')
+          deps = requires('docharvest')
           assert any(d.startswith('mcp>=') and 'extra' not in d for d in deps), 'mcp must be a base dependency'
           print('mcp present in base dependencies OK')"
 

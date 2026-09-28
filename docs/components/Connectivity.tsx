@@ -6,7 +6,7 @@ const CONFIGS = [
     label: 'MCP client',
     title: 'Connect a client over stdio',
     path: '.cursor/mcp.json or claude_desktop_config.json',
-    code: '{\n  "mcpServers": {\n    "docharvest": {\n      "command": "uvx",\n      "args": ["gitbook-downloader", "mcp"]\n    }\n  }\n}',
+    code: '{\n  "mcpServers": {\n    "docharvest": {\n      "command": "uvx",\n      "args": ["docharvest", "mcp"]\n    }\n  }\n}',
   },
   {
     label: 'Agent Skill',

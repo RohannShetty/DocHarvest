@@ -18,7 +18,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DIFF_VIEW = REPO_ROOT / "frontend" / "src" / "views" / "DiffView.tsx"
-BRIDGE = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py"
+BRIDGE = REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py"
 
 
 def test_diff_view_no_hardcoded_snapshot_fallback() -> None:
@@ -45,10 +45,10 @@ def test_diff_view_reads_snapshots_from_library() -> None:
 def test_bridge_list_library_returns_snapshots_field() -> None:
     """Smoke: ApiBridge().list_library() includes a ``snapshots: list[str]`` per entry."""
     # Use a temp dir so we don't touch the real user library.
-    from gitbook_downloader.gui.bridge import ApiBridge
+    from docharvest.gui.bridge import ApiBridge
 
     with tempfile.TemporaryDirectory() as tmp:
-        from gitbook_downloader.storage import StorageManager
+        from docharvest.storage import StorageManager
         storage = StorageManager(base_dir=Path(tmp))
         bridge = ApiBridge(storage_manager=storage)
         # An empty storage returns an empty list; that's fine. We just need

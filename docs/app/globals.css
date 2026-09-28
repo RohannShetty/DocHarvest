@@ -1,41 +1,12 @@
 @import "tailwindcss";
+/* Brand values live in brand/tokens.json; this file is generated into the app
+   by scripts/sync-brand-tokens.mjs so the website and the desktop GUI cannot
+   drift apart. Do not re-declare these colours here. */
+@import "./brand-tokens.css";
 
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:not(.light *));
-
-:root {
-  --bond: #09090B;
-  --bond-2: #101013;
-  --bond-3: #18181B;
-  --rule: #27272A;
-  --rule-strong: #3F3F46;
-  --rule-subtle: #1F1F23;
-  --ink: #F4F4F5;
-  --ink-2: #A1A1AA;
-  --ink-3: #8A8A93;
-  --match: #F59E0B;
-  --match-deep: #D97706;
-  --match-subtle: rgba(245, 158, 11, 0.08);
-  --alert: #EF4444;
-  --radius: 0px;
-}
-
-.light {
-  --bond: #FBFBFA;
-  --bond-2: #F4F4F5;
-  --bond-3: #ECECEF;
-  --rule: #E4E4E7;
-  --rule-strong: #A1A1AA;
-  --rule-subtle: #EDEDF0;
-  --ink: #18181B;
-  --ink-2: #52525B;
-  --ink-3: #6B6B74;
-  --match: #B45309;
-  --match-deep: #92400E;
-  --match-subtle: rgba(180, 83, 9, 0.06);
-  --alert: #B91C1C;
-}
 
 @theme inline {
   --color-bond: var(--bond);
@@ -51,6 +22,8 @@
   --color-match-deep: var(--match-deep);
   --color-match-subtle: var(--match-subtle);
   --color-alert: var(--alert);
+  --color-ok: var(--ok);
+  --color-paper: var(--paper);
   --radius-xs: 0px;
   --radius-sm: 0px;
   --radius-md: 0px;
@@ -70,7 +43,10 @@
     font-stretch: 100%;
     font-weight: 700;
     font-size: clamp(2.5rem, 6vw, 5.25rem);
-    line-height: 0.98;
+    /* 0.98 leading looked tight-but-intentional on one line and tiring on two,
+       which is what the hero headline actually is at every breakpoint below
+       1440px. 1.06 keeps the display weight without crowding the lines. */
+    line-height: 1.06;
     letter-spacing: -0.045em;
     text-wrap: balance;
   }
@@ -88,8 +64,12 @@
   .sheet-label {
     font-family: var(--font-mono);
     font-weight: 500;
-    font-size: 0.6875rem;
-    letter-spacing: 0.12em;
+    /* Was 11px at 0.12em tracking. The smallest text on the page is also the
+       most load-bearing (section labels, table headers, field names), and 11px
+       uppercase is genuinely hard to read. 12px at 0.10em is slightly *narrower*
+       overall — same layout, larger glyphs. */
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-3);
   }
@@ -181,6 +161,32 @@ code {
 pre {
   margin: 0;
   white-space: pre-wrap;
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────
+   Every custom `animate-*` utility used in `docs/components` must have its
+   keyframe defined here. `tests/test_animation_contract.py` enforces this.
+
+   Why it exists: the Index Sheet redesign removed the hero's tab panels and
+   with them the only `@keyframes fadeIn` definition, while
+   `InstallModal.tsx` kept using `animate-fadeIn` — so the install modal's
+   entrance animation was silently dead for several releases. `tailwindcss-animate`
+   does not provide `animate-fadeIn` (it ships `animate-in` / `fade-in`), so the
+   keyframe has to be declared explicitly. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 180ms ease-out both;
 }
 
 .sr-only {

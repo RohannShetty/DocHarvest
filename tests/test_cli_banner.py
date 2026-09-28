@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CLI = REPO_ROOT / "src" / "gitbook_downloader" / "cli.py"
+CLI = REPO_ROOT / "src" / "docharvest" / "cli.py"
 
 
 def _read_cli() -> str:
@@ -77,7 +77,7 @@ def test_banner_called_in_each_command() -> None:
 
 def test_banner_returns_three_lines() -> None:
     """Smoke: _banner('hello') returns a 3-tuple of strings."""
-    from gitbook_downloader.cli import _banner
+    from docharvest.cli import _banner
     result = _banner("hello")
     assert isinstance(result, tuple)
     assert len(result) == 3

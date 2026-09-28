@@ -14,7 +14,7 @@ import {
   Moon,
   Command,
   Heart,
-  Info,
+
   BookOpen,
   HelpCircle
 } from "lucide-react"
@@ -57,7 +57,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
   return (
     <aside
-      className={`relative flex flex-col border-r border-border bg-card/90 backdrop-blur-xl transition-all duration-300 select-none ${
+      className={`relative flex flex-col border-r border-border bg-card transition-all duration-300 select-none ${
         isCollapsed ? "w-16" : "w-60"
       }`}
     >
@@ -71,11 +71,11 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold tracking-tight text-foreground text-sm font-mono">DocHarvest</span>
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-cyan-500/30 text-cyan-700 bg-cyan-500/10 dark:text-cyan-400 font-mono">
+                <Badge variant="outline" className="text-xs px-1.5 py-0 h-4 border-primary/30 text-primary bg-primary/10 font-mono">
                   v{APP_VERSION}
                 </Badge>
               </div>
-              <span className="text-[11px] text-muted-foreground font-medium truncate">Universal Doc Harvester</span>
+              <span className="text-xs text-muted-foreground font-medium truncate">Universal Doc Harvester</span>
             </div>
           </div>
         )}
@@ -113,7 +113,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   {item.badge && (
                     <Badge
                       variant="secondary"
-                      className="ml-auto text-[10px] h-4 px-1.5 font-normal"
+                      className="ml-auto text-xs h-4 px-1.5 font-normal"
                     >
                       {item.badge}
                     </Badge>
@@ -144,7 +144,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={onOpenTour}
-                className="h-8 w-8 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400"
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
                 title="Start Interactive Tour"
               >
                 <HelpCircle className="h-4 w-4" />
@@ -156,17 +156,17 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={onOpenAbout}
-                className="h-8 w-8 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400"
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
                 title="About DocHarvest & Author"
               >
-                <Heart className="h-3.5 w-3.5 text-rose-500/80 hover:text-rose-500" />
+                <Heart className="h-3.5 w-3.5 text-destructive hover:text-destructive" />
               </Button>
             )}
           </div>
 
           {!isCollapsed && (
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono flex items-center gap-0.5">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted text-xs font-mono flex items-center gap-0.5">
                 <Command className="h-2.5 w-2.5" /> K
               </kbd>
             </div>

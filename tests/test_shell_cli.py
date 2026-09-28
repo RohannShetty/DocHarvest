@@ -12,15 +12,15 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader import cli
+from docharvest import cli
 
 
 @pytest.fixture(autouse=True)
 def isolated_env(tmp_path, monkeypatch):
     """Every CLI test runs in a temp CWD with a temp library — never the
-    real ~/.gitbook-downloader, never the repo."""
+    real ~/.docharvest, never the repo."""
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path / "library"))
+    monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path / "library"))
     return tmp_path
 
 
@@ -41,7 +41,7 @@ def fake_capture(monkeypatch):
     def fake_capture_fn(url, options, progress=None):
         recorded["url"] = url
         recorded["options"] = options
-        result = pytest.importorskip("gitbook_downloader.api").CaptureResult(
+        result = pytest.importorskip("docharvest.api").CaptureResult(
             source_url=url, provider="gitbook",
             site_versions_found=("v2",), pages_captured=2, skipped=1,
             warnings=(), library_path=None, local_path=None,
@@ -49,7 +49,7 @@ def fake_capture(monkeypatch):
         )
         return result
 
-    from gitbook_downloader import api
+    from docharvest import api
     monkeypatch.setattr(api, "capture", fake_capture_fn)
     return recorded
 
@@ -88,7 +88,7 @@ class TestCommandSurface:
         with pytest.raises(SystemExit) as exc:
             cli.main(["--version"])
         assert exc.value.code == 0
-        assert "gitbook-downloader" in capsys.readouterr().out
+        assert "docharvest" in capsys.readouterr().out
 
 
 # ── Bare-URL sugar & bare invocation ────────────────────────────────────
@@ -162,7 +162,7 @@ class TestCaptureFlags:
 
     def test_latest_only_maps_to_sentinel(self, tmp_path, monkeypatch,
                                           fake_capture):
-        from gitbook_downloader.api import LATEST_ONLY
+        from docharvest.api import LATEST_ONLY
 
         monkeypatch.chdir(tmp_path)
         cli.main(["dl", "https://docs.example.com/", "--latest-only"])
@@ -175,7 +175,7 @@ class TestCaptureFlags:
 
     def test_preset_supplies_url(self, tmp_path, monkeypatch,
                                  fake_capture):
-        config = tmp_path / "gitbook-downloader.toml"
+        config = tmp_path / "docharvest.toml"
         config.write_text(
             '[presets.api]\nurl = "https://docs.example.com/"\n',
             encoding="utf-8",
@@ -218,7 +218,7 @@ class TestConfigCommands:
                                               capsys):
         monkeypatch.chdir(tmp_path)
         assert cli.main(["config", "init", "--project"]) == 0
-        assert (tmp_path / "gitbook-downloader.toml").exists()
+        assert (tmp_path / "docharvest.toml").exists()
 
     def test_config_path_lists_search_order(self, tmp_path, monkeypatch,
                                             capsys):
@@ -239,19 +239,19 @@ class TestConfigCommands:
 class TestHistoryAndDiff:
     def test_history_unknown_domain_exits_1(self, tmp_path, monkeypatch,
                                             capsys):
-        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path))
+        monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path))
         rc = cli.main(["history", "ghost.example.com"])
         assert rc == 1
 
     def test_diff_unknown_domain_exits_1(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path))
+        monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path))
         rc = cli.main(["diff", "ghost.example.com", "v1.0.0", "v1.0.1"])
         assert rc == 1
 
     def test_history_shows_snapshots(self, tmp_path, monkeypatch, capsys):
-        from gitbook_downloader.storage import StorageManager, VersionManager
+        from docharvest.storage import StorageManager, VersionManager
 
-        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path))
+        monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path))
         sm = StorageManager(base_dir=tmp_path)
         sm.save_doc(domain="d.com", content="C", url="u", title="T",
                     pages=1, provider="g", new_pages=1, size_kb=0.1)
@@ -289,11 +289,11 @@ class TestConsoleEncoding:
 
 class TestMcpCommand:
     def test_mcp_starts_server_main(self, monkeypatch):
-        """`gitbook-dl mcp` must delegate to gitbook_downloader.mcp.main()."""
+        """`gitbook-dl mcp` must delegate to docharvest.mcp.main()."""
         calls = []
-        fake_module = types.ModuleType("gitbook_downloader.mcp")
+        fake_module = types.ModuleType("docharvest.mcp")
         fake_module.main = lambda: calls.append("main")
-        monkeypatch.setitem(sys.modules, "gitbook_downloader.mcp", fake_module)
+        monkeypatch.setitem(sys.modules, "docharvest.mcp", fake_module)
 
         assert cli.main(["mcp"]) == 0
         assert calls == ["main"]
@@ -313,17 +313,17 @@ class TestMcpCommand:
         """
         # Keep the fresh server import off the real home directory.
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path / "library"))
+        monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path / "library"))
         cached = [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]
         for key in cached:
             monkeypatch.delitem(sys.modules, key, raising=False)
         monkeypatch.setitem(sys.modules, "mcp", None)  # blocks `import mcp`
-        monkeypatch.delitem(sys.modules, "gitbook_downloader.mcp", raising=False)
-        monkeypatch.delitem(sys.modules, "gitbook_downloader.mcp.server", raising=False)
+        monkeypatch.delitem(sys.modules, "docharvest.mcp", raising=False)
+        monkeypatch.delitem(sys.modules, "docharvest.mcp.server", raising=False)
 
         rc = cli.main(["mcp"])
 
         assert rc == 1
         err = capsys.readouterr().err
         assert "MCP functionality requires the 'mcp' package" in err
-        assert "gitbook-downloader[mcp]" in err
+        assert "docharvest[mcp]" in err

@@ -1,53 +1,17 @@
+/* Fonts are bundled, not fetched: the desktop app has to look identical offline.
+   Archivo + Geist Mono are the same two families the website self-hosts, so the
+   GUI and the site now set type in the same voice. */
+@import "@fontsource-variable/archivo";
+@import "@fontsource-variable/geist-mono";
+
+/* Brand tokens (generated). Regenerate with: node scripts/sync-brand-tokens.mjs
+   This brings in the shared primitives plus the shadcn/ui semantic layer, so
+   every component in ./components/ui reads the brand without being edited. */
+@import "./styles/brand-tokens.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 38 92% 50%;
-    --primary-foreground: 224 47% 4.5%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 38 92% 50%;
-    --radius: 0.625rem;
-  }
-
-  .dark {
-    --background: 224 47% 4.5%;
-    --foreground: 210 40% 98%;
-    --card: 224 47% 7%;
-    --card-foreground: 210 40% 98%;
-    --popover: 224 47% 7%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 38 92% 50%;
-    --primary-foreground: 224 47% 4.5%;
-    --secondary: 217 33% 13%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 11%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 14%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 15%;
-    --input: 217 33% 15%;
-    --ring: 38 92% 50%;
-  }
-}
 
 @layer base {
   * {
@@ -58,70 +22,51 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     user-select: none;
   }
+  /* Numbers in a capture tool are data: keep them from dancing as they tick. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-/* Premium Glassmorphism & custom glowing utilities */
-.glass-panel {
-  background: hsl(var(--card) / 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid hsl(var(--border) / 0.85);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+/* ---------------------------------------------------------------------------
+   Surfaces.
+
+   The website's design language is flat hairline sheets: depth comes from a
+   1px rule, never from blur or shadow. The GUI used to fake depth with
+   glassmorphism (20px backdrop blur + drop shadows + multi-hue glow), which
+   is a large part of why the two surfaces never looked like one product.
+--------------------------------------------------------------------------- */
+.sheet-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
 }
 
-.dark .glass-panel {
-  background: hsl(var(--card) / 0.75);
-  border: 1px solid hsl(var(--border) / 0.8);
-  box-shadow: none;
+.sheet-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card {
-  background: hsl(var(--card) / 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(var(--border) / 0.85);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dark .glass-card {
-  background: hsl(var(--card) / 0.65);
-  border: 1px solid hsl(var(--border) / 0.7);
-  box-shadow: none;
-}
-
-.glass-card:hover {
+.sheet-card:hover {
   border-color: hsl(var(--primary) / 0.5);
-  box-shadow: 0 8px 30px -12px rgba(245, 158, 11, 0.15);
 }
 
-.glow-amber {
-  box-shadow: 0 0 24px -4px rgba(245, 158, 11, 0.4), 0 0 0 1px rgba(245, 158, 11, 0.25);
+/* Labels mirror the website's .sheet-label: mono, uppercase, wide tracking,
+   never below 12px. */
+.sheet-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
 }
 
-.glow-cyan {
-  box-shadow: 0 0 24px -4px rgba(14, 165, 233, 0.35), 0 0 0 1px rgba(14, 165, 233, 0.25);
-}
-
-.glow-emerald {
-  box-shadow: 0 0 24px -4px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(16, 185, 129, 0.25);
-}
-
-.glow-rose {
-  box-shadow: 0 0 24px -4px rgba(244, 63, 94, 0.4), 0 0 0 1px rgba(244, 63, 94, 0.25);
-}
-
-.glow-emerald {
-  box-shadow: 0 0 24px -4px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(16, 185, 129, 0.25);
-}
-
-.glow-rose {
-  box-shadow: 0 0 24px -4px rgba(244, 63, 94, 0.4), 0 0 0 1px rgba(244, 63, 94, 0.25);
-}
-
-/* Smooth micro-interactions */
+/* Smooth micro-interactions (kept - motion is part of the brand feel). */
 .interactive-scale {
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 .interactive-scale:hover {
   transform: translateY(-1px);
@@ -130,7 +75,7 @@
   transform: scale(0.98);
 }
 
-/* Custom Scrollbars */
+/* Custom Scrollbars - sharp, like every other corner in the product. */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -140,7 +85,7 @@
 }
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--muted-foreground) / 0.25);
-  border-radius: 9999px;
+  border-radius: 0;
   transition: background-color 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {

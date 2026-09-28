@@ -2,7 +2,7 @@
 
 The TypeScript `pyApi` interface in `frontend/src/lib/bridge.ts` must declare
 every method exposed by the Python `ApiBridge` class in
-`src/gitbook_downloader/gui/bridge.py`, and the `list_library` return shape
+`src/docharvest/gui/bridge.py`, and the `list_library` return shape
 must include the `snapshots: list[str]` field added in Phase 2.
 
 Naming convention:
@@ -23,7 +23,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TS_BRIDGE = REPO_ROOT / "frontend" / "src" / "lib" / "bridge.ts"
-PY_BRIDGE = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py"
+PY_BRIDGE = REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py"
 
 
 def _read_text(path: Path) -> str:

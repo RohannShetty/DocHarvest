@@ -11,14 +11,14 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.tui.engine_protocol import (
+from docharvest.tui.engine_protocol import (
     PROGRESS_KINDS,
     CaptureOptions,
     CaptureResult,
     EngineProtocol,
     ProgressEvent,
 )
-from gitbook_downloader.tui.testing import FakeEngine
+from docharvest.tui.testing import FakeEngine
 
 # ── Pinned contract (plan §2) ────────────────────────────────────────────
 
@@ -97,7 +97,7 @@ def _fresh_import(module_name: str):
     set of newly-added top-level module names."""
     before = set(sys.modules)
     for mod in list(sys.modules):
-        if mod.startswith(("gitbook_downloader", "textual")):
+        if mod.startswith(("docharvest", "textual")):
             del sys.modules[mod]
     import importlib
 
@@ -108,24 +108,24 @@ def _fresh_import(module_name: str):
 def test_engine_protocol_module_imports_no_textual():
     """The contract layer must never pull textual.
 
-    Note: the repo root ``gitbook_downloader/__init__.py`` (v6 legacy,
+    Note: the repo root ``docharvest/__init__.py`` (v6 legacy,
     outside TUI write scope) eagerly imports providers/utils, so
     transitive stdlib/backend roots appear regardless; we assert on what
     the TUI layers themselves control.
     """
     saved = dict(sys.modules)
     try:
-        new_top_level = _fresh_import("gitbook_downloader.tui.engine_protocol")
-        new_top_level |= _fresh_import("gitbook_downloader.tui.testing")
+        new_top_level = _fresh_import("docharvest.tui.engine_protocol")
+        new_top_level |= _fresh_import("docharvest.tui.testing")
 
         assert "textual" not in new_top_level
-        assert "gitbook_downloader.api" not in sys.modules
+        assert "docharvest.api" not in sys.modules
         # Only tui-owned submodules may be newly imported.
         unexpected = {
             m
             for m in new_top_level
-            if m.startswith("gitbook_downloader.")
-            and not m.startswith("gitbook_downloader.tui")
+            if m.startswith("docharvest.")
+            and not m.startswith("docharvest.tui")
         }
         assert unexpected == set(), unexpected
     finally:
@@ -138,31 +138,31 @@ def test_real_engine_module_is_lazy_about_backends():
     scope; backend imports happen only inside method bodies at launch."""
     saved = dict(sys.modules)
     try:
-        new_top_level = _fresh_import("gitbook_downloader.tui.real_engine")
+        new_top_level = _fresh_import("docharvest.tui.real_engine")
 
         assert "textual" not in new_top_level
-        assert "gitbook_downloader.api" not in sys.modules
+        assert "docharvest.api" not in sys.modules
 
         # Constructing the adapter still imports nothing heavy.
-        from gitbook_downloader.tui.real_engine import RealEngine
+        from docharvest.tui.real_engine import RealEngine
 
         RealEngine()
-        assert "gitbook_downloader.api" not in sys.modules
+        assert "docharvest.api" not in sys.modules
 
         # Static laziness contract: backend/textual imports may only live
         # inside function bodies, never at module top level.
         import ast
         import inspect
 
-        from gitbook_downloader.tui import app as app_mod
-        from gitbook_downloader.tui import real_engine as engine_mod
+        from docharvest.tui import app as app_mod
+        from docharvest.tui import real_engine as engine_mod
 
         forbidden_roots = ("requests", "textual")
         forbidden_full = {
-            "gitbook_downloader.api",
-            "gitbook_downloader.storage.manager",
-            "gitbook_downloader.search.index",
-            "gitbook_downloader.providers",
+            "docharvest.api",
+            "docharvest.storage.manager",
+            "docharvest.search.index",
+            "docharvest.providers",
         }
 
         def assert_lazy(mod, roots):
@@ -192,9 +192,9 @@ def test_tui_package_import_does_not_pull_textual():
     try:
         before = set(sys.modules)
         for mod in list(sys.modules):
-            if mod.startswith(("gitbook_downloader", "textual")):
+            if mod.startswith(("docharvest", "textual")):
                 del sys.modules[mod]
-        import gitbook_downloader.tui as tui_pkg  # noqa: F401
+        import docharvest.tui as tui_pkg  # noqa: F401
 
         assert "textual" not in set(sys.modules) - before
         # Lazy attribute access works and only then pulls textual.
@@ -207,7 +207,7 @@ def test_tui_package_import_does_not_pull_textual():
 
 
 def test_capture_run_defaults_allow_failed_runs():
-    from gitbook_downloader.tui.engine_protocol import CaptureRun
+    from docharvest.tui.engine_protocol import CaptureRun
 
     run = CaptureRun(
         url="https://x.example",

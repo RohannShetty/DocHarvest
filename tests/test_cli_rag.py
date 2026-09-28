@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader import api, cli
-from gitbook_downloader.storage import StorageManager
+from docharvest import api, cli
+from docharvest.storage import StorageManager
 
 PAGES = [
     {
@@ -55,7 +55,7 @@ class FakeEngine:
 def isolated_env(tmp_path, monkeypatch):
     """Temp CWD + temp library, wired into the facade via its seams."""
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path / "library"))
+    monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path / "library"))
     manager = StorageManager(base_dir=tmp_path / "library")
     monkeypatch.setattr(api, "_default_storage", lambda: manager)
     return tmp_path
@@ -114,7 +114,7 @@ class TestRagExport:
         def broken_export(*args, **kwargs):
             raise RuntimeError("disk exploded")
 
-        monkeypatch.setattr("gitbook_downloader.utils.export.export_to_jsonl", broken_export)
+        monkeypatch.setattr("docharvest.utils.export.export_to_jsonl", broken_export)
 
         rc = cli.main(["capture", "https://docs.example.com/", "--rag"])
 
@@ -160,7 +160,7 @@ class TestPdfExport:
         def broken_export(*args, **kwargs):
             raise RuntimeError("no fonts today")
 
-        monkeypatch.setattr("gitbook_downloader.utils.export.export_to_pdf", broken_export)
+        monkeypatch.setattr("docharvest.utils.export.export_to_pdf", broken_export)
 
         rc = cli.main(["capture", "https://docs.example.com/", "--pdf"])
 

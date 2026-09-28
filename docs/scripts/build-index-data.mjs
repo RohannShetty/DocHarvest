@@ -215,8 +215,8 @@ function excerpt(file, lineCount) {
   return readLines(file).slice(0, lineCount).join('\n');
 }
 
-/** Book excerpt is the first 24 lines; llms.txt the first 20. */
-const PLATE_LINES = { book: 24, llms: 20, page: 12 };
+/** Book excerpt is the first 24 lines; manifests the first 20. */
+const PLATE_LINES = { book: 24, llms: 20, full: 20, page: 12 };
 
 function pagePlate(pages, pagesDir) {
   if (pages.length === 0) return null;
@@ -293,6 +293,7 @@ async function main() {
 
     const bookPath = join(dir, 'book.md');
     const llmsPath = join(dir, 'llms.txt');
+    const fullManifestPath = join(dir, 'llms-full.txt');
     const metadataPath = join(dir, 'metadata.json');
     const versionsDir = join(dir, 'versions');
     const exportsDir = join(dir, 'exports');
@@ -303,6 +304,7 @@ async function main() {
     const pagesBytes = pages.reduce((sum, file) => sum + statSync(file).size, 0);
     const bookBytes = existsSync(bookPath) ? statSync(bookPath).size : null;
     const llmsBytes = existsSync(llmsPath) ? statSync(llmsPath).size : null;
+    const fullManifestBytes = existsSync(fullManifestPath) ? statSync(fullManifestPath).size : null;
 
     const comparison = await rawHtmlComparison(facts, pages, pagesDir);
 
@@ -312,6 +314,9 @@ async function main() {
         : null,
       llms: existsSync(llmsPath)
         ? { file: 'llms.txt', excerpt: excerpt(llmsPath, PLATE_LINES.llms) }
+        : null,
+      full: existsSync(fullManifestPath)
+        ? { file: 'llms-full.txt', excerpt: excerpt(fullManifestPath, PLATE_LINES.full) }
         : null,
       page: pagePlate(pages, pagesDir),
       rag: ragPath && existsSync(ragPath)
@@ -330,13 +335,15 @@ async function main() {
       bytes: {
         'book.md': bookBytes,
         'llms.txt': llmsBytes,
+        'llms-full.txt': fullManifestBytes,
         pages: pagesBytes,
-        total: (bookBytes ?? 0) + (llmsBytes ?? 0) + pagesBytes,
+        total: (bookBytes ?? 0) + (llmsBytes ?? 0) + (fullManifestBytes ?? 0) + pagesBytes,
       },
       outputs: [
         { path: 'pages/', bytes: pagesBytes, pages: pages.length },
         { path: 'book.md', bytes: bookBytes, libraryName: 'docs.md' },
         { path: 'llms.txt', bytes: llmsBytes },
+        { path: 'llms-full.txt', bytes: fullManifestBytes },
         { path: 'metadata.json', bytes: existsSync(metadataPath) ? statSync(metadataPath).size : null },
         { path: 'versions/', bytes: existsSync(versionsDir) ? statSync(versionsDir).size : null },
         {

@@ -10,22 +10,21 @@ import {
   Calendar, 
   HardDrive, 
   Sparkles, 
-  ExternalLink, 
+
   RefreshCw, 
   ArrowUpDown, 
-  FileCode, 
+
   Check,
   Pencil,
   Edit3,
   X,
   CheckSquare,
   Square,
-  Share2
-} from "lucide-react"
+  } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, } from "@/components/ui/card"
 import { formatBytes } from "@/lib/utils"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
@@ -170,19 +169,19 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   const getProviderBadgeStyle = (provider: string) => {
     const p = (provider || "").toLowerCase()
-    if (p.includes("gitbook")) return "border-sky-500/30 text-sky-700 bg-sky-500/10 dark:text-sky-400"
-    if (p.includes("mintlify")) return "border-teal-500/30 text-teal-700 bg-teal-500/10 dark:text-teal-400"
-    if (p.includes("docusaurus")) return "border-emerald-500/30 text-emerald-700 bg-emerald-500/10 dark:text-emerald-400"
-    if (p.includes("readthedocs")) return "border-blue-500/30 text-blue-700 bg-blue-500/10 dark:text-blue-400"
-    return "border-amber-500/30 text-amber-700 bg-amber-500/10 dark:text-amber-400"
+    if (p.includes("gitbook")) return "border-primary/30 text-muted-foreground bg-primary/10"
+    if (p.includes("mintlify")) return "border-border text-muted-foreground bg-muted"
+    if (p.includes("docusaurus")) return "border-border text-muted-foreground bg-muted"
+    if (p.includes("readthedocs")) return "border-primary/30 text-muted-foreground bg-primary/10"
+    return "border-primary/30 text-primary bg-primary/10"
   }
 
   return (
     <div className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full space-y-6 animate-in fade-in-50 duration-300">
       {/* Rename Dialog Modal */}
       {renamingDomain && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl backdrop-blur-xl animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 animate-in fade-in duration-150">
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Edit3 className="h-5 w-5 text-primary" />
@@ -319,7 +318,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
       {/* Batch Action Bar */}
       {isBatchMode && (
-        <Card className="border-primary/40 bg-primary/10 backdrop-blur-md shadow-sm p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-2">
+        <Card className="border-primary/40 bg-primary/10 shadow-sm p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -355,7 +354,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           Loading library entries...
         </div>
       ) : filteredAndSorted.length === 0 ? (
-        <Card className="glass-card p-12 text-center border-dashed border-border/80">
+        <Card className="sheet-card p-12 text-center border-dashed border-border/80">
           <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 border border-primary/20">
             <Library className="h-7 w-7" />
           </div>
@@ -373,7 +372,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             return (
               <Card
                 key={item.domain}
-                className={`glass-card flex flex-col justify-between group shadow-sm transition-all ${
+                className={`sheet-card flex flex-col justify-between group shadow-sm transition-all ${
                   isSelected ? "border-primary bg-primary/10 shadow-md shadow-primary/15" : "hover:border-primary/50"
                 }`}
               >
@@ -397,15 +396,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                           {item.title && item.title !== item.domain ? item.title : item.domain}
                         </h4>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[130px]">{item.domain}</span>
-                          <Badge variant="outline" className={`text-[9px] uppercase font-mono tracking-wider h-4 px-1.5 py-0 ${getProviderBadgeStyle(item.provider)}`}>
+                          <span className="text-xs text-muted-foreground font-mono truncate max-w-[130px]">{item.domain}</span>
+                          <Badge variant="outline" className={`text-xs uppercase font-mono tracking-wider h-4 px-1.5 py-0 ${getProviderBadgeStyle(item.provider)}`}>
                             {item.provider || "generic"}
                           </Badge>
                         </div>
                       </div>
                     </div>
 
-                    <Badge variant="secondary" className="text-[11px] font-mono shrink-0 bg-muted/60">
+                    <Badge variant="secondary" className="text-xs font-mono shrink-0 bg-muted/60">
                       {pageCount} pages
                     </Badge>
                   </div>
@@ -413,7 +412,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
                 <CardContent className="p-5 pt-0 space-y-4">
                   {/* Meta details */}
-                  <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground pt-3 border-t border-border/40">
+                  <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground pt-3 border-t border-border/40">
                     <div className="flex items-center gap-1.5 truncate">
                       <HardDrive className="h-3.5 w-3.5 text-muted-foreground/70" />
                       <span className="font-mono">{formatBytes(item.size_bytes || 0)}</span>
@@ -422,7 +421,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       <Layers className="h-3.5 w-3.5 text-muted-foreground/70" />
                       <span>{item.snapshot_count || item.snapshots?.length || 1} Snapshots</span>
                     </div>
-                    <div className="col-span-2 flex items-center gap-1.5 truncate text-[10px] text-muted-foreground/80">
+                    <div className="col-span-2 flex items-center gap-1.5 truncate text-xs text-muted-foreground/80">
                       <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
                       <span>{item.last_crawled || "Recently captured"}</span>
                     </div>

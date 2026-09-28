@@ -24,7 +24,7 @@ from typing import Any
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-BRIDGE_PY = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py"
+BRIDGE_PY = REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py"
 
 
 class _StubWindow:
@@ -41,7 +41,7 @@ class _StubWindow:
 
 def test_bridge_uses_queue_dispatcher() -> None:
     """The bridge must define a queue and a drain thread."""
-    from gitbook_downloader.gui.bridge import ApiBridge
+    from docharvest.gui.bridge import ApiBridge
     bridge = ApiBridge()
     # The instance has a queue attribute (queue.Queue).
     assert hasattr(bridge, "_emit_queue"), (
@@ -54,7 +54,7 @@ def test_bridge_uses_queue_dispatcher() -> None:
 
 def test_emit_to_js_enqueues_instead_of_calling_evaluate_js_directly() -> None:
     """The new _emit_to_js must NOT call window.evaluate_js synchronously."""
-    from gitbook_downloader.gui.bridge import ApiBridge
+    from docharvest.gui.bridge import ApiBridge
     win = _StubWindow()
     bridge = ApiBridge()
     bridge.set_window(win)
@@ -81,7 +81,7 @@ def test_emit_to_js_enqueues_instead_of_calling_evaluate_js_directly() -> None:
 
 def test_burst_of_50_emits_all_reach_window() -> None:
     """50 rapid emits from a worker thread must all be delivered."""
-    from gitbook_downloader.gui.bridge import ApiBridge
+    from docharvest.gui.bridge import ApiBridge
     win = _StubWindow()
     bridge = ApiBridge()
     bridge.set_window(win)
@@ -106,7 +106,7 @@ def test_burst_of_50_emits_all_reach_window() -> None:
 
 def test_cleanup_stops_drain_thread() -> None:
     """After cleanup(), the drain thread must be stopped (not alive)."""
-    from gitbook_downloader.gui.bridge import ApiBridge
+    from docharvest.gui.bridge import ApiBridge
     win = _StubWindow()
     bridge = ApiBridge()
     bridge.set_window(win)
@@ -125,7 +125,7 @@ def test_cleanup_stops_drain_thread() -> None:
 
 def test_emit_to_js_safe_with_no_window() -> None:
     """Calling _emit_to_js with no window must not raise (and is a no-op)."""
-    from gitbook_downloader.gui.bridge import ApiBridge
+    from docharvest.gui.bridge import ApiBridge
     bridge = ApiBridge()  # no window
     # Should not raise.
     bridge._emit_to_js("noop", {"x": 1})

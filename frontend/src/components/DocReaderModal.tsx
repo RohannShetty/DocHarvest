@@ -17,8 +17,7 @@ import {
   Search, 
   BookOpen, 
   Sparkles,
-  Layers
-} from "lucide-react"
+  } from "lucide-react"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
 import { MarkdownViewer } from "@/components/MarkdownViewer"
@@ -119,7 +118,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, theme, o
             <div>
               <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
                 <span>{domain}</span>
-                <Badge variant="secondary" className="text-[10px] font-mono">
+                <Badge variant="secondary" className="text-xs font-mono">
                   {docData?.pages?.length || 0} Pages
                 </Badge>
               </DialogTitle>
@@ -145,7 +144,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, theme, o
               onClick={handleCopy}
               className="h-8 gap-1.5 text-xs border-border"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? "Copied" : "Copy Markdown"}</span>
             </Button>
           </div>

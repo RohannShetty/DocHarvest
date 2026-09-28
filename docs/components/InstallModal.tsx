@@ -37,8 +37,8 @@ const INSTALL_OPTIONS: InstallOption[] = [
     title: 'pip',
     Icon: PythonIcon,
     command:
-      'pip install gitbook-downloader\n\n# Run GUI:\ndocharvest --gui\n\n# Or CLI capture:\ndocharvest capture https://docs.openalgo.in/v/v2.0 --rag --pdf',
-    ctaUrl: 'https://pypi.org/project/gitbook-downloader/',
+      'pip install docharvest\n\n# Run GUI:\ndocharvest --gui\n\n# Or CLI capture:\ndocharvest capture https://docs.openalgo.in/v/v2.0 --rag --pdf',
+    ctaUrl: 'https://pypi.org/project/docharvest/',
     ctaLabel: 'View on PyPI',
   },
   {
@@ -46,7 +46,7 @@ const INSTALL_OPTIONS: InstallOption[] = [
     title: 'uv',
     Icon: LinuxIcon,
     command:
-      '# Run instantly with uv without installing to global Python:\nuvx gitbook-downloader --gui\n\n# Or install permanently:\nuv tool install gitbook-downloader',
+      '# Run instantly with uv without installing to global Python:\nuvx docharvest --gui\n\n# Or install permanently:\nuv tool install docharvest',
     ctaUrl: 'https://github.com/RohannShetty/DocHarvest',
     ctaLabel: 'View GitHub Repo',
   },

@@ -13,12 +13,12 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.storage import (
+from docharvest.storage import (
     StorageManager,
     VersionManager,
     VersioningError,
 )
-from gitbook_downloader.storage.manager import (
+from docharvest.storage.manager import (
     DomainLock,
     LockHeldError,
     atomic_write_text,
@@ -326,17 +326,17 @@ class TestRollbackNoInflation:
 
 class TestBaseDirEnvOverride:
     def test_env_var_overrides_default_base(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME", str(tmp_path))
+        monkeypatch.setenv("DOCHARVEST_HOME", str(tmp_path))
         manager = StorageManager()
         assert manager.base == tmp_path.resolve()
 
     def test_explicit_base_beats_env(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("GITBOOK_DOWNLOADER_HOME",
+        monkeypatch.setenv("DOCHARVEST_HOME",
                            str(tmp_path / "env"))
         manager = StorageManager(base_dir=tmp_path / "explicit")
         assert manager.base == (tmp_path / "explicit").resolve()
 
     def test_no_env_falls_back_to_home(self, monkeypatch):
-        monkeypatch.delenv("GITBOOK_DOWNLOADER_HOME", raising=False)
+        monkeypatch.delenv("DOCHARVEST_HOME", raising=False)
         manager = StorageManager()
-        assert manager.base == Path.home() / ".gitbook-downloader"
+        assert manager.base == Path.home() / ".docharvest"

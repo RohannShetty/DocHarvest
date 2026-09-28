@@ -1,7 +1,21 @@
 # DocHarvest — Brand Guidelines
 
-Version 1.0 · 2026-08-22
-Applies to: README, GitHub social preview, TUI/CLI output styling, website, badges.
+Version 2.0 · 2026-09-28
+Applies to: README, GitHub social preview, TUI/CLI output styling, website, badges,
+**and the desktop GUI** (React + Vite + shadcn/ui).
+
+> **Where the values live.** Every colour and font in this document is defined once
+> in `brand/tokens.json` and generated into both surfaces:
+>
+> | Command | Effect |
+> |---|---|
+> | `node scripts/sync-brand-tokens.mjs` | writes `docs/app/brand-tokens.css` (website) and `frontend/src/styles/brand-tokens.css` (GUI) |
+> | `node scripts/sync-brand-tokens.mjs --check` | exits 1 if either file is stale (runs in CI) |
+> | `pytest tests/test_brand_tokens.py` | fails if a surface stops using the tokens, hard-codes a palette colour, or the two surfaces disagree |
+>
+> Change a value in `brand/tokens.json`, run the generator, and the website, the
+> desktop GUI and the README all move together. Never hand-edit a generated
+> stylesheet, and never write a colour literal into a component.
 
 ---
 
@@ -21,13 +35,15 @@ canvas, hairline borders, one amber accent — exists to keep that idea quiet an
 
 | Context | Form | Example |
 |---|---|---|
-| Code, commands, package name | `gitbook-downloader` (lowercase, mono) | `pip install gitbook-downloader` |
-| Command | `gitbook-dl` (mono) | `gitbook-dl capture <url>` |
+| Package, import, library dir | `docharvest` (lowercase, mono) | `pip install docharvest` |
+| Command | `docharvest` (mono) | `docharvest capture <url>` |
+| Legacy alias | `gitbook-dl` (mono, kept working) | `gitbook-dl capture <url>` |
 | Formal prose | **DocHarvest** | "DocHarvest is a free, MIT-licensed documentation compiler…" |
 
-Never use "GitBook Downloader™", "GBD", or the package identifier as the
-product name. `gitbook-downloader` remains a compatibility identifier for code,
-commands, package metadata, and install instructions; formal product prose uses DocHarvest.
+The distribution, the import path, the command and the on-disk library all say
+`docharvest`. `gitbook-dl` is an alias that still resolves so older scripts keep
+working; it is not a product name and must not appear in new documentation.
+Never use "GitBook Downloader™" or "GBD".
 
 ---
 
@@ -80,39 +96,61 @@ stroke width; cursor baseline aligns with chevron's lower vertex.
 ### 3.5 Wordmark rule
 
 The wordmark is **typeset, never baked into SVG**: `DocHarvest` in
-Archivo SemiBold, sitting right of the icon at ~55% of icon height, zinc-100.
+Archivo SemiBold, sitting right of the icon at ~55% of icon height, zinc ink.
 No custom lettering exists; don't create any.
 
 ---
 
 ## 4. Color
 
-Near-black canvas, zinc scale for everything structural, **one** amber accent.
+Near-black canvas, zinc ramp for everything structural, **one** amber accent.
 Amber appears at most once per visual composition (see §7).
 
-| Token | Hex | Usage |
-|---|---|---|
-| `canvas` | `#09090b` | Backgrounds: social card, TUI theme base, page background |
-| `surface` | `#101013` | Cards, terminal/code blocks sitting on canvas |
-| `zinc-900` | `#18181b` | Raised surfaces, badge label background |
-| `zinc-800` | `#27272a` | Hairline borders (always 1px), dividers |
-| `zinc-700` | `#3f3f46` | Secondary borders, disabled states |
-| `zinc-600` | `#52525b` | Tertiary text, muted glyphs, page text-lines |
-| `zinc-500` | `#71717a` | Metadata text (dates, paths, captions) |
-| `zinc-400` | `#a1a1aa` | Secondary body text, URLs in terminals |
-| `zinc-300` | `#d4d4d8` | Primary glyph strokes, strong body text |
-| `zinc-100` | `#f4f4f5` | Headings on dark |
-| `white` | `#fafafa` | Hero text only |
-| `amber-500` | `#f59e0b` | **THE accent:** prompt glyph, ✓ checks, one badge per row, link hover |
-| `amber-600` | `#d97706` | Hover/pressed state of an amber element |
+Token names are the real ones from `brand/tokens.json` — the interface calls them
+`--bond`, `--rule`, `--ink`, `--match`, and every surface speaks that vocabulary.
+
+| Token | Dark | Light | Usage |
+|---|---|---|---|
+| `--bond` | `#09090B` | `#FBFBFA` | Page/app background — the canvas |
+| `--bond-2` | `#101013` | `#F4F4F5` | Cards, code blocks, panels sitting on the canvas |
+| `--bond-3` | `#18181B` | `#ECECEF` | Raised/hover surfaces, label backgrounds |
+| `--rule` | `#27272A` | `#E4E4E7` | **Hairline borders, always 1px**, dividers |
+| `--rule-strong` | `#3F3F46` | `#A1A1AA` | Secondary borders, disabled states, diagram strokes |
+| `--rule-subtle` | `#1F1F23` | `#EDEDF0` | Internal dividers inside a panel |
+| `--ink` | `#F4F4F5` | `#18181B` | Headings and primary text |
+| `--ink-2` | `#A1A1AA` | `#52525B` | Secondary body text, captions, metadata |
+| `--ink-3` | `#8A8A93` | `#6B6B74` | Tertiary text, disabled labels |
+| `--match` | `#F59E0B` | `#B45309` | **THE accent:** prompt glyph, ✓ checks, one badge per row, links, hover |
+| `--match-deep` | `#D97706` | `#92400E` | Hover/pressed state of an amber element |
+| `--match-subtle` | `rgba(245,158,11,.08)` | `rgba(180,83,9,.06)` | Tinted amber background behind a single badge or row |
+| `--alert` | `#EF4444` | `#B91C1C` | Errors and destructive actions **only** |
+| `--paper` | `#FAFAFA` | `#FAFAFA` | Hero text on dark, text on an amber fill |
 
 Rules:
 
 1. Amber is a signal, not a decoration. If removing it doesn't lose meaning, remove it.
 2. Never apply a gradient to amber. Never glow it. Never outline text with it.
 3. No purple, no blue, no multi-hue palettes. The zinc ramp does all the quiet work.
-4. On light backgrounds (rare — print, external docs): invert to white canvas,
-   zinc-700 text, keep amber-600 for contrast. Prefer keeping surfaces dark.
+   Icons are zinc — an icon does not get its own colour.
+4. On light surfaces invert the ramp exactly as the table above does; keep amber-600
+   for contrast. Prefer dark surfaces where there's a choice.
+
+### 4.1 Status colours (application surfaces only)
+
+A tool that runs jobs needs to tell "working", "finished" and "failed" apart, and
+a single accent cannot express three states. The desktop app therefore carries
+one extra semantic token:
+
+| Token | Dark | Light | Meaning |
+|---|---|---|---|
+| `--ok` | `#34D399` | `#047857` | A capture finished, a check passed |
+| `--match` (above) | `#F59E0B` | `#B45309` | Working, waiting, needs you |
+| `--alert` (above) | `#EF4444` | `#B91C1C` | Failed, blocked |
+
+Scope: this is a **status layer, not a palette**. It never appears in marketing
+surfaces (README, social cards, the website hero, badges) and never as
+decoration. Where a view is only conveying "good/bad", use words and icons —
+the colour is a reinforcement, not the message.
 
 ---
 
@@ -120,23 +158,95 @@ Rules:
 
 | Role | Font | Weights | Notes |
 |---|---|---|---|
-| Prose, headings | Inter | 400 / 500 / 600 / 700 | Sentence case headings. No ALL CAPS except tiny labels. |
-| Code, commands, numerals, badges | JetBrains Mono | 400 / 500 / 600 | Every command, path, and stat is mono. Always. |
+| Prose, headings | **Archivo** | 400 / 500 / 600 / 700 | Sentence case headings. No ALL CAPS except tiny labels. |
+| Code, commands, numerals, badges | **Geist Mono** | 400 / 500 / 600 | Every command, path, and stat is mono. Always. |
 
-Fallback stacks (use everywhere, including SVG):
+Both surfaces load the same two families: the website through `next/font`
+(self-hosted), the desktop GUI through `@fontsource-variable/*` (bundled — the
+app must render identically with no network).
 
-- Sans: `Inter, "Segoe UI", system-ui, sans-serif`
-- Mono: `"JetBrains Mono", "Cascadia Code", "SF Mono", Consolas, monospace`
+Fallback stacks (generated into `--font-sans` / `--font-mono`):
 
-Numerals: enable tabular figures in UI and tables —
+- Sans: `Archivo, ui-sans-serif, system-ui, sans-serif`
+- Mono: `Geist Mono, ui-monospace, SFMono-Regular, Roboto Mono, Menlo, Monaco, Consolas, monospace`
+
+Numerals: enable tabular figures wherever numbers sit next to each other —
 `font-variant-numeric: tabular-nums`. Numbers align in columns or they're wrong.
+(The GUI sets this on every `font-mono` element.)
 
-Scale (web/README): hero 48–56 px · h2 32 px · h3 20 px · body 16 px · caption 13 px.
-Line-height 1.5 body, 1.15 headings. Max prose measure ~72 characters.
+Scale (web/README/GUI): hero 48–56 px · h2 32 px · h3 20 px · body 16 px ·
+caption 13 px. Line-height 1.5 body, 1.06 display, 1.15 headings.
+Max prose measure ~72 characters.
+
+**Minimum sizes.** No label, badge, caption or chip falls below **12 px**, in
+either surface. Compact chips inside dense rows may go to 11 px; nothing is
+smaller. Long headlines get `line-height` ≥ 1.05, never tighter.
 
 ---
 
-## 6. Voice
+## 6. Surfaces
+
+Three surfaces ship from this repo. They are the same product, so they share the
+tokens above rather than inventing their own.
+
+| Surface | Stack | Consumes |
+|---|---|---|
+| Website (`docs/`) | Next.js static export, Tailwind **v4** | `docs/app/brand-tokens.css`, mapped into `@theme inline` |
+| Desktop GUI (`frontend/`) | React + Vite, Tailwind **v3**, **shadcn/ui** on Radix | `frontend/src/styles/brand-tokens.css` |
+| CLI / TUI (Python) | Rich | the same hexes, by hand (no CSS available) |
+
+### 6.1 Desktop GUI rules
+
+The app reads the tokens through shadcn/ui's semantic variables, which the
+generator derives from the brand primitives (`--background` = `--bond`,
+`--primary` = `--match`, `--border` = `--rule`, …). Components therefore never
+name a colour themselves.
+
+1. **Components use roles, not hues.** `text-primary`, `bg-muted`,
+   `border-border`, `text-success`, `text-destructive`. Never `text-cyan-400`,
+   `bg-amber-500/20`, `border-slate-200`, or a raw `#hex`. A component that
+   needs a new role gets a new token, not a colour.
+2. **Square corners.** `--radius: 0px` everywhere, matching the website.
+3. **Flat surfaces.** Depth is a 1px hairline (`--rule`) and a slightly lighter
+   fill (`--bond-2`). No glassmorphism, no `backdrop-blur`, no drop shadows on
+   cards, no coloured glow. The only allowed overlay darkening is the standard
+   modal scrim.
+4. **One accent per composition.** A row with an amber badge does not also get
+   an amber icon and an amber link. Status colours (§4.1) are the only other
+   colours in play.
+5. **Motion is functional.** 150–200 ms ease-out for entrances, a 1px lift on
+   hover, `scale(0.98)` on press. Nothing pulses, spins or shimmers to look busy.
+6. **Focus is visible.** Every interactive primitive keeps a `--ring` focus ring;
+   never remove it to make something look tidier.
+
+---
+
+## 7. Badges
+
+Style: **`flat-square` only**. Compact, hairline-adjacent, reads like a status row
+instead of a carnival banner.
+
+Recipe: `labelColor=18181b` on every badge; message colour from the zinc ramp;
+**exactly one amber badge per row** — currently the license badge.
+
+Fixed order: license → python → platform → PyPI.
+
+```
+https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square&labelColor=18181b
+https://img.shields.io/badge/python-3.10%2B-3f3f46?style=flat-square&labelColor=18181b
+https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-3f3f46?style=flat-square&labelColor=18181b
+https://img.shields.io/badge/PyPI-DocHarvest-f59e0b?style=flat-square&labelColor=18181b
+```
+
+The test-count badge is **generated** by `docs/scripts/sync-stats.mjs` and is the
+only badge allowed to carry a number that changes. Never hand-type a metric.
+
+Never: stars/downloads counters until the numbers are real and stable,
+`for-the-badge`, `plastic`, `social` styles, or more than one amber badge per row.
+
+---
+
+## 8. Voice
 
 Plain-spoken. Short sentences. Show the command, then the result.
 
@@ -156,37 +266,17 @@ Three hard rules:
 
 ---
 
-## 7. Badges
-
-Style: **`flat-square` only** (see README.design.md §2 for why). Compact, hairline-
-adjacent, reads like a status row instead of a carnival banner.
-
-Recipe: `labelColor=18181b` on every badge; message color from the zinc ramp;
-**exactly one amber badge per row** — currently the license badge.
-
-Fixed order: license → python → platform → PyPI.
-
-```
-https://img.shields.io/badge/license-MIT-f59e0b?style=flat-square&labelColor=18181b
-https://img.shields.io/badge/python-3.10%2B-3f3f46?style=flat-square&labelColor=18181b
-https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-3f3f46?style=flat-square&labelColor=18181b
-https://img.shields.io/badge/PyPI-DocHarvest-f59e0b?style=flat-square&labelColor=18181b
-```
-
-Never: stars/downloads counters until the numbers are real and stable, `for-the-badge`,
-`plastic`, `social` styles, or more than one amber badge per row.
-
----
-
-## 8. Do / Don't
+## 9. Do / Don't
 
 **Do**
 
 - Keep compositions mostly empty; let the amber element be the only loud thing.
-- Use hairline 1px `#27272a` borders for every card, table, and terminal block.
-- Pair every claim with a runnable command in JetBrains Mono.
+- Use hairline 1px `--rule` borders for every card, table, panel and terminal block.
+- Pair every claim with a runnable command in Geist Mono.
 - Keep the mark geometric and flat — it must survive 16 px.
-- Use snapshots/screenshots of the real TUI when showing the product.
+- Use snapshots/screenshots of the real TUI or the real GUI when showing the product.
+- Add a token to `brand/tokens.json` and regenerate when a surface needs a new
+  colour; the guard tests will keep both surfaces honest.
 
 **Don't**
 
@@ -195,11 +285,13 @@ Never: stars/downloads counters until the numbers are real and stable, `for-the-
 - Don't rotate, stretch, or animate the mark (a 150 ms fade is the only allowed motion).
 - Don't publish metrics, benchmarks, quotes, or star counts we didn't earn.
 - Don't use purple/blue defaults or rainbow badge rows.
+- Don't give every icon in a list its own colour.
+- Don't fake depth with blur, glass or glow — in the app or on the site.
 - Don't write "scrape" in user-facing copy — the tool *captures*.
 
 ---
 
-## 9. Asset inventory & export
+## 10. Asset inventory & export
 
 | Asset | Notes |
 |---|---|
@@ -208,6 +300,6 @@ Never: stars/downloads counters until the numbers are real and stable, `for-the-
 | `assets/social-preview.svg` | 1280×640 social card; export PNG before upload (comment in file) |
 
 Exporting SVG → PNG: open in a browser at native size and screenshot at 2×, or
-`resvg --width 1280 --height 640 input.svg output.png`. Install Inter and
-JetBrains Mono locally first for faithful rendering; fallbacks are defined but
+`resvg --width 1280 --height 640 input.svg output.png`. Install Archivo and
+Geist Mono locally first for faithful rendering; fallbacks are defined but
 approximate.

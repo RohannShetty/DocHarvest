@@ -15,7 +15,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOC_READER = REPO_ROOT / "frontend" / "src" / "components" / "DocReaderModal.tsx"
 BRIDGE = REPO_ROOT / "frontend" / "src" / "lib" / "bridge.ts"
-PY_BRIDGE = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py"
+PY_BRIDGE = REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py"
 
 
 def test_doc_reader_no_res_file_reference() -> None:

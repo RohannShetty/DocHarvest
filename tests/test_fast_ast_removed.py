@@ -14,7 +14,7 @@ import sys
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CLI = REPO_ROOT / "src" / "gitbook_downloader" / "cli.py"
+CLI = REPO_ROOT / "src" / "docharvest" / "cli.py"
 
 
 def test_cli_no_fast_ast_flag() -> None:
@@ -29,7 +29,7 @@ def test_cli_no_fast_ast_flag() -> None:
 def test_cli_help_does_not_mention_fast_ast() -> None:
     """Smoke: running the CLI's help must not list --fast-ast."""
     proc = subprocess.run(
-        [sys.executable, "-m", "gitbook_downloader", "capture", "--help"],
+        [sys.executable, "-m", "docharvest", "capture", "--help"],
         capture_output=True,
         text=True,
         cwd=REPO_ROOT,

@@ -1,9 +1,9 @@
 # Multi-Agent Automation Feasibility & Architecture Research Report
-## DocHarvest (gitbook-downloader) in Autonomous Swarm Systems
+## DocHarvest (docharvest) in Autonomous Swarm Systems
 
 **Author:** DocHarvest Research & Architecture Group  
 **Version:** 1.0.0  
-**Target System:** `gitbook-downloader` v11.0.10  
+**Target System:** `docharvest` v11.0.10  
 **Date:** September 2026  
 
 ---
@@ -38,7 +38,7 @@ Modern autonomous agents face three critical limitations when interacting with w
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**DocHarvest** (`gitbook-downloader`) resolves these challenges by operating as an **embedded local documentation compiler**. It extracts clean, structured markdown with cryptographic SHA-256 provenance, indexes pages into an SQLite FTS5 BM25 search engine in WAL mode, builds topological concept graphs, and exposes everything through a native FastMCP v2 server and universal agent skills.
+**DocHarvest** (`docharvest`) resolves these challenges by operating as an **embedded local documentation compiler**. It extracts clean, structured markdown with cryptographic SHA-256 provenance, indexes pages into an SQLite FTS5 BM25 search engine in WAL mode, builds topological concept graphs, and exposes everything through a native FastMCP v2 server and universal agent skills.
 
 This research report evaluates the architectural feasibility, concurrency guarantees, subagent orchestration patterns, and token economics of DocHarvest in autonomous multi-agent environments.
 
@@ -52,7 +52,7 @@ In autonomous multi-agent swarms, multiple agents operate concurrently on shared
 
 When multiple subagents (e.g., a Refactor Agent and a Unit-Test Agent) identify missing library documentation, both might attempt to trigger a capture on the same domain simultaneously. 
 
-DocHarvest handles domain-level race conditions via the [`DomainLock`](file:///D:/gd-new/src/gitbook_downloader/storage/manager.py#L250-L320) protocol in `src/gitbook_downloader/storage/manager.py`:
+DocHarvest handles domain-level race conditions via the [`DomainLock`](file:///D:/gd-new/src/docharvest/storage/manager.py#L250-L320) protocol in `src/docharvest/storage/manager.py`:
 
 ```python
 class DomainLock:
@@ -63,7 +63,7 @@ class DomainLock:
 ```
 
 #### Lease Mechanics & Stale Detection
-1. **Exclusive File Creation**: The lock file (`~/.gitbook-downloader/docs/<domain>/.lock`) is acquired using atomic creation semantics (`os.O_CREAT | os.O_EXCL`).
+1. **Exclusive File Creation**: The lock file (`~/.docharvest/docs/<domain>/.lock`) is acquired using atomic creation semantics (`os.O_CREAT | os.O_EXCL`).
 2. **PID & Timestamp Tracking**: The lock file payload contains:
    ```json
    {
@@ -73,7 +73,7 @@ class DomainLock:
    }
    ```
 3. **Stale Lock Recovery (`LOCK_STALE_SECONDS = 900`)**: If an agent process crashes or is terminated by the OS mid-capture, subsequent agents evaluate the timestamp. If elapsed time exceeds 15 minutes (900 seconds), the lock is considered abandoned, removed safely, and re-acquired without human intervention.
-4. **Non-Blocking Contention Resolution**: Secondary agents attempting to capture an actively locked domain receive a clean [`CaptureError`](file:///D:/gd-new/src/gitbook_downloader/api.py#L60-L80) with active PID metadata rather than hanging indefinitely.
+4. **Non-Blocking Contention Resolution**: Secondary agents attempting to capture an actively locked domain receive a clean [`CaptureError`](file:///D:/gd-new/src/docharvest/api.py#L60-L80) with active PID metadata rather than hanging indefinitely.
 
 ```
        Subagent A                             Subagent B
@@ -100,7 +100,7 @@ class DomainLock:
 
 ### 2.2 Atomic File Mutations via `atomic_write_text`
 
-Corrupted documentation files or half-written `metadata.json` files would permanently break downstream LLM parser pipelines. DocHarvest mandates that all writes execute through [`atomic_write_text()`](file:///D:/gd-new/src/gitbook_downloader/storage/manager.py#L97-L140):
+Corrupted documentation files or half-written `metadata.json` files would permanently break downstream LLM parser pipelines. DocHarvest mandates that all writes execute through [`atomic_write_text()`](file:///D:/gd-new/src/docharvest/storage/manager.py#L97-L140):
 
 ```python
 def atomic_write_text(path: str | Path, text: str) -> Path:
@@ -131,7 +131,7 @@ def atomic_write_text(path: str | Path, text: str) -> Path:
 
 ### 2.3 Self-Healing Metadata & Registry Reconciliation
 
-If an agent or host environment suffers a hard power loss during metadata updates, DocHarvest's [`StorageManager.reconcile_versions()`](file:///D:/gd-new/src/gitbook_downloader/storage/manager.py#L380-L450) automatically reconciles physical disk state with `metadata.json`:
+If an agent or host environment suffers a hard power loss during metadata updates, DocHarvest's [`StorageManager.reconcile_versions()`](file:///D:/gd-new/src/docharvest/storage/manager.py#L380-L450) automatically reconciles physical disk state with `metadata.json`:
 
 ```
 Disk State (versions/ directory)        metadata.json Registry
@@ -153,7 +153,7 @@ Disk State (versions/ directory)        metadata.json Registry
 
 In multi-agent environments operating across heterogeneous clouds and local OS environments (Windows, macOS, Linux Docker containers), domains such as `localhost:3000` or `api.v2.internal:8080` cause severe path collisions on Windows due to NTFS reserved characters (`:`, `<`, `>`, `"`, `\`, `/`, `|`, `?`, `*`) and DOS device names (`CON`, `NUL`, `PRN`, `COM1`).
 
-DocHarvest implements idempotent path sanitization via [`domain_to_path_name()`](file:///D:/gd-new/src/gitbook_downloader/storage/manager.py#L64-L95):
+DocHarvest implements idempotent path sanitization via [`domain_to_path_name()`](file:///D:/gd-new/src/docharvest/storage/manager.py#L64-L95):
 
 ```python
 _WINDOWS_ILLEGAL_PATH_CHARS = frozenset('<>:"/\\|?*')
@@ -188,7 +188,7 @@ Subagent swarms generate high-frequency read bursts. A team of 10 agents refacto
 
 ### 3.1 SQLite WAL Mode Concurrency
 
-DocHarvest implements SQLite Write-Ahead Logging (WAL) in [`src/gitbook_downloader/search/index.py`](file:///D:/gd-new/src/gitbook_downloader/search/index.py#L101-L108):
+DocHarvest implements SQLite Write-Ahead Logging (WAL) in [`src/docharvest/search/index.py`](file:///D:/gd-new/src/docharvest/search/index.py#L101-L108):
 
 ```python
 def _get_connection(base_dir: Optional[Path] = None) -> sqlite3.Connection:
@@ -254,7 +254,7 @@ CREATE TABLE IF NOT EXISTS pages_meta(
 ```
 
 #### Query Sanitization & Punctuation Tolerant FTS5
-Raw queries generated by LLMs frequently include code syntax, dotted versions (e.g. `v2.0.2.1`), and operators that break FTS5 grammar. DocHarvest’s [`_fts_escape()`](file:///D:/gd-new/src/gitbook_downloader/search/index.py#L21-L59) parses and sanitizes tokens:
+Raw queries generated by LLMs frequently include code syntax, dotted versions (e.g. `v2.0.2.1`), and operators that break FTS5 grammar. DocHarvest’s [`_fts_escape()`](file:///D:/gd-new/src/docharvest/search/index.py#L21-L59) parses and sanitizes tokens:
 - Safe tokens (`[A-Za-z0-9_]+`) and prefix queries (`auth*`) pass through cleanly.
 - Punctuation strings (`OAuth2.0/token`) are quoted as literal phrases (`"OAuth2.0/token"`).
 - Orphaned boolean operators (`AND`, `OR`, `NOT`) are gracefully pruned to prevent syntax exceptions.
@@ -267,7 +267,7 @@ DocHarvest provides a native **Model Context Protocol (FastMCP v2)** server that
 
 ### 4.1 The Pinned Facade Contract
 
-To guarantee that MCP tools, CLI commands, TUI, and GUI never bypass core safety validations or diverge in behavior, all capture operations funnel exclusively through the pinned facade in [`src/gitbook_downloader/api.py`](file:///D:/gd-new/src/gitbook_downloader/api.py#L30-L100):
+To guarantee that MCP tools, CLI commands, TUI, and GUI never bypass core safety validations or diverge in behavior, all capture operations funnel exclusively through the pinned facade in [`src/docharvest/api.py`](file:///D:/gd-new/src/docharvest/api.py#L30-L100):
 
 ```python
 @dataclass(frozen=True)
@@ -328,7 +328,7 @@ class CaptureResult:
 
 FastMCP servers require `async def` tool definitions. Because the core crawler uses optimized thread-pool IO (`requests` + `ThreadPoolExecutor`), running synchronous network operations directly inside the async event loop would block heartbeat pings and stall other subagent tool requests.
 
-DocHarvest bridges async MCP tools to synchronous execution using non-blocking thread execution in [`src/gitbook_downloader/mcp/server.py`](file:///D:/gd-new/src/gitbook_downloader/mcp/server.py#L180-L240):
+DocHarvest bridges async MCP tools to synchronous execution using non-blocking thread execution in [`src/docharvest/mcp/server.py`](file:///D:/gd-new/src/docharvest/mcp/server.py#L180-L240):
 
 ```python
 @mcp.tool()
@@ -412,7 +412,7 @@ In an autonomous development team, agents should not execute monolithic all-in-o
             ▼                             ▼                             ▼
   ┌───────────────────────────────────────────────────────────────────────────────┐
   │                         DocHarvest Local Storage Engine                       │
-  │        ~/.gitbook-downloader/docs/<domain>/ (FTS5 + Graph + Versions)         │
+  │        ~/.docharvest/docs/<domain>/ (FTS5 + Graph + Versions)         │
   └───────────────────────────────────────────────────────────────────────────────┘
                                           ▲
                                           │ `diff_versions` / `get_changelog`

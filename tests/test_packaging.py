@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_DIR = REPO_ROOT / "src" / "gitbook_downloader"
+PACKAGE_DIR = REPO_ROOT / "src" / "docharvest"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
 
 #: Build/byte-code directories that never belong in a distribution.
@@ -42,12 +42,12 @@ def _declared_patterns() -> list[str]:
             r"\[tool\.setuptools\.package-data\](.*?)(?:\n\[|\Z)", text, re.S
         )
         assert table, "tool.setuptools.package-data table not found"
-        entry = re.search(r"gitbook_downloader\s*=\s*\[(.*?)\]", table.group(1), re.S)
-        assert entry, "gitbook_downloader package-data entry not found"
+        entry = re.search(r"docharvest\s*=\s*\[(.*?)\]", table.group(1), re.S)
+        assert entry, "docharvest package-data entry not found"
         return re.findall(r'"([^"]+)"', entry.group(1))
 
     data = tomllib.loads(text)
-    return list(data["tool"]["setuptools"]["package-data"]["gitbook_downloader"])
+    return list(data["tool"]["setuptools"]["package-data"]["docharvest"])
 
 
 def _data_files() -> list[Path]:
@@ -66,7 +66,7 @@ def _data_files() -> list[Path]:
 
 def test_package_data_patterns_are_declared():
     patterns = _declared_patterns()
-    assert patterns, "no package-data patterns declared for gitbook_downloader"
+    assert patterns, "no package-data patterns declared for docharvest"
     assert any(p.endswith("SKILL.md") for p in patterns), (
         "the bundled skill must stay declared"
     )
@@ -82,7 +82,7 @@ def test_every_package_data_file_is_declared():
     ]
 
     assert not uncovered, (
-        "these data files exist under src/gitbook_downloader but match no "
+        "these data files exist under src/docharvest but match no "
         "tool.setuptools.package-data pattern, so they will NOT ship in the "
         f"wheel or sdist: {uncovered}"
     )

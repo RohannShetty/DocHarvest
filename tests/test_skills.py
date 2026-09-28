@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.skills import (
+from docharvest.skills import (
     SKILLS_DIR,
     available_skills,
     install_skill,
@@ -50,7 +50,7 @@ class TestBundledSkills:
         """The file must live under the package, not only in the repo, or a
         pip/uvx install has nothing to install from."""
         package_dir = Path(
-            __import__("gitbook_downloader").__file__
+            __import__("docharvest").__file__
         ).resolve().parent
 
         assert SKILLS_DIR.parent == package_dir
@@ -104,7 +104,7 @@ class TestCommittedSkillCopy:
 class TestSkillCli:
     def test_list_reports_the_bundled_skill(self):
         result = subprocess.run(
-            [sys.executable, "-m", "gitbook_downloader", "skill", "list"],
+            [sys.executable, "-m", "docharvest", "skill", "list"],
             capture_output=True,
             text=True,
             cwd=REPO_ROOT,
@@ -116,7 +116,7 @@ class TestSkillCli:
     def test_install_into_a_chosen_harness_directory(self, tmp_path: Path):
         result = subprocess.run(
             [
-                sys.executable, "-m", "gitbook_downloader", "skill", "install",
+                sys.executable, "-m", "docharvest", "skill", "install",
                 "docharvest", "-o", str(tmp_path),
             ],
             capture_output=True,
@@ -129,7 +129,7 @@ class TestSkillCli:
 
 class TestPackagedSkillShipsInGit:
     """The bare `skills/` .gitignore rule matches at any depth, so it also hid
-    `src/gitbook_downloader/skills/`. The canonical skill was absent from git —
+    `src/docharvest/skills/`. The canonical skill was absent from git —
     and therefore from every wheel built from a clone — while every local test
     still passed, because the files simply existed on disk. CI caught it; these
     guards keep it caught.

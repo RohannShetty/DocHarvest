@@ -1,4 +1,4 @@
-# Contributing to gitbook-downloader
+# Contributing to DocHarvest (`docharvest`)
 
 Thanks for helping. This page gets you from clone to green tests in a few
 minutes, and explains how the code is organized so your PR lands in the right
@@ -33,7 +33,7 @@ than fetching live sites in tests.
 
 ## How the code fits together
 
-One seam matters: `src/gitbook_downloader/api.py`. The CLI, TUI, and MCP server
+One seam matters: `src/docharvest/api.py`. The CLI, TUI, and MCP server
 all call the same facade and own no download logic themselves.
 
 ```text
@@ -42,7 +42,7 @@ TUI (tui/)    ──┼─→  api.capture(url, options) → CaptureResult
 MCP (mcp/)    ──┘           │
                     engine.py (discover + fetch, provider-aware)
                              │
-                    output_contract.py (page tree + book.md + llms.txt + frontmatter)
+                    output_contract.py (page tree + book.md + llms.txt + llms-full.txt + frontmatter)
                              │
                     storage/ (library, snapshots) · search/ (FTS5 index + concept graph)
 ```
@@ -50,10 +50,10 @@ MCP (mcp/)    ──┘           │
 | Package | What it does |
 |---|---|
 | `api.py` | The facade: validates options, takes the single snapshot, runs the engine, writes output, updates library + search index |
-| `output_contract.py` | Turns captured pages into the four artifacts (page tree, `book.md`, `llms.txt`, frontmatter) |
+| `output_contract.py` | Turns captured pages into the page tree, `book.md`, `llms.txt`, `llms-full.txt`, and frontmatter |
 | `engine.py` | Discovery (BFS + sitemaps) and parallel fetching |
 | `providers/` | Per-platform extractors — GitBook, Mintlify, Docusaurus, ReadTheDocs, generic. HTML in, Markdown out |
-| `storage/` | Per-domain library at `~/.gitbook-downloader/`, snapshots, diffs. Owns snapshotting — the engine must not snapshot |
+| `storage/` | Per-domain library at `~/.docharvest/`, snapshots, diffs. Owns snapshotting — the engine must not snapshot |
 | `search/` | SQLite FTS5 index (per-page `source_url` anchors when a page tree exists) + the concept graph |
 | `tui/` | Textual app with five screens; supports a fake engine for tests |
 | `mcp/` | MCP server wrapping the facade for AI agents (capture runs via `asyncio.to_thread`, so it never blocks the loop) |
@@ -67,7 +67,19 @@ MCP (mcp/)    ──┘           │
 - **Every bug fix ships with a test** that fails without the fix.
 - New user-facing behavior? Update `README.md` and `CHANGELOG.md` in the same PR.
 - **Claims policy:** no benchmarks, star counts, or testimonials we didn't earn.
-  Capability claims only (see `docs/brand/BRAND.md`, §6).
+  Capability claims only (see `docs/brand/BRAND.md`, §6). In practice:
+  - **No number without the command that reproduces it and the date it was run.**
+  - **Generated, not typed.** The test count on the showcase is produced by
+    `node docs/scripts/sync-stats.mjs --run` and stored in `docs/lib/stats.ts`; the
+    Pages workflow regenerates it on every deploy. Never hand-edit those fields.
+  - **A red suite is published as red.** The site says how many tests are failing
+    instead of quoting the last good run.
+  - **Names and URLs have one source:** `server.json` plus the `mcp-name:` token in
+    `README.md`. `marketing/REGISTRY_SUBMISSION.md` lists the identifiers that must
+    *not* be renamed (PyPI package, import path, library dir).
+  - **Before pushing**, run `python -m pytest tests -q` — it covers the claim
+    contracts (`test_stats_drift.py`, `test_registry_manifest.py`,
+    `test_animation_contract.py`, `test_version_drift.py`).
 - Keep `api.py` the only entry point — don't add download logic to CLI/TUI/MCP.
 - Python ≥ 3.10, stdlib-first. Propose new dependencies in an issue before adding them.
 

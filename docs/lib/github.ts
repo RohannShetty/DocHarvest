@@ -165,7 +165,7 @@ function getFallbackRelease(): ReleaseInfo {
   return {
     tag: `v${VERSION}`,
     name: `DocHarvest v${VERSION}`,
-    publishedAt: '2026-09-19',
+    publishedAt: '2026-09-28',
     body: `## Highlights
 
 - Native FastMCP v2 server: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more).
@@ -173,11 +173,11 @@ function getFallbackRelease(): ReleaseInfo {
 - Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
-### What's New in v11.1.0
+### What's New in v11.1.1
 
-- Universal Agent Skill & 17+ Harness Matrix: 1-click skill installer and FastMCP configurations across 17 AI IDEs, CLI harnesses, and editor extensions.
-- Zero-Dependency Browser GUI: Automatic graceful fallback to embedded HTTP/SSE browser interface when native WebView2 is missing, eliminating OS runtime dependencies.
-- Multi-Agent Autonomous Simulation & AST Token Benchmark: Live visual demonstration of autonomous agent swarm doc exploration and empirical ~83% token savings.`,
+- Claim integrity: every public number is now generated from a real run and date-stamped, replacing the stale hardcoded test count.
+- Fixed links: PyPI project URLs and the showcase link point at DocHarvest instead of the retired docharvest slug.
+- Restored the install modal's entrance animation, which had been dead since the Index Sheet redesign removed its keyframe.`,
     htmlUrl: `https://github.com/RohannShetty/DocHarvest/releases/tag/v${VERSION}`,
     assets: [
       {

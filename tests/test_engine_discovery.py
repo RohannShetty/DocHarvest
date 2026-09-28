@@ -7,8 +7,8 @@ parsing (#11).
 
 import requests
 
-from gitbook_downloader.utils import create_session
-import gitbook_downloader.utils.discovery as discovery
+from docharvest.utils import create_session
+import docharvest.utils.discovery as discovery
 
 FIXTURES_DIR = None  # set lazily to avoid duplicate constant
 

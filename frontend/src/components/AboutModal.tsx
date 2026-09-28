@@ -5,13 +5,13 @@ import {
   Heart, 
   ExternalLink, 
   Github, 
-  BookOpen, 
+
   CheckCircle2, 
   X, 
   Cpu, 
-  HardDrive, 
+
   Terminal, 
-  Layers,
+
   FileCode,
   ShieldCheck,
   Globe
@@ -45,13 +45,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({
   const authorName = systemInfo?.author || "Rohan Shetty"
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 animate-in fade-in duration-200">
       <div 
-        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border/80 bg-card/95 p-6 shadow-2xl shadow-cyan-950/20 backdrop-blur-2xl animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border/80 bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Ambient Top Glow */}
-        <div className="absolute -top-24 -left-24 w-60 h-60 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-60 h-60 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -top-24 -right-24 w-60 h-60 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close Button */}
@@ -64,9 +64,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({
 
         {/* Header Branding */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25">
-            <Sparkles className="h-7 w-7 animate-pulse" />
-            <div className="absolute inset-0 rounded-2xl bg-cyan-400/20 blur-sm" />
+          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary">
+            <Sparkles className="h-7 w-7" />
           </div>
 
           <div className="flex flex-col">
@@ -74,7 +73,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               <h2 className="text-2xl font-bold tracking-tight text-foreground font-mono">
                 DocHarvest
               </h2>
-              <Badge variant="outline" className="px-2 py-0.5 text-xs font-mono font-semibold bg-cyan-500/10 text-cyan-700 border-cyan-500/30 dark:text-cyan-400">
+              <Badge variant="outline" className="px-2 py-0.5 text-xs font-mono font-semibold bg-primary/10 text-primary border-primary/30">
                 v{appVersion}
               </Badge>
             </div>
@@ -88,40 +87,40 @@ export const AboutModal: React.FC<AboutModalProps> = ({
         <div className="grid grid-cols-2 gap-2.5 mb-5 text-xs">
           <div className="p-3 rounded-xl border border-border/60 bg-muted/40 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <Cpu className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+              <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Engine Core</span>
             </div>
-            <span className="font-mono text-[11px] font-semibold text-foreground truncate">
+            <span className="font-mono text-xs font-semibold text-foreground truncate">
               {engineVersion}
             </span>
           </div>
 
           <div className="p-3 rounded-xl border border-border/60 bg-muted/40 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <Terminal className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+              <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
               <span>Runtime &amp; GUI</span>
             </div>
-            <span className="font-mono text-[11px] font-semibold text-foreground truncate">
+            <span className="font-mono text-xs font-semibold text-foreground truncate">
               React 18 + WebView2 · Python {systemInfo?.python || "3.12"}
             </span>
           </div>
 
           <div className="p-3 rounded-xl border border-border/60 bg-muted/40 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <FileCode className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+              <FileCode className="h-3.5 w-3.5 text-muted-foreground" />
               <span>AI Integration</span>
             </div>
-            <span className="font-mono text-[11px] font-semibold text-foreground truncate">
+            <span className="font-mono text-xs font-semibold text-foreground truncate">
               FastMCP Server · RAG JSONL · llms.txt
             </span>
           </div>
 
           <div className="p-3 rounded-xl border border-border/60 bg-muted/40 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <ShieldCheck className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+              <ShieldCheck className="h-3.5 w-3.5 text-primary600" />
               <span>License &amp; Privacy</span>
             </div>
-            <span className="font-mono text-[11px] font-semibold text-foreground truncate">
+            <span className="font-mono text-xs font-semibold text-foreground truncate">
               MIT License · 100% Local &amp; Private
             </span>
           </div>
@@ -130,28 +129,28 @@ export const AboutModal: React.FC<AboutModalProps> = ({
         {/* Feature Highlights */}
         <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 mb-5 space-y-1.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <CheckCircle2 className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Universal Scoper &amp; AST Cleaner for GitBook, Mintlify, Docusaurus &amp; SPAs</span>
           </div>
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <CheckCircle2 className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Deterministic Four-Part Output Contract (Pages, book.md, llms.txt, PDF)</span>
           </div>
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <CheckCircle2 className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Zero-Crash Domain Locks with Automatic Dead-Process PID Reclamation</span>
           </div>
         </div>
 
         {/* Made with Love Banner */}
-        <div className="flex items-center justify-between p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/10 via-primary/10 to-purple-500/10 border border-cyan-500/20 mb-5">
+        <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-muted/40 mb-5">
           <div className="flex items-center gap-2">
-            <Heart className="h-4 w-4 text-rose-500 fill-rose-500 animate-pulse" />
+            <Heart className="h-4 w-4 text-primary fill-primary" />
             <span className="text-xs font-semibold text-foreground">
-              Made with Love by <span className="text-cyan-700 dark:text-cyan-400 font-bold">{authorName}</span>
+              Made with Love by <span className="text-muted-foreground font-bold">{authorName}</span>
             </span>
           </div>
-          <span className="text-[11px] font-mono text-muted-foreground">
+          <span className="text-xs font-mono text-muted-foreground">
             shettyrohan2@gmail.com
           </span>
         </div>

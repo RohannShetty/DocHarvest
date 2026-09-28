@@ -13,14 +13,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from gitbook_downloader.providers import (
+from docharvest.providers import (
     Provider, ProviderRegistry,
     GitBookProvider, DocusaurusProvider, ReadTheDocsProvider,
     MintlifyProvider, GenericProvider,
     detect_provider, get_provider, list_providers,
     normalize_url, is_md_url, same_domain,
 )
-from gitbook_downloader.utils import create_session
+from docharvest.utils import create_session
 
 
 # ════════════════════════════════════════════════════════════════

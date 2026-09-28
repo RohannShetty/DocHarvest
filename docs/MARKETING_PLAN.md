@@ -1,8 +1,8 @@
 # DocHarvest — Multi-Channel Developer Marketing & Skill Distribution Plan
 ## Strategy, Post Copy, Registry Submissions & Ecosystem Integrations
 
-**Product:** DocHarvest (`gitbook-downloader`)  
-**Version:** 11.0.10  
+**Product:** DocHarvest (`docharvest`)  
+**Version:** 11.1.1  
 **Target Audience:** AI Engineers, Agent Developers, RAG Builders, Technical Writers, Offline Developers  
 **Author:** Marketing & Developer Relations Lead  
 **Last Updated:** September 2026  
@@ -65,14 +65,14 @@ Week 1: Foundations            Week 2: Community Launch         Week 3: Framewor
 Harvest any documentation site (GitBook, Mintlify, Docusaurus, VitePress, ReadMe, ReadTheDocs, MkDocs) into local, noise-free Markdown with full-text search and semantic concept graphs.
 
 ### Features:
-- 🚀 Ultra-fast: Compiles 673 pages in 18.2s into `.cursor/` or `~/.gitbook-downloader/`
+- 🚀 Ultra-fast: Compiles 673 pages in 18.2s into `.cursor/` or `~/.docharvest/`
 - 🎯 ~83% Token Reduction: Strips navbars, ads, cookie modals, and tracking scripts
 - 🔍 SQLite FTS5 BM25 search across all harvested documentation
 - 📊 DocGraph semantic concept exploration for prerequisite and API discovery
 - 🔒 Cryptographic SHA-256 provenance in YAML frontmatter
 
 ### Quick Setup:
-1. `pip install gitbook-downloader`
+1. `pip install docharvest`
 2. `docharvest skill install docharvest -o .cursor/skills`
 3. Add to `.cursor/mcp.json`:
 ```json
@@ -92,7 +92,7 @@ Harvest any documentation site (GitBook, Mintlify, Docusaurus, VitePress, ReadMe
 ### 3.2 Anthropic Claude Skills & MCP Registry (`modelcontextprotocol/servers`)
 
 **PR Target:** `modelcontextprotocol/servers` / `awesome-mcp-servers`  
-**Server Name:** `docharvest` (`gitbook-downloader`)  
+**Server Name:** `docharvest` (`docharvest`)  
 **Transport:** `stdio` (FastMCP v2)  
 
 **Pull Request Description:**
@@ -100,7 +100,7 @@ Harvest any documentation site (GitBook, Mintlify, Docusaurus, VitePress, ReadMe
 ### Add DocHarvest MCP Server
 
 **Repository:** https://github.com/RohannShetty/DocHarvest
-**Package:** `pip install gitbook-downloader` (or `uvx gitbook-downloader mcp`)  
+**Package:** `pip install docharvest` (or `uvx docharvest mcp`)  
 **License:** MIT  
 
 DocHarvest provides 12 MCP tools for downloading, searching, reading, diffing, and exploring technical documentation portals locally.
@@ -108,7 +108,7 @@ DocHarvest provides 12 MCP tools for downloading, searching, reading, diffing, a
 - **12 FastMCP Tools:** `download_docs`, `search_docs`, `find_docs`, `read_doc`, `get_doc`, `list_domains`, `query_doc_graph`, `get_related_concepts`, `diff_versions`, `list_versions`, `export_docs`, `get_changelog`.
 - **MCP Resources:** `docs://{domain}/book`, `docs://{domain}/manifest`.
 - **MCP Prompts:** `prompt://search-docset`, `prompt://summarize-library`.
-- **Zero Configuration:** Bundled FastMCP SDK works out-of-the-box with `uvx gitbook-downloader mcp`.
+- **Zero Configuration:** Bundled FastMCP SDK works out-of-the-box with `uvx docharvest mcp`.
 ```
 
 ---
@@ -153,7 +153,7 @@ gh repo edit RohannShetty/DocHarvest \
 
 **Body Text:**
 ```markdown
-Hi HN! I built DocHarvest (pip install gitbook-downloader) because I was tired of watching my coding agents ingest 85% boilerplate HTML when trying to read documentation.
+Hi HN! I built DocHarvest (pip install docharvest) because I was tired of watching my coding agents ingest 85% boilerplate HTML when trying to read documentation.
 
 ### The Problem
 When you ask an agent (Cursor, Claude Code, Windsurf) to read a documentation portal, it usually downloads raw web pages. Navbars, footer links, cookie consents, SVG icons, and search modals consume up to 85% of your context window before a single API signature arrives. Cloud scraping APIs charge per page, add network latency, and lose code block hierarchy.
@@ -163,7 +163,7 @@ DocHarvest is a 100% local, MIT-licensed documentation compiler with zero extern
 
 1. **Auto-Detects 8 Platforms**: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, and ReadTheDocs (plus fallback for generic HTML / SPAs).
 2. **~83% Token Reduction**: Strips DOM noise and extracts pristine markdown with AST-safe token bounding.
-3. **Four-Part Output Contract**: Every capture yields a modular `pages/` tree, a consolidated `book.md` with hierarchical TOC, an `llms.txt` manifest, and search index records.
+3. **Five-Part Output Contract**: Every capture yields a modular `pages/` tree, a consolidated `book.md` with hierarchical TOC, `llms.txt`, a full-content `llms-full.txt`, and search index records.
 4. **Local SQLite FTS5 Search & Semantic Graph**: BM25 full-text search and concept dependency graph (`query_doc_graph`) to traverse API relationships with zero network requests.
 5. **Native FastMCP v2 Server (12 Tools)**: Direct stdio integration for Claude Code, Cursor, Windsurf, VS Code, and Oh My Pi.
 6. **Universal Agent Skill (`SKILL.md`)**: 1-command installer (`docharvest skill install docharvest -o <dir>`) that equips 14+ agent harnesses with automated retrieval intelligence.
@@ -177,13 +177,13 @@ On our reference capture of the OpenAlgo docs portal (673 pages):
 
 ### Try It in 30 Seconds:
 ```bash
-pip install gitbook-downloader
+pip install docharvest
 docharvest capture https://docs.openalgo.in/ --rag --pdf
 ```
 
 Or connect it to Claude Desktop / Cursor:
 ```bash
-uvx gitbook-downloader mcp
+uvx docharvest mcp
 ```
 
 Repository: https://github.com/RohannShetty/DocHarvest
@@ -207,7 +207,7 @@ Hey r/LocalLLaMA,
 
 When running 8B or 70B models locally, context windows are precious and inference speed depends heavily on prompt length. Feeding raw web pages with HTML headers, sidebars, and tracking wrappers burns thousands of unnecessary tokens.
 
-I built **DocHarvest** (`gitbook-downloader`) — a 100% local, zero-telemetry tool that compiles whole documentation sites into clean markdown, vector JSONL, and SQLite FTS5 indexes.
+I built **DocHarvest** (`docharvest`) — a 100% local, zero-telemetry tool that compiles whole documentation sites into clean markdown, vector JSONL, and SQLite FTS5 indexes.
 
 **Why it's useful for Local LLMs:**
 - **~83% Token Reduction**: AST DOM cleaning strips out everything except the actual technical content.
@@ -219,7 +219,7 @@ I built **DocHarvest** (`gitbook-downloader`) — a 100% local, zero-telemetry t
 Reference benchmark: Captured 673 pages in 18.2 seconds with parallel worker threads.
 
 GitHub: https://github.com/RohannShetty/DocHarvest
-Install: `pip install gitbook-downloader` or `uvx gitbook-downloader --gui`
+Install: `pip install docharvest` or `uvx docharvest --gui`
 ```
 
 ---
@@ -272,17 +272,18 @@ Install: `pip install gitbook-downloader` or `uvx gitbook-downloader --gui`
 > The bundled `docharvest` skill teaches LLMs the exact two-stage lookup workflow to prevent hallucinated API calls:
 > `docharvest skill install docharvest -o .cursor/skills`
 
-**Tweet 5 (Four-Part Output Contract):**
-> 📦 Every capture outputs a standardized 4-part contract:
+**Tweet 5 (Five-Part Output Contract):**
+> 📦 Every capture outputs a standardized contract:
 > 1. `pages/`: Modular markdown files with SHA-256 YAML frontmatter
 > 2. `book.md`: Single comprehensive handbook with TOC
 > 3. `llms.txt`: Standardized discovery manifest
-> 4. `exports/`: Tokenized RAG JSONL & printable PDF handbooks
+> 4. `llms-full.txt`: Full-content manifest with per-page hashes
+> 5. `exports/`: Tokenized RAG JSONL & printable PDF handbooks
 
 **Tweet 6 (CTA & Links):**
 > Try it in 30 seconds:
 > 
-> `pip install gitbook-downloader`
+> `pip install docharvest`
 > `docharvest capture https://docs.openalgo.in/ --rag --pdf`
 > 
 > ⭐ Star on GitHub: https://github.com/RohannShetty/DocHarvest
@@ -300,8 +301,8 @@ Create community Document Loader PR: `DocHarvestLoader`
 from typing import Iterator, List, Optional
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
-from gitbook_downloader.api import capture, CaptureOptions
-from gitbook_downloader.storage import StorageManager
+from docharvest.api import capture, CaptureOptions
+from docharvest.storage import StorageManager
 
 class DocHarvestLoader(BaseLoader):
     """Load documentation using DocHarvest compiler with ~83% token reduction."""
@@ -349,8 +350,8 @@ Create reader plugin: `DocHarvestReader`
 from typing import List, Optional
 from llama_index.core.readers.base import BaseReader
 from llama_index.core.schema import Document
-from gitbook_downloader.api import capture, CaptureOptions
-from gitbook_downloader.storage import StorageManager
+from docharvest.api import capture, CaptureOptions
+from docharvest.storage import StorageManager
 
 class DocHarvestReader(BaseReader):
     """LlamaIndex Reader for compiling documentation portals locally."""
@@ -388,7 +389,7 @@ class DocHarvestReader(BaseReader):
 ```python
 # crewAI Tool Definition
 from crewai.tools import tool
-from gitbook_downloader.search import SearchIndex
+from docharvest.search import SearchIndex
 
 @tool("Search Local Documentation")
 def search_local_docs(query: str, domain: str = None) -> str:

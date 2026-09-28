@@ -2,7 +2,7 @@
 
 After Phase 4 step 2, the Python ``open_local_folder`` alias (which was
 never typed in the frontend and never called) must be removed from
-``src/gitbook_downloader/gui/bridge.py``. The TS side already had it
+``src/docharvest/gui/bridge.py``. The TS side already had it
 removed.
 """
 
@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PY_BRIDGE = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py"
+PY_BRIDGE = REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py"
 TS_BRIDGE = REPO_ROOT / "frontend" / "src" / "lib" / "bridge.ts"
 
 

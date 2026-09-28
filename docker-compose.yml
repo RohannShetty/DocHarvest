@@ -1,10 +1,10 @@
 services:
-  gitbook-downloader:
+  docharvest:
     build: .
-    image: gitbook-downloader:7.0
-    container_name: gitbook-downloader
+    image: docharvest:7.0
+    container_name: docharvest
     command: --help
     volumes:
       - type: bind
-        source: ~/.gitbook-downloader
-        target: /root/.gitbook-downloader
+        source: ~/.docharvest
+        target: /root/.docharvest

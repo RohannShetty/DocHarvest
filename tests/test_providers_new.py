@@ -4,7 +4,7 @@ import pytest
 import requests
 from unittest.mock import MagicMock
 
-from gitbook_downloader.providers import (
+from docharvest.providers import (
     ProviderRegistry,
     MkDocsProvider,
     VitePressProvider,
@@ -12,11 +12,11 @@ from gitbook_downloader.providers import (
     ReadMeProvider,
     detect_provider,
 )
-from gitbook_downloader.providers.base import (
+from docharvest.providers.base import (
     looks_like_spa_shell,
     looks_like_challenge_or_blocked,
 )
-from gitbook_downloader.utils.renderer import HeadlessRenderer, is_render_available
+from docharvest.utils.renderer import HeadlessRenderer, is_render_available
 
 
 def test_mkdocs_provider_detection():

@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.providers import (
+from docharvest.providers import (
     DocusaurusProvider,
     GitBookProvider,
     MintlifyProvider,
     ReadTheDocsProvider,
 )
-from gitbook_downloader.utils import create_session
+from docharvest.utils import create_session
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
@@ -41,14 +41,14 @@ class TestGitBookBoilerplate:
         assert content.strip() == _expected("gitbook_page.expected.md")
 
     def test_llm_ref_line_regex_matches_real_line(self):
-        from gitbook_downloader.providers.gitbook import _LLM_REF_LINE
+        from docharvest.providers.gitbook import _LLM_REF_LINE
 
         line = "For the complete documentation index, see [llms.txt](https://docs.example.com/llms.txt)"
         assert _LLM_REF_LINE.search(line), "regex must match a real trailer line"
         assert _LLM_REF_LINE.search("> " + line)
 
     def test_strip_leaves_no_stray_horizontal_rule(self):
-        from gitbook_downloader.providers.gitbook import strip_agent_boilerplate
+        from docharvest.providers.gitbook import strip_agent_boilerplate
 
         raw = "# Title\n\nBody text.\n\n---\n# Agent Instructions\n\nBlurb.\n\nFor the complete documentation index, see [llms.txt](https://x.com/llms.txt)\n\n---\n"
         cleaned = strip_agent_boilerplate(raw)
@@ -91,8 +91,8 @@ class TestDetectionHardening:
     def test_registry_chain_runs_on_root_fetch_failure(self, monkeypatch):
         """When the root fetch fails, every provider still gets to decide
         from its own signals before Generic wins."""
-        from gitbook_downloader.providers.base import Provider as BaseProvider
-        from gitbook_downloader.providers.base import ProviderRegistry
+        from docharvest.providers.base import Provider as BaseProvider
+        from docharvest.providers.base import ProviderRegistry
 
         calls = []
 

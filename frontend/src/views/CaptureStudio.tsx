@@ -7,37 +7,34 @@ import {
   Terminal, 
   Clock, 
   FileCheck, 
-  AlertCircle, 
-  Layers, 
+
   ChevronDown, 
   Copy, 
   Trash2, 
-  FolderOpen, 
+
   CheckCircle2, 
   Plus, 
   ListOrdered, 
   Globe,
   Search,
   BookOpen,
-  ArrowRight,
-  ExternalLink,
+
   ShieldAlert,
   RotateCcw,
   Zap,
-  Activity,
+
   Lock,
   Unlock,
   Sliders,
-  Cpu,
+
   Check
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import { pyApi, CaptureProgressPayload, CaptureDonePayload } from "@/lib/bridge"
 import { toast } from "sonner"
@@ -412,7 +409,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               <Download className="h-6 w-6 text-primary" />
               <span>Capture Studio</span>
             </h1>
-            <Badge variant="outline" className="text-xs font-mono font-medium border-cyan-500/30 text-cyan-700 bg-cyan-500/10 dark:text-cyan-400">
+            <Badge variant="outline" className="text-xs font-mono font-medium border-primary/30 text-primary bg-primary/10">
               v11.0 Engine
             </Badge>
           </div>
@@ -440,7 +437,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             className="h-9 gap-1.5 text-xs border-border/80 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
             title="Force clear active locks and background threads"
           >
-            <Zap className="h-3.5 w-3.5 text-amber-600 dark:text-amber-500" />
+            <Zap className="h-3.5 w-3.5 text-primary" />
             <span className="hidden sm:inline">Force Reset</span>
           </Button>
         </div>
@@ -448,10 +445,10 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
       {/* Active Lock Notification Banner */}
       {hasActiveLocks && (
-        <Card className="border-amber-500/40 bg-amber-500/10 backdrop-blur-md shadow-sm animate-in slide-in-from-top-2 duration-300">
+        <Card className="border-primary/40 bg-primary/10 shadow-sm animate-in slide-in-from-top-2 duration-300">
           <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-500 flex items-center justify-center shrink-0 border border-amber-500/30">
+              <div className="h-9 w-9 rounded-lg bg-primary/20 text-primary flex items-center justify-center shrink-0 border border-primary/30">
                 <Lock className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
@@ -459,7 +456,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   <h3 className="text-sm font-semibold text-foreground">
                     Active Storage Lock Detected
                   </h3>
-                  <Badge variant="outline" className="text-[10px] border-amber-500/40 text-amber-700 bg-amber-500/5 dark:text-amber-500 font-mono">
+                  <Badge variant="outline" className="text-xs border-primary/40 text-primary bg-primary/5 font-mono">
                     {activeLockList.length} Lock{activeLockList.length > 1 ? "s" : ""}
                   </Badge>
                 </div>
@@ -473,7 +470,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             <Button
               size="sm"
               onClick={handleForceReset}
-              className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-8 px-3 gap-1.5 shadow-sm shrink-0 interactive-scale"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8 px-3 gap-1.5 shadow-sm shrink-0 interactive-scale"
             >
               <Unlock className="h-3.5 w-3.5" />
               <span>Unlock & Force Reset</span>
@@ -484,7 +481,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
       {/* Main URL Input Card */}
       {activeTab === "single" ? (
-        <Card className="glass-card shadow-sm border-border/70">
+        <Card className="sheet-card shadow-sm border-border/70">
           <CardContent className="p-6 flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row items-stretch gap-3">
               <div className="relative flex-1">
@@ -514,7 +511,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 <Button
                   variant="destructive"
                   onClick={handleCancelCapture}
-                  className="h-12 px-6 font-semibold shadow-sm bg-destructive hover:bg-destructive/90 text-white animate-pulse interactive-scale"
+                  className="h-12 px-6 font-semibold shadow-sm bg-destructive text-destructive-foreground hover:bg-destructive/90 interactive-scale"
                 >
                   <Square className="h-4 w-4 mr-2 fill-current" />
                   Cancel Capture
@@ -557,7 +554,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       <Badge 
                         key={v} 
                         variant={selectedVersions.includes(v) ? "default" : "outline"}
-                        className="cursor-pointer text-[10px] py-0.5 px-2 font-mono transition-all interactive-scale"
+                        className="cursor-pointer text-xs py-0.5 px-2 font-mono transition-all interactive-scale"
                         onClick={() => {
                           if (selectedVersions.includes(v)) {
                             setSelectedVersions(selectedVersions.filter(x => x !== v))
@@ -585,7 +582,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       try {
                         const status = await pyApi.isRenderAvailable()
                         if (status && !status.available) {
-                          toast.warning("Playwright is not installed. To render client-side SPAs: pip install 'gitbook-downloader[render]' && playwright install chromium")
+                          toast.warning("Playwright is not installed. To render client-side SPAs: pip install 'docharvest[render]' && playwright install chromium")
                         } else {
                           toast.info("Headless SPA rendering enabled via Playwright")
                         }
@@ -596,11 +593,11 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   }}
                   disabled={isCapturing}
                   className={`h-7 px-2.5 text-xs gap-1.5 font-medium transition-all ${
-                    renderSpa ? "bg-cyan-600 hover:bg-cyan-500 text-white shadow-xs" : "border-border text-muted-foreground hover:text-foreground"
+                    renderSpa ? "bg-primary text-primary-foreground shadow-xs" : "border-border text-muted-foreground hover:text-foreground"
                   }`}
                   title="Execute client-side JavaScript before extracting markdown using Playwright (required for dynamic SPAs like omp.sh)"
                 >
-                  <Zap className={`h-3 w-3 ${renderSpa ? "text-amber-300" : "text-muted-foreground"}`} />
+                  <Zap className={`h-3 w-3 ${renderSpa ? "text-primary" : "text-muted-foreground"}`} />
                   <span>Headless SPA ({renderSpa ? "ON" : "OFF"})</span>
                 </Button>
 
@@ -624,7 +621,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
             {/* Smart SPA Hint Banner */}
             {url.includes("omp.sh") && !renderSpa && (
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-700 dark:text-cyan-300 animate-in fade-in-50">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-primary/10 border border-border text-xs text-muted-foreground animate-in fade-in-50">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
                   <span><strong>SPA Detected:</strong> <code>omp.sh</code> is a client-rendered JavaScript SPA. Enable Headless SPA mode for complete rendering.</span>
@@ -632,7 +629,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 <Button 
                   size="sm" 
                   onClick={() => setRenderSpa(true)} 
-                  className="h-6 text-[11px] px-2.5 bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 ml-2"
+                  className="h-6 px-2.5 bg-primary text-primary-foreground shrink-0 ml-2"
                 >
                   Enable SPA Mode
                 </Button>
@@ -689,7 +686,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                         disabled={isCapturing}
                         className="h-8 bg-background border border-border text-foreground text-xs rounded-md px-2 focus:ring-1 focus:ring-primary outline-none"
                       >
-                        <option value="library">Library Only (~/.gitbook-downloader)</option>
+                        <option value="library">Library Only (~/.docharvest)</option>
                         <option value="both">Both (Library + Local Folder)</option>
                         <option value="local">Local Folder Only (./domain-docs)</option>
                       </select>
@@ -702,7 +699,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
         </Card>
       ) : (
         /* Batch Queue Manager */
-        <Card className="glass-card shadow-sm border-border/70">
+        <Card className="sheet-card shadow-sm border-border/70">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
               <ListOrdered className="h-4 w-4 text-primary" />
@@ -736,7 +733,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 {batchUrls.map((bUrl, idx) => (
                   <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 border border-border/50 text-xs">
                     <div className="flex items-center gap-2 overflow-hidden">
-                      <span className="text-muted-foreground font-mono text-[10px]">#{idx + 1}</span>
+                      <span className="text-muted-foreground font-mono text-xs">#{idx + 1}</span>
                       <span className="font-mono truncate">{bUrl}</span>
                     </div>
                     <Button
@@ -754,7 +751,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
             {batchUrls.length > 0 && (
               <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/40">
-                <span className="text-[11px] text-muted-foreground font-mono">
+                <span className="text-xs text-muted-foreground font-mono">
                   {batchRunning
                     ? `Running ${batchIndex + 1} / ${batchUrls.length}: ${batchUrls[batchIndex]}`
                     : `${batchUrls.length} URL${batchUrls.length === 1 ? "" : "s"} queued`}
@@ -795,8 +792,8 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
         <div className="flex flex-col gap-4 animate-in fade-in-50 duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Radial Gauge Card */}
-            <Card className={`glass-card shadow-sm transition-all duration-300 ${
-              isComplete ? "border-emerald-500/40 glow-emerald" : captureError ? "border-destructive/40 glow-rose" : isCapturing ? "border-primary/40 glow-cyan" : ""
+            <Card className={`sheet-card shadow-sm transition-all duration-300 ${
+              isComplete ? "border-destructive/40" : captureError ? "border-destructive/40" : isCapturing ? "border-primary/40" : ""
             }`}>
               <CardContent className="p-5 flex flex-col items-center justify-center text-center gap-3">
                 <div className="relative flex items-center justify-center w-28 h-28">
@@ -807,7 +804,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       r="40"
                       stroke="currentColor"
                       strokeWidth="8"
-                      className="text-slate-200 dark:text-muted/40"
+                      className="text-foreground dark:text-muted/40"
                       fill="transparent"
                     />
                     <circle
@@ -820,7 +817,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                       strokeDashoffset={251.2 - (251.2 * progressPercent) / 100}
                       strokeLinecap="round"
                       className={`transition-all duration-500 ${
-                        isComplete ? "text-emerald-600 dark:text-emerald-400" : captureError ? "text-destructive" : "text-primary"
+                        isComplete ? "text-destructive" : captureError ? "text-destructive" : "text-primary"
                       }`}
                       fill="transparent"
                     />
@@ -829,7 +826,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                     <span className="text-2xl font-bold tracking-tight text-foreground font-mono">
                       {isComplete ? "100%" : `${progressPercent}%`}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                       {isCapturing && <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />}
                       {isComplete ? "COMPLETE" : isCapturing ? "CRAWLING" : captureError ? "ERROR" : "READY"}
                     </span>
@@ -839,10 +836,10 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 <div className="w-full flex flex-col gap-1">
                   <Progress 
                     value={progressPercent} 
-                    className="h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-muted/40 border border-border/30"
-                    indicatorClassName={isComplete ? "bg-emerald-500" : captureError ? "bg-destructive" : "bg-primary animate-shimmer"}
+                    className="h-2 rounded-full overflow-hidden bg-muted dark:bg-muted/40 border border-border/30"
+                    indicatorClassName={isComplete ? "bg-destructive" : captureError ? "bg-destructive" : "bg-primary animate-shimmer"}
                   />
-                  <div className="flex justify-between text-[11px] text-muted-foreground pt-1 font-mono">
+                  <div className="flex justify-between text-xs text-muted-foreground pt-1 font-mono">
                     <span className="font-medium text-foreground/80">{downloadedCount} / {discoveredCount || downloadedCount} pages</span>
                     <span className="text-primary font-semibold">{speedPagesPerSec} p/s</span>
                   </div>
@@ -851,7 +848,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             </Card>
 
             {/* Stat Card 1: Discovered URLs */}
-            <Card className="glass-card shadow-sm">
+            <Card className="sheet-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Discovered URLs</CardTitle>
                 <div className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
@@ -860,39 +857,39 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-foreground font-mono">{discoveredCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-1">Sitemap & DOM link frontier</p>
+                <p className="text-xs text-muted-foreground mt-1">Sitemap & DOM link frontier</p>
               </CardContent>
             </Card>
 
             {/* Stat Card 2: Downloaded Pages */}
-            <Card className="glass-card shadow-sm">
+            <Card className="sheet-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Downloaded Pages</CardTitle>
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <div className="p-2 rounded-lg bg-muted text-muted-foreground border border-border">
                   <FileCheck className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-foreground font-mono">{downloadedCount}</div>
-                <p className="text-[11px] text-muted-foreground mt-1">Normalized Markdown artifacts</p>
+                <p className="text-xs text-muted-foreground mt-1">Normalized Markdown artifacts</p>
               </CardContent>
             </Card>
 
             {/* Stat Card 3: Elapsed Time & Health */}
-            <Card className="glass-card shadow-sm">
+            <Card className="sheet-card shadow-sm">
               <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Elapsed Time</CardTitle>
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
                   <Clock className="h-4 w-4" />
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-foreground font-mono">{elapsedSeconds}s</div>
-                <p className="text-[11px] mt-1 flex items-center justify-between">
-                  <span className={failedCount > 0 ? "text-amber-600 dark:text-amber-400 font-medium" : "text-muted-foreground"}>
+                <p className="text-xs mt-1 flex items-center justify-between">
+                  <span className={failedCount > 0 ? "text-primary font-medium" : "text-muted-foreground"}>
                     {failedCount > 0 ? `${failedCount} skipped / error` : "Optimal socket throughput"}
                   </span>
-                  <span className="font-mono text-[10px] text-muted-foreground">{speedPagesPerSec} p/s</span>
+                  <span className="font-mono text-xs text-muted-foreground">{speedPagesPerSec} p/s</span>
                 </p>
               </CardContent>
             </Card>
@@ -900,10 +897,10 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
           {/* Success Banner */}
           {isComplete && (
-            <Card className="border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-sm animate-in fade-in-50 duration-300">
+            <Card className="border-border bg-muted shadow-sm animate-in fade-in-50 duration-300">
               <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                  <div className="h-10 w-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center shrink-0 border border-border">
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
                   <div>
@@ -917,7 +914,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   <Button 
                     size="sm" 
                     onClick={() => onOpenDocReader(lastDomain)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm interactive-scale shrink-0"
+                    className="bg-success text-success-foreground hover:bg-success/90 shadow-sm interactive-scale shrink-0"
                   >
                     <BookOpen className="h-3.5 w-3.5 mr-1.5" />
                     Read in Studio
@@ -929,7 +926,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
           {/* Error Banner */}
           {captureError && (
-            <Card className="border-destructive/40 bg-destructive/10 backdrop-blur-md shadow-sm animate-in fade-in-50 duration-300">
+            <Card className="border-destructive/40 bg-destructive/10 shadow-sm animate-in fade-in-50 duration-300">
               <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-destructive/20 text-destructive flex items-center justify-center shrink-0 border border-destructive/30">
@@ -945,7 +942,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                     size="sm" 
                     variant="destructive"
                     onClick={handleForceReset}
-                    className="bg-destructive hover:bg-destructive/90 text-white shadow-sm interactive-scale"
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm interactive-scale"
                   >
                     <Zap className="h-3.5 w-3.5 mr-1.5" />
                     Force Reset
@@ -965,18 +962,18 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
           )}
 
           {/* Filterable Live Crawl Terminal */}
-          <Card className="glass-card shadow-sm overflow-hidden border-border/70">
+          <Card className="sheet-card shadow-sm overflow-hidden border-border/70">
             <div className="p-3.5 border-b border-border/50 bg-muted/20 flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center gap-2.5">
                 <div className="relative flex items-center">
-                  <span className={`h-2.5 w-2.5 rounded-full ${isCapturing ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'}`} />
-                  {isCapturing && <span className="absolute h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping opacity-75" />}
+                  <span className={`h-2.5 w-2.5 rounded-full ${isCapturing ? 'bg-muted animate-pulse' : 'bg-muted-foreground/50'}`} />
+                  {isCapturing && <span className="absolute h-2.5 w-2.5 rounded-full bg-muted animate-ping opacity-75" />}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Terminal className="h-4 w-4 text-primary" />
                   <span className="text-xs font-semibold text-foreground">Live Telemetry Terminal</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4 font-mono border-border text-muted-foreground">
+                <Badge variant="outline" className="text-xs py-0 px-1.5 h-4 font-mono border-border text-muted-foreground">
                   {logs.length} events
                 </Badge>
               </div>
@@ -987,7 +984,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   variant={logFilter === "all" ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setLogFilter("all")}
-                  className="h-6 text-[11px] px-2 rounded-md font-medium"
+                  className="h-6 text-xs px-2 rounded-md font-medium"
                 >
                   All ({logs.length})
                 </Button>
@@ -995,7 +992,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   variant={logFilter === "downloaded" ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setLogFilter("downloaded")}
-                  className="h-6 text-[11px] px-2 rounded-md font-medium text-emerald-700 dark:text-emerald-400"
+                  className="h-6 text-xs px-2 rounded-md font-medium text-muted-foreground"
                 >
                   Downloaded ({logs.filter(l => l.level === "downloaded").length})
                 </Button>
@@ -1003,7 +1000,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   variant={logFilter === "discovered" ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setLogFilter("discovered")}
-                  className="h-6 text-[11px] px-2 rounded-md font-medium text-primary"
+                  className="h-6 text-xs px-2 rounded-md font-medium text-primary"
                 >
                   Discovered ({logs.filter(l => l.level === "discovered").length})
                 </Button>
@@ -1011,7 +1008,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   variant={logFilter === "error" ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setLogFilter("error")}
-                  className="h-6 text-[11px] px-2 rounded-md font-medium text-destructive"
+                  className="h-6 text-xs px-2 rounded-md font-medium text-destructive"
                 >
                   Errors ({logs.filter(l => l.level === "error").length})
                 </Button>
@@ -1025,7 +1022,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                     placeholder="Search logs..."
                     value={logSearch}
                     onChange={(e) => setLogSearch(e.target.value)}
-                    className="h-7 text-[11px] pl-6 pr-2 w-32 sm:w-40 bg-background/70 font-mono"
+                    className="h-7 text-xs pl-6 pr-2 w-32 sm:w-40 bg-background/70 font-mono"
                   />
                 </div>
                 <Button
@@ -1036,7 +1033,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   title={autoScroll ? "Auto-scroll is active" : "Auto-scroll is paused"}
                 >
                   <ChevronDown className={`h-3 w-3 mr-1 transition-transform ${autoScroll ? "" : "-rotate-90"}`} />
-                  <span className="hidden sm:inline text-[10px] font-mono">{autoScroll ? "Auto-scroll" : "Paused"}</span>
+                  <span className="hidden sm:inline text-xs font-mono">{autoScroll ? "Auto-scroll" : "Paused"}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -1051,7 +1048,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   className="h-7 px-2.5 text-xs border-border/70 interactive-scale"
                   title="Copy terminal logs"
                 >
-                  {copiedLogs ? <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                  {copiedLogs ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                 </Button>
                 <Button
                   variant="outline"
@@ -1068,7 +1065,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
             {/* Log Stream Window */}
             <div 
               ref={logScrollRef}
-              className="h-72 overflow-y-auto p-4 font-mono text-xs flex flex-col gap-1.5 bg-slate-50/70 dark:bg-black/50 border-t border-border/40 leading-relaxed select-text shadow-inner"
+              className="h-72 overflow-y-auto p-4 font-mono text-xs flex flex-col gap-1.5 bg-muted/70 dark:bg-black/50 border-t border-border/40 leading-relaxed select-text shadow-inner"
             >
               {filteredLogs.length === 0 ? (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-xs italic">
@@ -1079,37 +1076,37 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
               ) : (
                 filteredLogs.map((log) => (
                   <div key={log.id} className="flex items-start gap-2 py-0.5 border-b border-border/30 dark:border-border/20 last:border-none">
-                    <span className="text-muted-foreground/70 text-[10px] select-none shrink-0 pt-0.5">[{log.time}]</span>
+                    <span className="text-muted-foreground/70 text-xs select-none shrink-0 pt-0.5">[{log.time}]</span>
                     {log.level === "downloaded" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-600/30 text-emerald-800 bg-emerald-50 dark:border-emerald-500/40 dark:text-emerald-400 dark:bg-emerald-500/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-xs py-0 px-1 border-border text-muted-foreground bg-muted shrink-0 font-mono">
                         DOWNLOADED
                       </Badge>
                     )}
                     {log.level === "discovered" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-sky-600/30 text-sky-800 bg-sky-50 dark:border-primary/40 dark:text-sky-400 dark:bg-primary/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-xs py-0 px-1 border-primary/30 text-primary bg-muted dark:border-primary/40 dark:bg-primary/10 shrink-0 font-mono">
                         DISCOVERED
                       </Badge>
                     )}
                     {log.level === "error" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-destructive/40 text-destructive bg-destructive/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-xs py-0 px-1 border-destructive/40 text-destructive bg-destructive/10 shrink-0 font-mono">
                         ERROR
                       </Badge>
                     )}
                     {log.level === "written" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-600/30 text-emerald-800 bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-400 dark:bg-emerald-400/10 shrink-0 font-mono">
+                      <Badge variant="outline" className="text-xs py-0 px-1 border-border text-muted-foreground bg-muted shrink-0 font-mono">
                         WRITTEN
                       </Badge>
                     )}
                     {log.level === "info" && (
-                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-border text-muted-foreground shrink-0 font-mono">
+                      <Badge variant="outline" className="text-xs py-0 px-1 border-border text-muted-foreground shrink-0 font-mono">
                         INFO
                       </Badge>
                     )}
                     <span className={`break-all ${
-                      log.level === "downloaded" ? "text-emerald-900 dark:text-emerald-300 font-medium" :
-                      log.level === "discovered" ? "text-sky-900 dark:text-sky-300" :
-                      log.level === "error" ? "text-rose-700 dark:text-rose-400 font-medium" :
-                      "text-slate-700 dark:text-slate-300"
+                      log.level === "downloaded" ? "text-muted-foreground font-medium" :
+                      log.level === "discovered" ? "text-muted-foreground" :
+                      log.level === "error" ? "text-destructive font-medium" :
+                      "text-muted-foreground"
                     }`}>
                       {log.message}
                     </span>

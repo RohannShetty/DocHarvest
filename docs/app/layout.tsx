@@ -47,7 +47,7 @@ const jsonLd = {
     {
       "@type": "SoftwareApplication",
       name: "DocHarvest",
-      alternateName: ["gitbook-downloader", "DocHarvest CLI", "DocHarvest FastMCP"],
+      alternateName: ["docharvest", "DocHarvest CLI", "DocHarvest FastMCP"],
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Windows, macOS, Linux",
       softwareVersion: VERSION,

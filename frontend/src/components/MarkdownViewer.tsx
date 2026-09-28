@@ -3,17 +3,18 @@ import {
   Copy,
   Check,
   Download,
-  FileText,
+
   Search,
   List,
   ChevronRight,
   Sparkles,
-  ExternalLink,
+
   Code,
   BookOpen,
   Maximize2,
   Minimize2
 } from "lucide-react"
+import { brandTokens } from "@/lib/brand"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -35,47 +36,32 @@ interface TocItem {
   level: number
 }
 
-// Theme-aware, re-runnable Mermaid initialization. The dark palette is pinned
-// (must not regress); the light palette uses a near-white background with dark
-// strokes/text so diagrams stay readable on light glass cards.
+// Re-runnable, brand-driven Mermaid initialization. The palette is read from the
+// live CSS custom properties, so diagrams follow BRAND.md (neutral sheet
+// surfaces, one amber accent) and switch with the app theme - rather than
+// carrying their own hard-coded cyan/blue/indigo palette that matched nothing.
 let activeMermaidTheme: "dark" | "light" | null = null
 
 export function initMermaid(theme: "dark" | "light"): void {
   if (activeMermaidTheme === theme) return
-  if (theme === "dark") {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: "dark",
-      themeVariables: {
-        darkMode: true,
-        background: "#090d16",
-        primaryColor: "#06b6d4",
-        primaryTextColor: "#f8fafc",
-        lineColor: "#38bdf8",
-        secondaryColor: "#10b981",
-        tertiaryColor: "#6366f1"
-      },
-      securityLevel: "loose"
-    })
-  } else {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: "default",
-      themeVariables: {
-        darkMode: false,
-        background: "#ffffff",
-        primaryColor: "#e0f2fe",
-        primaryTextColor: "#0f172a",
-        primaryBorderColor: "#0369a1",
-        lineColor: "#475569",
-        secondaryColor: "#d1fae5",
-        tertiaryColor: "#e0e7ff",
-        textColor: "#0f172a",
-        edgeLabelBackground: "#ffffff"
-      },
-      securityLevel: "loose"
-    })
-  }
+  const t = brandTokens()
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: theme === "dark" ? "dark" : "default",
+    themeVariables: {
+      darkMode: theme === "dark",
+      background: t.bond,
+      primaryColor: t.bond3,
+      primaryTextColor: t.ink,
+      primaryBorderColor: t.rule,
+      lineColor: t.ruleStrong,
+      secondaryColor: t.bond2,
+      tertiaryColor: t.bond3,
+      textColor: t.ink2,
+      edgeLabelBackground: t.bond
+    },
+    securityLevel: "loose"
+  })
   activeMermaidTheme = theme
 }
 
@@ -229,9 +215,9 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
 
           if (isMermaid) {
             elements.push(
-              <div key={`mermaid-${index}-${resolvedTheme}`} className="my-6 rounded-xl border border-cyan-500/20 bg-background/80 p-4 shadow-sm">
+              <div key={`mermaid-${index}-${resolvedTheme}`} className="my-6 rounded-xl border border-border bg-background/80 p-4 shadow-sm">
                 <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3 text-xs text-muted-foreground font-mono">
-                  <span className="flex items-center gap-1.5 text-cyan-700 dark:text-cyan-400">
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
                     <Sparkles className="h-3.5 w-3.5" /> Mermaid Architecture Diagram
                   </span>
                 </div>
@@ -245,10 +231,10 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             )
           } else {
             elements.push(
-              <div key={`code-${index}`} className="group relative my-5 rounded-xl border border-border/60 bg-[#090d16] text-slate-100 shadow-md">
-                <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs font-mono text-slate-400">
+              <div key={`code-${index}`} className="group relative my-5 rounded-xl border border-border/60 bg-muted text-foreground shadow-md">
+                <div className="flex items-center justify-between border-b border-border px-4 py-2 text-xs font-mono text-muted-foreground">
                   <span className="flex items-center gap-1.5">
-                    <Code className="h-3.5 w-3.5 text-cyan-400" />
+                    <Code className="h-3.5 w-3.5 text-muted-foreground" />
                     {codeLanguage || "text"}
                   </span>
                   <button
@@ -256,7 +242,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                       navigator.clipboard.writeText(codeText)
                       toast.success("Code snippet copied!")
                     }}
-                    className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <Copy className="h-3 w-3" /> Copy
                   </button>
@@ -292,7 +278,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               key={`h1-${index}`}
               data-heading-id={headingId}
               className={`mt-8 mb-4 text-2xl font-bold tracking-tight text-foreground border-b border-border/50 pb-2 ${
-                isMatch ? "bg-amber-500/20 px-2 rounded" : ""
+                isMatch ? "bg-primary/20 px-2 rounded" : ""
               }`}
             >
               {cleanText}
@@ -304,7 +290,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               key={`h2-${index}`}
               data-heading-id={headingId}
               className={`mt-6 mb-3 text-xl font-semibold tracking-tight text-foreground ${
-                isMatch ? "bg-amber-500/20 px-2 rounded" : ""
+                isMatch ? "bg-primary/20 px-2 rounded" : ""
               }`}
             >
               {cleanText}
@@ -316,7 +302,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               key={`h3-${index}`}
               data-heading-id={headingId}
               className={`mt-4 mb-2 text-base font-semibold text-foreground/90 ${
-                isMatch ? "bg-amber-500/20 px-2 rounded" : ""
+                isMatch ? "bg-primary/20 px-2 rounded" : ""
               }`}
             >
               {cleanText}
@@ -328,7 +314,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               key={`h4-${index}`}
               data-heading-id={headingId}
               className={`mt-3 mb-1 text-sm font-semibold text-foreground/80 ${
-                isMatch ? "bg-amber-500/20 px-2 rounded" : ""
+                isMatch ? "bg-primary/20 px-2 rounded" : ""
               }`}
             >
               {cleanText}
@@ -352,10 +338,10 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       }
 
       // Bullet lists
-      if (line.match(/^[\*\-]\s+/)) {
+      if (line.match(/^[*-]\s+/)) {
         elements.push(
           <li key={`li-${index}`} className="ml-5 list-disc text-xs leading-relaxed text-foreground/90 my-1">
-            {line.replace(/^[\*\-]\s+/, "")}
+            {line.replace(/^[*-]\s+/, "")}
           </li>
         )
         return
@@ -372,7 +358,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       }
 
       // Horizontal rules
-      if (line.match(/^(\-{3,}|\*{3,}|_{3,})$/)) {
+      if (line.match(/^(-{3,}|\*{3,}|_{3,})$/)) {
         elements.push(<hr key={`hr-${index}`} className="my-6 border-border/60" />)
         return
       }
@@ -399,7 +385,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       isFullscreen ? "fixed inset-2 z-50 rounded-2xl" : "relative"
     }`}>
       {/* Header Bar */}
-      <div className="flex items-center justify-between border-b border-border bg-card/80 px-4 py-3 backdrop-blur-md">
+      <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary border border-primary/20">
             <BookOpen className="h-4 w-4" />
@@ -410,12 +396,12 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                 {title || domain || "Documentation Viewer"}
               </span>
               {domain && (
-                <Badge variant="outline" className="text-[10px] font-mono border-primary/30 text-primary">
+                <Badge variant="outline" className="text-xs font-mono border-primary/30 text-primary">
                   {domain}
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
               <span>{stats.words.toLocaleString()} words</span>
               <span>•</span>
               <span>~{stats.readingTimeMin} min read</span>
@@ -457,7 +443,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
             className="h-8 gap-1.5 text-xs"
             title="Copy Raw Markdown"
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
             <span className="hidden md:inline">{copied ? "Copied" : "Copy MD"}</span>
           </Button>
 
@@ -466,7 +452,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
               variant="outline"
               size="sm"
               onClick={onExportPdf}
-              className="h-8 gap-1.5 text-xs border-cyan-500/30 text-cyan-700 hover:bg-cyan-500/10 dark:text-cyan-400"
+              className="h-8 gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/10"
               title="Export as Pure-Python PDF Handbook"
             >
               <Download className="h-3.5 w-3.5" />
@@ -501,10 +487,10 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
       <div className="flex flex-1 overflow-hidden">
         {/* Dynamic Table of Contents Sidebar */}
         {showToc && toc.length > 0 && (
-          <aside className="w-64 border-r border-border bg-card/40 backdrop-blur-sm p-4 overflow-y-auto hidden sm:block select-none">
+          <aside className="w-64 border-r border-border bg-card p-4 overflow-y-auto hidden sm:block select-none">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-border/50 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               <span>Table of Contents</span>
-              <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+              <Badge variant="secondary" className="text-xs h-4 px-1.5">
                 {toc.length}
               </Badge>
             </div>
@@ -517,7 +503,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
                     activeHeadingId === item.id
                       ? "bg-primary/10 text-primary font-medium border border-primary/20"
                       : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
-                  } ${item.level === 2 ? "pl-4 text-[11px]" : item.level >= 3 ? "pl-6 text-[10px]" : "font-medium"}`}
+                  } ${item.level === 2 ? "pl-4 text-xs" : item.level >= 3 ? "pl-6 text-xs" : "font-medium"}`}
                 >
                   <ChevronRight className={`h-3 w-3 shrink-0 opacity-0 group-hover:opacity-100 ${
                     activeHeadingId === item.id ? "opacity-100 text-primary" : ""
@@ -532,7 +518,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         {/* Main Formatted Markdown Body */}
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto p-6 md:p-8 font-sans antialiased text-foreground selection:bg-cyan-500/20 selection:text-cyan-700 dark:selection:text-cyan-300"
+          className="flex-1 overflow-y-auto p-6 md:p-8 font-sans antialiased text-foreground selection:bg-primary/20 selection:text-muted-foreground dark:selection:text-muted-foreground"
         >
           <div className="max-w-4xl mx-auto">
             {renderFormattedContent()}

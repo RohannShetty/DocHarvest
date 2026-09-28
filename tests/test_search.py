@@ -1,7 +1,7 @@
 """Tests for SQLite FTS5 search index.
 
 All tests use a temporary directory for the database, never touching
-~/.gitbook-downloader/search.db.
+~/.docharvest/search.db.
 """
 
 import sqlite3
@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.search import SearchIndex
-from gitbook_downloader.search.index import _fts_escape
+from docharvest.search import SearchIndex
+from docharvest.search.index import _fts_escape
 
 
 class TestSearchIndexInit:
@@ -436,7 +436,7 @@ class TestSearchIndexInsertErrorLogging:
     def test_failed_section_insert_is_logged_not_swallowed(self, tmp_path, monkeypatch, caplog):
         """A failing section insert must log a warning (url + error), not
         silently ``pass``."""
-        import gitbook_downloader.search.index as index_module
+        import docharvest.search.index as index_module
 
         SearchIndex(base_dir=tmp_path)  # ensure schema exists
         real_connect = index_module._get_connection
@@ -463,7 +463,7 @@ class TestSearchIndexInsertErrorLogging:
 
         si = index_module.SearchIndex.__new__(index_module.SearchIndex)
         si.base_dir = tmp_path
-        with caplog.at_level("WARNING", logger="gitbook_downloader.search.index"):
+        with caplog.at_level("WARNING", logger="docharvest.search.index"):
             si.index_domain("broken.com", "# A\n\nAlpha.\n\n# B\n\nBeta.")
 
         messages = "\n".join(record.getMessage() for record in caplog.records)

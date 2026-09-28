@@ -8,7 +8,7 @@ script; there is deliberately no second copy of the spec.
 Run:  python build_exe.py
 
 Output: dist/gitbook-dl(.exe)  — console onefile, TUI entry point
-        (`gitbook_downloader.cli:main`; bare invocation launches the Textual TUI).
+        (`docharvest.cli:main`; bare invocation launches the Textual TUI).
 """
 
 import os
@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 # a real script file, so we generate a runner that imports cli:main.
 #
 # Two non-obvious requirements:
-# 1. `gitbook_downloader.tui` is imported LAZILY by cli.py, so PyInstaller's
+# 1. `docharvest.tui` is imported LAZILY by cli.py, so PyInstaller's
 #    static analysis never sees it — we must import it here explicitly or the
 #    frozen exe reports "TUI isn't available" (v7.0.0 release bug).
 # 2. Double-clicking an exe gives you a console that closes the instant the
@@ -39,9 +39,9 @@ if sys.platform == "win32":
             except Exception:
                 pass
 
-import gitbook_downloader.tui.app  # noqa: F401  (force-bundle the lazy TUI)
-import gitbook_downloader.gui.app  # noqa: F401  (force-bundle the Desktop GUI)
-from gitbook_downloader.cli import main
+import docharvest.tui.app  # noqa: F401  (force-bundle the lazy TUI)
+import docharvest.gui.app  # noqa: F401  (force-bundle the Desktop GUI)
+from docharvest.cli import main
 
 if __name__ == "__main__":
     try:
@@ -84,7 +84,7 @@ HIDDEN_IMPORTS = [
 # Whole-package collects: modules whose submodules/data files are loaded
 # dynamically and would otherwise be missed by static analysis.
 COLLECT_ALL = [
-    "gitbook_downloader",  # submodules + package data (TUI + GUI assets)
+    "docharvest",  # submodules + package data (TUI + GUI assets)
     "textual",             # .tcss stylesheets, drivers, widget data
     "webview",             # pywebview drivers and JS bridges
     "fpdf2",               # fonts, metrics, and resources
@@ -106,9 +106,9 @@ def build() -> int:
         with open(runner, "w", encoding="utf-8") as fh:
             fh.write(RUNNER)
 
-        web_src = os.path.join(ROOT, "src", "gitbook_downloader", "gui", "web")
+        web_src = os.path.join(ROOT, "src", "docharvest", "gui", "web")
         data_sep = ";" if sys.platform == "win32" else ":"
-        add_data = f"{web_src}{data_sep}gitbook_downloader/gui/web"
+        add_data = f"{web_src}{data_sep}docharvest/gui/web"
 
         cmd = [
             sys.executable,

@@ -6,7 +6,7 @@ import { MANIFEST, formatBytes } from '../lib/indexData';
  * Line 03 — the providers.
  *
  * Detection order and priorities are the code's own values
- * (`src/gitbook_downloader/providers/*.py`); each signal line is that detector's
+ * (`src/docharvest/providers/*.py`); each signal line is that detector's
  * own docstring prose. The before/after row is the one measured pair the
  * generator could fetch, and it prints only what it measured.
  */

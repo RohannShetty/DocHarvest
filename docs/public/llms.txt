@@ -2,21 +2,21 @@
 
 > Turn any documentation site into LLM-ready Markdown, vector RAG context & offline books. 100% local, MIT-licensed, zero telemetry.
 
-DocHarvest (PyPI package: `gitbook-downloader`) is a local-first documentation compiler: it auto-detects the documentation platform (GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, ReadTheDocs, generic SPAs), probes native `.md` endpoints, and compiles a deterministic knowledge corpus — per-page Markdown with SHA-256 YAML frontmatter, a consolidated `book.md` with table of contents, an `llms.txt` manifest, RAG-ready JSONL, and an embedded SQLite FTS5 search index.
+DocHarvest (PyPI package: `docharvest`) is a local-first documentation compiler: it auto-detects the documentation platform (GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe, ReadTheDocs, generic SPAs), probes native `.md` endpoints, and compiles a deterministic knowledge corpus — per-page Markdown with SHA-256 YAML frontmatter, a consolidated `book.md` with table of contents, an `llms.txt` discovery manifest, an `llms-full.txt` full-content manifest, RAG-ready JSONL, and an embedded SQLite FTS5 search index.
 
-Measured on the canonical full-suite capture: **673 pages in 18.2 seconds at ~83% token reduction** vs raw pages.
+Measured on the canonical full-suite capture: **673 pages in 18.2 seconds at ~83% token reduction** vs raw pages. This is a reference measurement, not a guarantee; reproduce local claims with the checked-in benchmark workflow.
 
 ## Interfaces
 
 - [DocHarvest Showcase](https://rohannshetty.github.io/DocHarvest/): Product overview, output contract, agent integrations, and FAQ.
 - [GitHub Repository](https://github.com/RohannShetty/DocHarvest): Source code, releases, and the 14 documented AI client configs.
-- [PyPI: DocHarvest](https://pypi.org/project/gitbook-downloader/): `pip install gitbook-downloader`.
+- [PyPI: DocHarvest](https://pypi.org/project/docharvest/): `pip install docharvest`.
 
 ## Use With AI Coding Agents
 
-DocHarvest ships a FastMCP v2 server (`docharvest mcp`) exposing 12 tools — including `download_docs`, `search_docs`, `find_docs`, and `read_doc` with AST-safe token bounding — for Cursor, Claude Code/Desktop, Windsurf, VS Code, OpenCode, Oh My Pi, and other MCP clients. Ready-made configs for 14 clients are in the README.
+DocHarvest ships a FastMCP v2 server (`docharvest mcp`) with a minimal default profile and an explicit full profile (`docharvest mcp --profile full`). The full profile exposes 12 tools — including `download_docs`, `search_docs`, `find_docs`, and `read_doc` with AST-safe token bounding — for Cursor, Claude Code/Desktop, Windsurf, VS Code, OpenCode, Oh My Pi, and other MCP clients. Ready-made configs for 14 clients are in the README.
 
-A bundled agent skill (`docharvest`) ships inside the package and installs into any harness layout — `.agents/skills`, `.claude/skills`, `.cursor/skills`, `.gemini/skills`, `.github/skills`, `.omp/skills` — with `docharvest skill install docharvest -o <dir>`. The skill teaches an agent the `download_docs` → `search_docs`/`read_doc` → `export_docs` workflow and the CLI fallback when MCP is unavailable.
+A bundled agent skill (`docharvest`) ships inside the package and installs into any harness layout — `.agents/skills`, `.claude/skills`, `.cursor/skills`, `.gemini/skills`, `.github/skills`, `.omp/skills` — with `docharvest skill install docharvest -o <dir>`. The skill teaches an agent the `download_docs` → `search_docs(max_tokens=...)`/`read_doc` workflow and the CLI fallback when MCP is unavailable.
 
 ## Optional
 

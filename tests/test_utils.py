@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from gitbook_downloader.utils import (
+from docharvest.utils import (
     create_session, retry_get, TimeoutHTTPAdapter, DEFAULT_TIMEOUT,
     load_config, merge_config, init_default_config, DEFAULTS,
     normalize_url, is_md_url,
@@ -162,7 +162,7 @@ class TestConfigDefaults:
         assert DEFAULTS["use_llms_txt"] is True
 
     def test_output_dir(self):
-        assert "gitbook-downloader" in DEFAULTS["output_dir"]
+        assert "docharvest" in DEFAULTS["output_dir"]
 
 
 class TestMergeConfig:
@@ -359,14 +359,14 @@ class TestDiscoverFromLlmsTxt:
 
     def test_returns_empty_set_on_error(self):
         session = create_session()
-        with patch("gitbook_downloader.utils.discovery.retry_get") as mock_rg:
+        with patch("docharvest.utils.discovery.retry_get") as mock_rg:
             mock_rg.return_value = (None, "Timeout")
             urls = discover_from_llms_txt("https://docs.example.com", session)
             assert urls == set()
 
     def test_returns_empty_set_on_404(self):
         session = create_session()
-        with patch("gitbook_downloader.utils.discovery.retry_get") as mock_rg:
+        with patch("docharvest.utils.discovery.retry_get") as mock_rg:
             mock_resp = MagicMock()
             mock_resp.status_code = 404
             mock_rg.return_value = (mock_resp, None)
@@ -389,7 +389,7 @@ class TestDiscoverFromSitemap:
 
     def test_returns_urls_from_xml(self):
         session = create_session()
-        with patch("gitbook_downloader.utils.discovery.retry_get") as mock_rg:
+        with patch("docharvest.utils.discovery.retry_get") as mock_rg:
             mock_resp = MagicMock()
             mock_resp.status_code = 200
             mock_resp.text = (
@@ -407,14 +407,14 @@ class TestDiscoverFromSitemap:
 
     def test_returns_empty_on_no_sitemap(self):
         session = create_session()
-        with patch("gitbook_downloader.utils.discovery.retry_get") as mock_rg:
+        with patch("docharvest.utils.discovery.retry_get") as mock_rg:
             mock_rg.return_value = (None, "Connection failed")
             urls = discover_from_sitemap("https://docs.example.com", session)
             assert urls == set()
 
     def test_filters_external_urls(self):
         session = create_session()
-        with patch("gitbook_downloader.utils.discovery.retry_get") as mock_rg:
+        with patch("docharvest.utils.discovery.retry_get") as mock_rg:
             mock_resp = MagicMock()
             mock_resp.status_code = 200
             mock_resp.text = (

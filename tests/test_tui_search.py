@@ -20,8 +20,8 @@ pytestmark = pytest.mark.skipif(
 
 from textual.widgets import Input, Select, Static  # noqa: E402
 
-from gitbook_downloader.tui.screens.search import HitCard  # noqa: E402
-from gitbook_downloader.tui.testing import FakeEngine  # noqa: E402
+from docharvest.tui.screens.search import HitCard  # noqa: E402
+from docharvest.tui.testing import FakeEngine  # noqa: E402
 
 
 def run_async(coro):
@@ -29,7 +29,7 @@ def run_async(coro):
 
 
 def make_app(engine=None):
-    from gitbook_downloader.tui.app import GitbookDownloaderApp
+    from docharvest.tui.app import GitbookDownloaderApp
 
     engine = engine or FakeEngine()
     opened: list[str] = []

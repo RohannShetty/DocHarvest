@@ -10,8 +10,8 @@ import asyncio
 import pytest
 from pathlib import Path
 
-from gitbook_downloader.splitter import extract_topic_context
-from gitbook_downloader.storage.manager import StorageManager
+from docharvest.splitter import extract_topic_context
+from docharvest.storage.manager import StorageManager
 
 
 def test_extract_topic_context_basic():
@@ -96,7 +96,14 @@ def test_storage_load_and_list_pages(tmp_path: Path):
 
 @pytest.mark.asyncio
 async def test_find_docs_and_read_doc_mcp_tools(tmp_path: Path, monkeypatch):
-    import gitbook_downloader.mcp.server as mcp_server
+    # The optional `mcp` extra may be absent (or unimportable). Skipping here
+    # rather than skipping the module keeps the topic-extraction tests running —
+    # and makes this test's result independent of test order, which it was not:
+    # it only ever passed when an earlier test happened to stub `mcp` into
+    # sys.modules, so the suite went red as soon as collection order changed.
+    pytest.importorskip("mcp", reason="requires the optional 'mcp' extra")
+
+    import docharvest.mcp.server as mcp_server
 
     fake_storage = StorageManager(base_dir=tmp_path)
     monkeypatch.setattr(mcp_server, "_storage", fake_storage)

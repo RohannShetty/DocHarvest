@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.api import CaptureOptions
-from gitbook_downloader.utils.config import (
+from docharvest.api import CaptureOptions
+from docharvest.utils.config import (
     AppConfig,
     capture_options_from_config,
     find_config_files,

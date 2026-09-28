@@ -47,7 +47,7 @@ export function ProductWalkthrough() {
             <p className="sheet-label text-match">Inspect and export</p>
             <h3 className="mt-3 text-2xl font-semibold tracking-tight text-ink">The library keeps the work reusable.</h3>
             <p className="sheet-body mt-4 text-ink-2">Search captured domains, open their folders, compare snapshots, and send the same files to a RAG pipeline or a PDF reader.</p>
-            <code className="mt-6 block border border-rule bg-bond px-4 py-3 text-xs leading-relaxed text-ink">~/.gitbook-downloader/docs/&lt;domain&gt;/</code>
+            <code className="mt-6 block border border-rule bg-bond px-4 py-3 text-xs leading-relaxed text-ink">~/.docharvest/docs/&lt;domain&gt;/</code>
           </div>
           <figure className="order-1 lg:order-2">
             <div className="overflow-hidden border border-rule-strong bg-bond">

@@ -1,6 +1,6 @@
 """Version drift regression.
 
-Single source of truth for DocHarvest version: ``11.1.0``.
+Single source of truth for DocHarvest version: ``11.1.1``.
 
 This test fails if any of the canonical reference files drift from that value.
 The list below is curated (not a grep over the whole tree) so that:
@@ -8,15 +8,15 @@ The list below is curated (not a grep over the whole tree) so that:
 - ``CHANGELOG.md`` is allowed to mention historical versions (out of scope).
 - ``package-lock.json`` lockfile entries like ``@octokit/endpoint@11.0.4`` are
   not DocHarvest version literals (out of scope).
-- ``docs/lib/version.ts`` and ``src/gitbook_downloader/__init__.py`` are the
+- ``docs/lib/version.ts`` and ``src/docharvest/__init__.py`` are the
   canonical sources and MUST equal ``11.1.0`` (we assert equality, not just
   presence).
 - ``frontend/index.html`` <title> must read ``DocHarvest v11.1.0``.
 
 Drift signals (these MUST all read ``11.1.0`` after Phase 1 step 1):
 - README.md version badge.
-- src/gitbook_downloader/cli.py direct-script fallback.
-- src/gitbook_downloader/gui/bridge.py User-Agent (it must use
+- src/docharvest/cli.py direct-script fallback.
+- src/docharvest/gui/bridge.py User-Agent (it must use
   ``__version__``, not a hardcoded literal — we assert the absence of a
   hardcoded 9.0.0/10.0.1/11.0.0 token).
 - frontend/src/lib/bridge.ts ``getSystemInfo`` fallback.
@@ -31,19 +31,19 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_VERSION = "11.1.0"
+CANONICAL_VERSION = "11.1.1"
 
 
 # Files where the value MUST literally equal CANONICAL_VERSION (not just
 # contain it as a substring — e.g. "11.0.30" must not match).
 CANONICAL_SOURCE_FILES = [
-    REPO_ROOT / "src" / "gitbook_downloader" / "__init__.py",
+    REPO_ROOT / "src" / "docharvest" / "__init__.py",
     REPO_ROOT / "docs" / "lib" / "version.ts",
     REPO_ROOT / "frontend" / "src" / "lib" / "version.ts",
 ]
 
 
-# Files where the file MUST contain the literal ``11.0.9`` somewhere.
+# Files where the file MUST contain the canonical version literal somewhere.
 # (We grep, not assert exact match, because each file embeds it in different
 # surrounding text — a badge URL, a JS string, a User-Agent f-string, etc.)
 MUST_CONTAIN = [
@@ -52,7 +52,7 @@ MUST_CONTAIN = [
     REPO_ROOT / "frontend" / "index.html",
     REPO_ROOT / "pyproject.toml",
     REPO_ROOT / "uv.lock",
-    REPO_ROOT / "src" / "gitbook_downloader" / "cli.py",
+    REPO_ROOT / "src" / "docharvest" / "cli.py",
     REPO_ROOT / "tests" / "test_imports.py",
     REPO_ROOT / "tests" / "test_gui_bridge.py",
     REPO_ROOT / "docs" / "components" / "__tests__" / "version.test.ts",
@@ -67,11 +67,14 @@ MUST_CONTAIN = [
 # (Allowed in CHANGELOG.md, package-lock.json, and test fixtures that
 # explicitly pin to historical versions.)
 STALE_LITERAL_PATTERNS = [
-    re.compile(r"gitbook-downloader/9\.0\.0"),
-    re.compile(r"gitbook-downloader/10\.0\.\d+"),
-    re.compile(r"gitbook-downloader/11\.0\.0"),
+    re.compile(r"docharvest/9\.0\.0"),
+    re.compile(r"docharvest/10\.0\.\d+"),
+    re.compile(r"docharvest/11\.0\.0"),
+    re.compile(r"docharvest/11\.1\.0"),
     re.compile(r"'11\.0\.0'"),
     re.compile(r'"11\.0\.0"'),
+    re.compile(r"'11\.1\.0'"),
+    re.compile(r'"11\.1\.0"'),
     re.compile(r"9\.0\.0b1"),
     # The fallback commit message must not still cite v10.0.1 as a release.
     re.compile(r"v10\.0\.1 - DocHarvest hotfix"),
@@ -82,7 +85,7 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
-def test_canonical_sources_equal_11_0_2() -> None:
+def test_canonical_sources_equal_canonical_version() -> None:
     for path in CANONICAL_SOURCE_FILES:
         assert path.exists(), f"Canonical source missing: {path}"
         text = _read_text(path)
@@ -94,7 +97,7 @@ def test_canonical_sources_equal_11_0_2() -> None:
 
 
 @pytest.mark.parametrize("path", MUST_CONTAIN, ids=lambda p: str(p.relative_to(REPO_ROOT)))
-def test_required_files_contain_11_0_2(path: Path) -> None:
+def test_required_files_contain_canonical_version(path: Path) -> None:
     assert path.exists(), f"Required file missing: {path}"
     text = _read_text(path)
     assert CANONICAL_VERSION in text, (
@@ -105,8 +108,8 @@ def test_required_files_contain_11_0_2(path: Path) -> None:
 @pytest.mark.parametrize(
     "path",
     [
-        REPO_ROOT / "src" / "gitbook_downloader" / "cli.py",
-        REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py",
+        REPO_ROOT / "src" / "docharvest" / "cli.py",
+        REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py",
         REPO_ROOT / "frontend" / "src" / "lib" / "bridge.ts",
     ],
     ids=lambda p: str(p.relative_to(REPO_ROOT)),
@@ -122,11 +125,11 @@ def test_no_stale_version_literal(path: Path) -> None:
 
 
 def test_cli_version_fallback_uses_canonical_value() -> None:
-    """The direct-script fallback in cli.py MUST equal 11.1.0 (not 9.0.0b1)."""
-    cli_text = _read_text(REPO_ROOT / "src" / "gitbook_downloader" / "cli.py")
+    """The direct-script fallback in cli.py MUST equal the canonical version."""
+    cli_text = _read_text(REPO_ROOT / "src" / "docharvest" / "cli.py")
     # The fallback literal is the value in the `except ImportError` branch.
-    assert "__version__ = \"11.1.0\"" in cli_text, (
-        "cli.py direct-script fallback should be 11.1.0, not 9.0.0b1"
+    assert f'__version__ = "{CANONICAL_VERSION}"' in cli_text, (
+        f"cli.py direct-script fallback should be {CANONICAL_VERSION}, not 9.0.0b1"
     )
     assert "9.0.0b1" not in cli_text, (
         "cli.py still contains stale 9.0.0b1 fallback"
@@ -135,21 +138,21 @@ def test_cli_version_fallback_uses_canonical_value() -> None:
 
 def test_bridge_user_agent_uses_version_constant() -> None:
     """The User-Agent in bridge.py must be built from __version__, not hardcoded."""
-    bridge_text = _read_text(REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "bridge.py")
+    bridge_text = _read_text(REPO_ROOT / "src" / "docharvest" / "gui" / "bridge.py")
     # The hardcoded literal must be gone, and an f-string interpolation must
     # build the User-Agent from __version__.
-    assert "gitbook-downloader/9.0.0" not in bridge_text, (
-        "bridge.py still has the hardcoded gitbook-downloader/9.0.0 User-Agent"
+    assert "docharvest/9.0.0" not in bridge_text, (
+        "bridge.py still has the hardcoded docharvest/9.0.0 User-Agent"
     )
-    assert "f\"gitbook-downloader/{__version__}\"" in bridge_text or \
-           "f'gitbook-downloader/{__version__}'" in bridge_text, (
+    assert "f\"docharvest/{__version__}\"" in bridge_text or \
+           "f'docharvest/{__version__}'" in bridge_text, (
         "bridge.py User-Agent must be built from __version__ via f-string"
     )
 
 
 def test_python_version_importable() -> None:
-    """Smoke: the Python package exposes __version__ == 11.0.9."""
-    from gitbook_downloader import __version__
+    """Smoke: the Python package exposes the canonical __version__."""
+    from docharvest import __version__
     assert __version__ == CANONICAL_VERSION
 
 
@@ -179,7 +182,7 @@ _HARDCODED_VERSION_ALLOWLIST = {
     REPO_ROOT / "frontend" / "src" / "lib" / "version.ts",
 }
 
-_HARDCODED_VERSION_RE = re.compile(r"""(?<!\d)11\.0\.\d+(?!\d)""")
+_HARDCODED_VERSION_RE = re.compile(r"""(?<!\d)11\.1\.\d+(?!\d)""")
 
 
 @pytest.mark.parametrize(
@@ -216,7 +219,7 @@ def test_prebuilt_gui_bundle_matches_canonical_version() -> None:
     Forgetting `npm run build` after a bump leaves the shipped app advertising
     the previous release even though every Python-side file is correct.
     """
-    bundle = REPO_ROOT / "src" / "gitbook_downloader" / "gui" / "web" / "index.html"
+    bundle = REPO_ROOT / "src" / "docharvest" / "gui" / "web" / "index.html"
     assert bundle.exists(), f"prebuilt GUI bundle missing: {bundle}"
 
     text = _read_text(bundle)
@@ -225,7 +228,7 @@ def test_prebuilt_gui_bundle_matches_canonical_version() -> None:
         "after bumping the version"
     )
 
-    for pattern in (re.compile(r"v11\.0\.\d+"),):
+    for pattern in (re.compile(r"v11\.1\.\d+"),):
         found = {m for m in pattern.findall(text) if m != f"v{CANONICAL_VERSION}"}
         assert not found, (
             f"GUI bundle carries a non-canonical version reference: {sorted(found)}"

@@ -1,6 +1,6 @@
 """Tests for storage system — StorageManager and VersionManager.
 
-All tests use temporary directories, never touching ~/.gitbook-downloader.
+All tests use temporary directories, never touching ~/.docharvest.
 """
 
 import json
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.storage import StorageManager, VersionManager, VersioningError
+from docharvest.storage import StorageManager, VersionManager, VersioningError
 
 
 # ════════════════════════════════════════════════════════════════
@@ -662,13 +662,13 @@ class TestDomainPathName:
     through untouched so existing libraries do not move."""
 
     def test_plain_hostnames_are_unchanged(self):
-        from gitbook_downloader.storage.manager import domain_to_path_name
+        from docharvest.storage.manager import domain_to_path_name
 
         for host in ("docs.example.com", "docs.openalgo.in", "readthedocs.io", "localhost"):
             assert domain_to_path_name(host) == host
 
     def test_host_with_port_is_sanitized(self):
-        from gitbook_downloader.storage.manager import domain_to_path_name
+        from docharvest.storage.manager import domain_to_path_name
 
         assert domain_to_path_name("localhost:3000") == "localhost_3000"
         assert domain_to_path_name("127.0.0.1:8080") == "127.0.0.1_8080"
@@ -676,14 +676,14 @@ class TestDomainPathName:
     def test_sanitizing_is_idempotent(self):
         """list_domains re-derives the domain from the directory name and feeds
         it back through the storage layer, so a second pass must be a no-op."""
-        from gitbook_downloader.storage.manager import domain_to_path_name
+        from docharvest.storage.manager import domain_to_path_name
 
         for host in ("docs.example.com", "localhost:3000", "a:b/c", "CON", "weird."):
             once = domain_to_path_name(host)
             assert domain_to_path_name(once) == once
 
     def test_reserved_and_degenerate_names(self):
-        from gitbook_downloader.storage.manager import domain_to_path_name
+        from docharvest.storage.manager import domain_to_path_name
 
         assert domain_to_path_name("CON") == "_CON"
         assert domain_to_path_name("nul") == "_nul"
@@ -708,7 +708,7 @@ class TestDomainPathName:
     def test_lock_does_not_use_illegal_characters(self):
         import tempfile
 
-        from gitbook_downloader.storage.manager import DomainLock
+        from docharvest.storage.manager import DomainLock
 
         with tempfile.TemporaryDirectory() as tmp:
             lock = DomainLock(tmp, "localhost:3000")
@@ -727,7 +727,7 @@ class TestCaptureStampIsHeaderScoped:
     snapshot comparison and the stored content."""
 
     def test_body_line_is_not_rewritten(self):
-        from gitbook_downloader.storage.versioning import _strip_capture_stamp
+        from docharvest.storage.versioning import _strip_capture_stamp
 
         body_line = b"> Captured: this is documented example text"
         doc = (
@@ -741,7 +741,7 @@ class TestCaptureStampIsHeaderScoped:
         assert b"> Captured: 2026-01-01T00:00:00Z" not in out
 
     def test_header_only_change_counts_as_unchanged(self):
-        from gitbook_downloader.storage.versioning import _same_ignoring_capture_stamp
+        from docharvest.storage.versioning import _same_ignoring_capture_stamp
 
         a = b"# S\n\n> Source: u\n> Captured: 2026-01-01T00:00:00Z\n\n## P\n\nbody"
         b = a.replace(b"2026-01-01", b"2026-07-07")
@@ -749,7 +749,7 @@ class TestCaptureStampIsHeaderScoped:
         assert _same_ignoring_capture_stamp(a, b)
 
     def test_body_difference_still_counts_as_changed(self):
-        from gitbook_downloader.storage.versioning import _same_ignoring_capture_stamp
+        from docharvest.storage.versioning import _same_ignoring_capture_stamp
 
         a = b"# S\n\n> Source: u\n> Captured: 2026-01-01T00:00:00Z\n\n## P\n\nbody"
         b = a.replace(b"body", b"different body")

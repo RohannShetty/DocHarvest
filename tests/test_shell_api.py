@@ -11,15 +11,15 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader import api
-from gitbook_downloader.api import (
+from docharvest import api
+from docharvest.api import (
     LATEST_ONLY,
     CaptureError,
     CaptureOptions,
     ProgressEvent,
     capture,
 )
-from gitbook_downloader.storage import StorageManager
+from docharvest.storage import StorageManager
 
 
 # ── Fixtures & helpers ──────────────────────────────────────────────────

@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_downloader.gui.app import get_web_dir
-from gitbook_downloader.gui.bridge import ApiBridge
+from docharvest.gui.app import get_web_dir
+from docharvest.gui.bridge import ApiBridge
 
 
 def test_get_web_dir_exists():
@@ -34,7 +34,7 @@ def test_bridge_detect_mocked(monkeypatch):
             return ["https://docs.example.com/v1/a", "https://docs.example.com/v2/b"]
 
     monkeypatch.setattr(
-        "gitbook_downloader.gui.bridge.detect_provider",
+        "docharvest.gui.bridge.detect_provider",
         lambda url, sess: FakeProvider(),
     )
     bridge = ApiBridge()
@@ -48,7 +48,7 @@ def test_bridge_detect_mocked(monkeypatch):
 def test_bridge_system_info():
     bridge = ApiBridge()
     info = bridge.get_system_info()
-    assert info["version"] == "11.1.0"
+    assert info["version"] == "11.1.1"
     assert info["name"] == "DocHarvest"
     assert "DocHarvest Engine" in info["engine"]
     assert info["author"] == "Rohan Shetty"
@@ -84,7 +84,7 @@ def test_bridge_list_library():
 
 
 def test_bridge_rename_domain(tmp_path):
-    from gitbook_downloader.storage import StorageManager
+    from docharvest.storage import StorageManager
     sm = StorageManager(base_dir=tmp_path)
     sm.save_doc(domain="test.domain", content="# Content", url="u", title="T", pages=1, provider="generic", new_pages=1, size_kb=1.0)
     bridge = ApiBridge(storage_manager=sm)

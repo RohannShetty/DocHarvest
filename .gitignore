@@ -169,13 +169,16 @@ AGENTS.md
 !.omp/skills/docharvest/**
 # The packaged skill inside the Python package must ship as well. The bare
 # `skills/` rule above matches at ANY depth, so it also hid
-# `src/gitbook_downloader/skills/`: the canonical skill was missing from git
+# `src/docharvest/skills/`: the canonical skill was missing from git
 # and therefore from every wheel built from a clone, while local tests still
 # passed because the files existed on disk. `tests/test_skills.py` guards this.
-!src/gitbook_downloader/skills/
+!src/docharvest/skills/
 # Everything else under it stays ignored (__pycache__, stray notes) so the
 # negation cannot sweep build byproducts into the commit.
-src/gitbook_downloader/skills/*
-!src/gitbook_downloader/skills/__init__.py
-!src/gitbook_downloader/skills/docharvest/
-!src/gitbook_downloader/skills/docharvest/**
+src/docharvest/skills/*
+!src/docharvest/skills/__init__.py
+!src/docharvest/skills/docharvest/
+!src/docharvest/skills/docharvest/**
+
+# Test-summary file written by the Pages workflow before regenerating stats
+.pytest-summary.txt
