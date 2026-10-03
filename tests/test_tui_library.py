@@ -29,11 +29,11 @@ def run_async(coro):
 
 
 def make_app(engine=None):
-    from docharvest.tui.app import GitbookDownloaderApp
+    from docharvest.tui.app import DocHarvestApp
 
     engine = engine or FakeEngine()
     opened: list[str] = []
-    app = GitbookDownloaderApp(engine=engine, opener=opened.append)
+    app = DocHarvestApp(engine=engine, opener=opened.append)
     return app, engine, opened
 
 

@@ -8,13 +8,13 @@ not drag their scrollbar away from the screen edge.
 
 import pytest
 
-from docharvest.tui.app import GitbookDownloaderApp
+from docharvest.tui.app import DocHarvestApp
 from docharvest.tui.testing import FakeEngine
 
 
 @pytest.fixture()
 def app():
-    return GitbookDownloaderApp(engine=FakeEngine())
+    return DocHarvestApp(engine=FakeEngine())
 
 
 @pytest.mark.asyncio

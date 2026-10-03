@@ -4,7 +4,7 @@ This file is intentionally local and owner-run. The current implementation pass 
 
 ## Repository settings
 
-- [ ] A2 — Open repository Settings → Social preview and verify `assets/social-preview.svg` renders. Capture a screenshot or record the result.
+- [ ] A2 — Upload `assets/social-preview.png` in repository Settings → Social preview. The branded card now exists (drawn from `brand/tokens.json`); only the upload and the `layout.tsx` swap from `og-sheet.png` remain owner steps. Capture a screenshot or record the result.
 - [ ] A3 — Add the eight audit topics: `ai-agents`, `claude-code`, `cursor`, `codex`, `skills`, `llm`, `ai`, `agent-skills`.
 - [ ] A4 — Enable GitHub Discussions after confirming a moderation owner.
 

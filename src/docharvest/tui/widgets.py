@@ -14,6 +14,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Static
 
 from .. import __version__
+from .theme import DARK_THEME_NAME
 
 # Surfaces in shell order; keys 1..5 map onto these.
 SURFACES = (
@@ -89,7 +90,7 @@ class NavBar(Horizontal):
 
     def set_theme_label(self, theme_name: str) -> None:
         self.query_one("#theme-toggle", Button).label = (
-            "Light" if theme_name == "gb-dark" else "Dark"
+            "Light" if theme_name == DARK_THEME_NAME else "Dark"
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

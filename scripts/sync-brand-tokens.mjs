@@ -1,19 +1,22 @@
 #!/usr/bin/env node
 /**
- * Generate the brand token stylesheets from brand/tokens.json.
+ * Generate the brand token surfaces from brand/tokens.json.
  *
- *   node scripts/sync-brand-tokens.mjs          # write both files
- *   node scripts/sync-brand-tokens.mjs --check   # exit 1 if they are stale
+ *   node scripts/sync-brand-tokens.mjs          # write every generated file
+ *   node scripts/sync-brand-tokens.mjs --check   # exit 1 if any file is stale
  *
- * Two surfaces consume the same values:
+ * Three surfaces consume the same values:
  *   docs/app/brand-tokens.css             -> website (Next.js / Tailwind v4)
  *   frontend/src/styles/brand-tokens.css  -> desktop GUI (Vite / Tailwind v3)
+ *   src/docharvest/brand_tokens.py        -> CLI / TUI / window chrome (Python)
  *
  * The website file holds the raw primitives only; the site maps them onto
  * Tailwind v4 theme variables itself. The GUI file additionally holds a
  * shadcn/ui semantic layer (--background, --primary, ...) because the component
  * primitives there read those names, plus HSL triplets so Tailwind's
- * `bg-primary/10` opacity modifier keeps working.
+ * `bg-primary/10` opacity modifier keeps working. The Python module carries the
+ * primitives and font stacks as data, so `docharvest tui` and the PyWebView
+ * window chrome name the brand instead of carrying private hex copies.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -25,6 +28,14 @@ const tokens = JSON.parse(readFileSync(join(root, "brand/tokens.json"), "utf8"))
 const BANNER = `/* GENERATED FILE - DO NOT EDIT.
    Source: brand/tokens.json   Regenerate: node scripts/sync-brand-tokens.mjs
    tests/test_brand_tokens.py fails if this file and the source disagree. */`;
+
+const PY_BANNER = `"""GENERATED FILE - DO NOT EDIT.
+
+Source: brand/tokens.json   Regenerate: node scripts/sync-brand-tokens.mjs
+tests/test_brand_tokens.py fails if this file and the source disagree.
+"""
+
+from __future__ import annotations`;
 
 /* ---------- colour maths ---------- */
 
@@ -173,9 +184,67 @@ ${fontLines("  ").join("\n")}
 }
 `;
 
+function pythonPrimitives(mode) {
+  return Object.entries(tokens.primitives[mode])
+    .map(([k, v]) => `        "${k}": "${v}",`)
+    .join("\n");
+}
+
+function pythonTuple(values) {
+  return `(\n${values.map((v) => `        "${v}",`).join("\n")}\n    )`;
+}
+
+const pythonModule = `${PY_BANNER}
+
+#: Every corner in the brand is square.
+RADIUS: str = "${tokens.radius}"
+
+#: The two families the whole product is set in. A terminal or a native window
+#: without them installed falls through the stack to the platform UI font rather
+#: than rendering in a different voice.
+FONTS: dict[str, tuple[str, ...]] = {
+    "sans": ${pythonTuple(tokens.fonts.sans)},
+    "mono": ${pythonTuple(tokens.fonts.mono)},
+}
+
+#: Brand primitives per mode. "dark" is the default world; "light" is a real
+#: second palette, not an inversion of the first.
+TOKENS: dict[str, dict[str, str]] = {
+    "dark": {
+${pythonPrimitives("dark")}
+    },
+    "light": {
+${pythonPrimitives("light")}
+    },
+}
+
+
+def token(name: str, mode: str = "dark") -> str:
+    """Return one brand primitive: token("bond") or token("match", "light")."""
+    try:
+        return TOKENS[mode][name]
+    except KeyError as exc:  # pragma: no cover - a typo at a call site
+        raise KeyError(
+            f"unknown brand token {name!r} for mode {mode!r}; "
+            f"known modes: {sorted(TOKENS)}, known tokens: {sorted(TOKENS[mode])}"
+        ) from exc
+
+
+def font_stack(kind: str) -> str:
+    """Return a CSS font stack for FONTS ("sans" or "mono")."""
+    try:
+        families = FONTS[kind]
+    except KeyError as exc:  # pragma: no cover - a typo at a call site
+        raise KeyError(
+            f"unknown font stack {kind!r}; known stacks: {sorted(FONTS)}"
+        ) from exc
+    return ", ".join(f'"{name}"' if " " in name else name for name in families)
+`;
+
 const targets = [
   ["docs/app/brand-tokens.css", websiteCss],
   ["frontend/src/styles/brand-tokens.css", guiCss],
+  ["src/docharvest/brand_tokens.py", pythonModule],
 ];
 
 const check = process.argv.includes("--check");

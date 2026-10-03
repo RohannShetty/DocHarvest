@@ -1,17 +1,21 @@
 """The brand-token contract.
 
 `brand/tokens.json` is the single source of truth for colour and type. It is
-generated into one stylesheet per surface:
+generated into one surface file per consumer:
 
     docs/app/brand-tokens.css              -> the website (Next.js, Tailwind v4)
     frontend/src/styles/brand-tokens.css   -> the desktop GUI (Vite, Tailwind v3)
+    src/docharvest/brand_tokens.py         -> the CLI / TUI / native window chrome
 
-Both surfaces must consume those files rather than naming colours of their own,
+Every surface must consume those files rather than naming colours of their own,
 which is the whole point of the exercise: before this existed the website spoke
-`--bond/--rule/--ink/--match` while the GUI spoke shadcn's slate defaults, so the
-product and its documentation never looked like the same thing.
+`--bond/--rule/--ink/--match` while the GUI spoke shadcn's slate defaults and the
+TUI carried a third hand-copied palette, so the product and its documentation
+never looked like the same thing.
 
-A failure here means the two surfaces have started to drift apart again.
+The drawn assets have their own guards in tests/test_brand_assets.py.
+
+A failure here means the surfaces have started to drift apart again.
 """
 from __future__ import annotations
 
@@ -39,13 +43,18 @@ GUI_TAILWIND = REPO / "frontend" / "tailwind.config.js"
 GUI_PACKAGE = REPO / "frontend" / "package.json"
 GUI_FALLBACK_TS = GUI_SRC / "lib" / "brand.ts"
 
+PY_TOKENS = REPO / "src" / "docharvest" / "brand_tokens.py"
+TUI_THEME = REPO / "src" / "docharvest" / "tui" / "theme.py"
+GUI_APP = REPO / "src" / "docharvest" / "gui" / "app.py"
+
 # Files allowed to mention a raw colour literal:
-#   - the generated stylesheets and the token source itself
+#   - the generated surfaces and the token source itself
 #   - lib/brand.ts, which carries the last-resort fallbacks for canvas surfaces
 RAW_COLOUR_ALLOWED = {
     "brand-tokens.css",
     "tokens.json",
     "brand.ts",
+    "brand_tokens.py",
 }
 
 # Overlay scrims are a platform convention (every modal needs one) rather than a
@@ -321,3 +330,58 @@ def test_both_surfaces_set_type_in_the_same_two_families() -> None:
     assert "fonts.googleapis.com" not in html, (
         "the desktop GUI must not fetch fonts from a CDN - it has to render offline"
     )
+
+
+# --------------------------------------------------------------------------
+# the Python surface (CLI / TUI / native window chrome)
+# --------------------------------------------------------------------------
+
+
+def test_python_token_module_is_generated() -> None:
+    assert PY_TOKENS.exists(), "the Python token module was never generated"
+    assert "GENERATED FILE" in PY_TOKENS.read_text(encoding="utf-8")
+
+
+def test_python_token_module_carries_the_primitives_per_mode() -> None:
+    """The TUI's colours must be the same values the two CSS surfaces ship."""
+    from docharvest import brand_tokens
+
+    tokens = load_tokens()
+    for mode in ("dark", "light"):
+        assert brand_tokens.TOKENS[mode] == tokens["primitives"][mode], (
+            f"the Python module's {mode} primitives drifted from brand/tokens.json"
+        )
+    assert brand_tokens.RADIUS == tokens["radius"]
+    assert brand_tokens.FONTS["sans"][0] == tokens["fonts"]["sans"][0]
+    assert brand_tokens.FONTS["mono"][0] == tokens["fonts"]["mono"][0]
+
+
+def test_python_surfaces_name_no_colour_of_their_own() -> None:
+    """tui/theme.py and the GUI window chrome must read tokens, not hexes.
+
+    They used to carry private copies of the palette (#111113, #71717a,
+    #090d16, Inter, JetBrains Mono) that drifted away from brand/tokens.json.
+    """
+    palette = {
+        value.upper()
+        for mode in load_tokens()["primitives"].values()
+        for name, value in mode.items()
+        if name != "match-subtle"
+    }
+    for path in (TUI_THEME, GUI_APP):
+        text = path.read_text(encoding="utf-8")
+        # Strip comments: the module docstring quotes tokens as documentation.
+        code = "\n".join(
+            line for line in text.splitlines() if not line.lstrip().startswith("#")
+        )
+        code = re.sub(r'""".*?"""', "", code, flags=re.S)
+        literals = {value.upper() for value in re.findall(r"#[0-9a-fA-F]{6}", code)}
+        assert not literals - palette, (
+            f"{path.relative_to(REPO)} hard-codes colour(s) outside the palette: "
+            f"{sorted(literals - palette)}"
+        )
+
+
+def test_the_window_chrome_is_the_brand_canvas() -> None:
+    """The native backdrop must be --bond, or the window flashes the wrong colour."""
+    assert 'token("bond")' in GUI_APP.read_text(encoding="utf-8")

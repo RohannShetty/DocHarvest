@@ -20,6 +20,7 @@ pytestmark = pytest.mark.skipif(
 
 from docharvest.tui.testing import FakeEngine  # noqa: E402
 from docharvest.tui.widgets import NavBar  # noqa: E402
+from docharvest.tui.theme import DARK_THEME_NAME, LIGHT_THEME_NAME  # noqa: E402
 
 
 def run_async(coro):
@@ -27,11 +28,11 @@ def run_async(coro):
 
 
 def make_app(engine=None):
-    from docharvest.tui.app import GitbookDownloaderApp
+    from docharvest.tui.app import DocHarvestApp
 
     engine = engine or FakeEngine()
     opened: list[str] = []
-    app = GitbookDownloaderApp(engine=engine, opener=opened.append)
+    app = DocHarvestApp(engine=engine, opener=opened.append)
     return app, engine, opened
 
 
@@ -51,7 +52,7 @@ def test_app_launches_dark_with_five_surfaces():
         async with app.run_test(size=(120, 42)) as pilot:
             for _ in range(5):
                 await pilot.pause()
-            assert app.theme == "gb-dark"
+            assert app.theme == DARK_THEME_NAME
             tabs = app.query_one("TabbedContent")
             assert tabs.active == "wizard"
             from textual.widgets import TabbedContent
@@ -112,11 +113,11 @@ def test_theme_toggle_via_key_and_nav_button():
             app.set_focus(None)
             await pilot.pause()
             await pilot.press("ctrl+t")
-            assert await wait_until(pilot, lambda: app.theme == "gb-light")
+            assert await wait_until(pilot, lambda: app.theme == LIGHT_THEME_NAME)
             assert toggle.label == "Dark"
 
             await pilot.click("#theme-toggle")
-            assert await wait_until(pilot, lambda: app.theme == "gb-dark")
+            assert await wait_until(pilot, lambda: app.theme == DARK_THEME_NAME)
             assert toggle.label == "Light"
 
     run_async(scenario())

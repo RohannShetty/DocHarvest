@@ -1,4 +1,4 @@
-"""GitbookDownloaderApp — the TUI shell.
+"""DocHarvestApp — the TUI shell.
 
 Five surfaces stay mounted in a tabbed shell so a running capture keeps
 ticking while you browse the Library. Screens consume ONLY the injected
@@ -23,7 +23,13 @@ from .engine_protocol import (
     Detection,
     EngineProtocol,
 )
-from .theme import BASE_TOKENS, DEFAULT_THEME, THEMES
+from .theme import (
+    BASE_TOKENS,
+    DARK_THEME_NAME,
+    DEFAULT_THEME,
+    LIGHT_THEME_NAME,
+    THEMES,
+)
 from .widgets import NavBar, SURFACES
 
 
@@ -45,7 +51,7 @@ class AppState:
     last_run: object | None = None  # CaptureRun | None (avoids import cycle)
 
 
-class GitbookDownloaderApp(App[None]):
+class DocHarvestApp(App[None]):
     TITLE = "DocHarvest"
     SUB_TITLE = "capture documentation sites as markdown"
 
@@ -127,7 +133,9 @@ class GitbookDownloaderApp(App[None]):
             self.surface("diagnostics").refresh_from_state()
 
     def action_toggle_theme(self) -> None:
-        self.theme = "gb-light" if self.theme == "gb-dark" else "gb-dark"
+        self.theme = (
+            LIGHT_THEME_NAME if self.theme == DARK_THEME_NAME else DARK_THEME_NAME
+        )
         self.query_one(NavBar).set_theme_label(self.theme)
 
     # ── clipboard paste ──────────────────────────────────────────────
@@ -214,4 +222,4 @@ def _surface_widget(name: str):
 
 def run() -> None:
     """Entry point used by `gitbook-dl` (bare) and `python -m …tui`."""
-    GitbookDownloaderApp().run()
+    DocHarvestApp().run()

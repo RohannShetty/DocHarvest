@@ -198,7 +198,7 @@ def test_tui_package_import_does_not_pull_textual():
 
         assert "textual" not in set(sys.modules) - before
         # Lazy attribute access works and only then pulls textual.
-        app_cls = tui_pkg.GitbookDownloaderApp
+        app_cls = tui_pkg.DocHarvestApp
         assert app_cls is not None
         assert "textual" in sys.modules
     finally:

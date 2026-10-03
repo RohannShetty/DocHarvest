@@ -67,9 +67,10 @@ jobs:
       working-directory: frontend
       run: npm run build
 
-  # The brand tokens are generated into both surfaces; this fails the moment
-  # someone edits a generated stylesheet by hand or changes a value without
-  # regenerating, which is how the two surfaces drifted apart before.
+  # The brand is generated from brand/tokens.json into three stylesheet/module
+  # surfaces and seven drawn assets; these fail the moment someone hand-edits
+  # a generated file, changes a value without regenerating, or draws a second
+  # logo - which is how the surfaces drifted apart before.
   brand-tokens:
     runs-on: ubuntu-latest
     steps:
@@ -81,3 +82,6 @@ jobs:
 
     - name: Brand tokens are current
       run: node scripts/sync-brand-tokens.mjs --check
+
+    - name: Drawn brand assets are current
+      run: node scripts/build-brand-kit.mjs --check

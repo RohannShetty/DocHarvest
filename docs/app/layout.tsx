@@ -32,10 +32,11 @@ THESIS — The page is a working index, not a brochure: every claim is a line of
 captured Markdown with its source file and line number, and amber marks only the matched
 term. It refuses the category default (dark hero + mock terminal + feature-card grid) and
 the incumbent indigo glass and gradient headline. seed 0acefbe5
-OWN-WORLD — Near-black bond #09090B, 1px #1F1F23 hairlines, zero radii, zinc text ramp
-#F4F4F5 / #A1A1AA / #71717A, one accent #F59E0B reserved for the matched term and the
+OWN-WORLD — Near-black bond #09090B, 1px #27272A hairlines, zero radii, zinc text ramp
+#F4F4F5 / #A1A1AA / #8A8A93, one accent #F59E0B reserved for the matched term and the
 active line; Archivo for prose, Geist Mono for every number, path and command; depth from
-section cuts & ambient light, never generic drop shadows.
+section cuts & ambient light, never generic drop shadows. Every value is generated from
+brand/tokens.json into docs/app/brand-tokens.css — see docs/brand/BRAND.md.
 FIRST VIEWPORT — Hero: "Turn any docs site into context your agent can use."
 beside the live index specimen, with the real command above the fold.
 -->`;

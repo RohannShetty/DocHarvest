@@ -1,34 +1,35 @@
-"""Design tokens — single source of truth for the TUI look.
+"""The TUI's binding of the shared brand tokens.
 
-Binding tokens (plan §6):
+Every value here is read from :mod:`docharvest.brand_tokens`, which is
+generated from ``brand/tokens.json`` — the same source the website and the
+desktop GUI read. This module only decides *which* primitive plays *which*
+role for Textual; it never names a colour of its own.
 
 ======================  ==========  ==========================================
-token                   value       role
+role                     token       what it carries
 ======================  ==========  ==========================================
-canvas (dark)           #09090b     app background, dark theme (default)
-canvas (light)          #fafafa     app background, light theme
-surface                 #18181b     cards / tables / raised panels (dark)
-hairline                #27272a     1px borders everywhere (dark)
-hairline (light)        #e4e4e7     1px borders (light)
-accent                  #f59e0b     THE one accent: primary action, active
-                                    tab marker, focus ring, progress fill,
-                                    snippet highlights, detected-provider chip
-accent-strong           #d97706     same hue, AA-safe on light canvas
-prose ink               #e4e4e7     body text (dark) / #18181b (light)
-muted ink               #a1a1aa     secondary labels (dark) / #52525b (light)
-faint ink               #71717a     hints, timestamps
-danger (semantic only)  #f85149     errors, destructive confirm (dark)
-success (semantic only) #3fb950     diff "added" (dark)
-mono font               JetBrains Mono, Cascadia Mono, Consolas…
-prose font              Inter, Segoe UI Variable, system-ui…
+canvas                   bond        app background (dark: #09090B, the default)
+surface                  bond-3      raised panels, tables (dark)
+panel                    bond-2      wells between canvas and surface
+hairline                 rule        every 1px border
+hairline-strong          rule-strong section cuts, table heads
+accent                   match       THE one accent: primary action, active tab
+                                   marker, focus ring, progress fill, matches
+prose ink                ink         body text / headings
+muted ink                ink-2       secondary labels
+faint ink                ink-3       hints, timestamps, line numbers
+danger (semantic only)   alert       errors and destructive confirms
+success (semantic only)  ok          diff "added", a finished capture
+mono font                mono        every number, path, command, count
+prose font               sans        labels, descriptions, buttons
 ======================  ==========  ==========================================
 
 Discipline rules enforced here:
 
-* Amber appears ONLY where this module puts it — never as body text,
-  never as decoration. Green/red appear ONLY as diff/error semantics.
-* Numerals, paths, URLs, table data, keycaps: mono stack (``.mono``).
-  Labels, descriptions, buttons: prose stack (the root default).
+* Amber appears ONLY where this module puts it — never as body text, never as
+  decoration. Green/red appear ONLY as diff/error semantics.
+* Numerals, paths, URLs, table data, keycaps: the mono stack. Labels,
+  descriptions and buttons: the sans stack.
 * Flat surfaces + hairlines only. No gradients, no glow, no emoji icons.
 """
 
@@ -36,42 +37,53 @@ from __future__ import annotations
 
 from textual.theme import Theme
 
-# ── Raw palette (zinc scale + one amber) ─────────────────────────────────
+from ..brand_tokens import font_stack, token
 
-CANVAS_DARK = "#09090b"      # zinc-950
-CANVAS_LIGHT = "#fafafa"     # zinc-50
-SURFACE_DARK = "#18181b"     # zinc-900
-SURFACE_LIGHT = "#ffffff"
-PANEL_DARK = "#111113"       # between canvas and surface
-PANEL_LIGHT = "#f4f4f5"      # zinc-100
-HAIRLINE_DARK = "#27272a"    # zinc-800
-HAIRLINE_LIGHT = "#e4e4e7"   # zinc-200
-HAIRLINE_STRONG_DARK = "#3f3f46"  # zinc-700
-HAIRLINE_STRONG_LIGHT = "#d4d4d8" # zinc-300
+# ── Roles, resolved per mode from the generated brand tokens ────────────────
 
-INK_HI_DARK = "#e4e4e7"      # zinc-200
-INK_HI_LIGHT = "#18181b"     # zinc-900
-INK_MUTED_DARK = "#a1a1aa"   # zinc-400
-INK_MUTED_LIGHT = "#52525b"  # zinc-600
-INK_FAINT_DARK = "#71717a"   # zinc-500
-INK_FAINT_LIGHT = "#71717a"
+CANVAS_DARK = token("bond")          # the canvas
+CANVAS_LIGHT = token("bond", "light")
+SURFACE_DARK = token("bond-3")       # raised panels / tables
+SURFACE_LIGHT = token("paper", "light")
+PANEL_DARK = token("bond-2")         # wells between canvas and surface
+PANEL_LIGHT = token("bond-2", "light")
 
-ACCENT = "#f59e0b"           # amber-500 — the ONE accent
-ACCENT_STRONG = "#d97706"    # amber-600 — light-theme shade of the same hue
-ON_ACCENT = "#09090b"        # text sitting on amber fills
+HAIRLINE_DARK = token("rule")
+HAIRLINE_LIGHT = token("rule", "light")
+HAIRLINE_STRONG_DARK = token("rule-strong")
+HAIRLINE_STRONG_LIGHT = token("rule-strong", "light")
 
-DANGER_DARK = "#f85149"
-DANGER_LIGHT = "#cf222e"
-SUCCESS_DARK = "#3fb950"
-SUCCESS_LIGHT = "#1a7f37"
+INK_HI_DARK = token("ink")
+INK_HI_LIGHT = token("ink", "light")
+INK_MUTED_DARK = token("ink-2")
+INK_MUTED_LIGHT = token("ink-2", "light")
+INK_FAINT_DARK = token("ink-3")
+INK_FAINT_LIGHT = token("ink-3", "light")
 
-MONO_STACK = '"JetBrains Mono", "Cascadia Mono", "SF Mono", Consolas, monospace'
-PROSE_STACK = '"Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif'
+ACCENT = token("match")             # the one accent
+ACCENT_STRONG = token("match", "light")  # same hue, AA-safe on the light canvas
+ON_ACCENT = token("bond")
+ON_ACCENT_LIGHT = token("paper", "light")
+
+DANGER_DARK = token("alert")
+DANGER_LIGHT = token("alert", "light")
+SUCCESS_DARK = token("ok")
+SUCCESS_LIGHT = token("ok", "light")
+
+
+MONO_STACK = font_stack("mono")
+PROSE_STACK = font_stack("sans")
+
+#: Theme names. They carry the product, not the retired `gitbook-dl` alias:
+#: a user who reads a theme name in a config file should see DocHarvest.
+DARK_THEME_NAME = "docharvest-dark"
+LIGHT_THEME_NAME = "docharvest-light"
+
 
 # ── Textual themes ───────────────────────────────────────────────────────
 
-GB_DARK = Theme(
-    name="gb-dark",
+DARK_THEME = Theme(
+    name=DARK_THEME_NAME,
     dark=True,
     primary=ACCENT,
     secondary=INK_MUTED_DARK,
@@ -96,8 +108,8 @@ GB_DARK = Theme(
     },
 )
 
-GB_LIGHT = Theme(
-    name="gb-light",
+LIGHT_THEME = Theme(
+    name=LIGHT_THEME_NAME,
     dark=False,
     primary=ACCENT_STRONG,
     secondary=INK_MUTED_LIGHT,
@@ -116,19 +128,20 @@ GB_LIGHT = Theme(
         "ink-muted": INK_MUTED_LIGHT,
         "ink-faint": INK_FAINT_LIGHT,
         "raised": SURFACE_LIGHT,
-        "on-accent": CANVAS_LIGHT,
+        "on-accent": ON_ACCENT_LIGHT,
         "mono-font": MONO_STACK,
         "prose-font": PROSE_STACK,
     },
 )
 
-THEMES = (GB_DARK, GB_LIGHT)
-DEFAULT_THEME = "gb-dark"
+THEMES = (DARK_THEME, LIGHT_THEME)
+DEFAULT_THEME = DARK_THEME_NAME
+
 
 #: Parse-time fallbacks. App stylesheets are parsed BEFORE any theme is
 #: applied, so every custom variable referenced in styles.tcss must exist
-#: even under the stock textual theme. Values here mirror GB_DARK; an
-#: active gb-dark/gb-light theme overrides them per theme.
+#: even under the stock textual theme. Values here mirror the dark theme; an
+#: active theme overrides them per mode.
 BASE_TOKENS = {
     "hairline": HAIRLINE_DARK,
     "hairline-strong": HAIRLINE_STRONG_DARK,

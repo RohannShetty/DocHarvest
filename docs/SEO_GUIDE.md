@@ -146,30 +146,33 @@ All of the following ship with the Next.js static export (`cd docs && npm run bu
 - Description: loss-framed, verb-first, front-loaded (see `app/layout.tsx`)
 - `og:title` and `twitter:title` match the title exactly
 
-**Outstanding (tool-blocked):** exporting the branded `public/assets/social-preview.svg` (1280×640 spec in §6) to PNG — `resvg`/`cairosvg` unavailable and Playwright browsers not installed in this environment. Run once, anywhere with browsers:
+**Social preview (done, 2026-10-03).** `assets/social-preview.svg` is now drawn
+from `brand/tokens.json` by `node scripts/build-brand-kit.mjs`, so it carries the
+real palette, the real type and the version read from `pyproject.toml`. It is
+exported to `assets/social-preview.png` at 1280×640. Regenerate with
+`node scripts/build-brand-kit.mjs` (both surfaces), re-export the PNG, then
+upload it in the repo's **Settings → General → Social preview**.
 
-```bash
-cd docs && npx playwright install chromium && \
-  npx playwright screenshot --viewport-size="1280,640" \
-  "$(pwd)/public/assets/social-preview.svg" public/assets/social-preview.png
-```
-
-…then swap `og-sheet.png` → `social-preview.png` in `layout.tsx` (both `openGraph` and `twitter`) and upload the same PNG as the GitHub social preview (Settings → General → Social preview).
+> **Still an owner step:** `layout.tsx` points `openGraph`/`twitter` at
+> `assets/og-sheet.png`. Swapping it to `social-preview.png` and uploading the
+> card to GitHub requires the repo owner — neither is checkable from this
+> checkout. Until then the product screenshot carries OG duty.
 
 ---
 
 ## 6. OpenGraph Social Preview Asset Specification
 
+Generated from the brand tokens — the spec below is what the generator draws,
+not a hand-drawn target. Change `brand/tokens.json` and regenerate.
+
 | Property | Value |
 |---|---|
 | Canvas | 1280 × 640 px (2:1) |
-| Background | `#09090b` (Zinc-950) + dot-grid texture (`#1b1b20`, r=1.4, 44px step) |
-| Border | `1px #27272a`, rx=24 |
-| Accents | `#06b6d4` (Cyan) + `#f59e0b` (Amber) |
-| Typography | Inter + JetBrains Mono, contrast > 12:1 |
-| Source | `docs/public/assets/social-preview.svg` (spec card: logo lockup, headline "Any Docs Site → LLM-Ready Markdown", live terminal mock, badges) |
-
-Export procedure in §5. Until then the product screenshot carries OG duty.
+| Background | `--bond` `#09090B` + dot-grid texture in `--rule` `#27272A`, r=1.4, 40px step |
+| Border | `1px` `--rule` `#27272A`, square corners (the brand has zero radii) |
+| Accent | `--match` amber `#F59E0B` — the word "context" in the headline, the prompt glyph, the `✓` results |
+| Typography | Archivo (headline, 46/700) + Geist Mono (every command, path and count) |
+| Source | `assets/social-preview.svg` and `docs/public/assets/social-preview.svg` (logo lockup, headline "Compile any docs portal into context your agent can verify.", terminal running a real capture command) |
 
 ---
 

@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .. import __version__
+from ..brand_tokens import token
 from .bridge import ApiBridge
 
 
@@ -66,7 +67,9 @@ def launch_gui(
             width=1160,
             height=780,
             min_size=(920, 600),
-            background_color="#090d16",
+            # The window's own backdrop is brand: what shows before first paint
+            # is the same bond the app canvas is painted with.
+            background_color=token("bond"),
             text_select=True,
         )
         bridge.set_window(window)

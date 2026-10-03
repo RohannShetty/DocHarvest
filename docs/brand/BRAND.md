@@ -1,21 +1,28 @@
 # DocHarvest — Brand Guidelines
 
-Version 2.0 · 2026-09-28
+Version 3.0 · 2026-10-03
 Applies to: README, GitHub social preview, TUI/CLI output styling, website, badges,
 **and the desktop GUI** (React + Vite + shadcn/ui).
 
 > **Where the values live.** Every colour and font in this document is defined once
-> in `brand/tokens.json` and generated into both surfaces:
+> in `brand/tokens.json` and generated into every surface:
 >
 > | Command | Effect |
 > |---|---|
-> | `node scripts/sync-brand-tokens.mjs` | writes `docs/app/brand-tokens.css` (website) and `frontend/src/styles/brand-tokens.css` (GUI) |
-> | `node scripts/sync-brand-tokens.mjs --check` | exits 1 if either file is stale (runs in CI) |
-> | `pytest tests/test_brand_tokens.py` | fails if a surface stops using the tokens, hard-codes a palette colour, or the two surfaces disagree |
+> | `node scripts/sync-brand-tokens.mjs` | writes `docs/app/brand-tokens.css` (website), `frontend/src/styles/brand-tokens.css` (GUI) and `src/docharvest/brand_tokens.py` (CLI / TUI / window chrome) |
+> | `node scripts/build-brand-kit.mjs` | draws `assets/logo.svg`, `assets/logo-icon.svg`, `docs/app/icon.svg`, the `docs/public/assets/` copies, `docs/public/assets/social-preview.svg` and `brand/brand-kit.svg` |
+> | `… --check` | exits 1 if any generated file is stale (both run in CI) |
+> | `pytest tests/test_brand_tokens.py tests/test_brand_assets.py` | fails if a surface stops using the tokens, hard-codes a palette colour, draws a second logo, or the surfaces disagree |
 >
-> Change a value in `brand/tokens.json`, run the generator, and the website, the
-> desktop GUI and the README all move together. Never hand-edit a generated
-> stylesheet, and never write a colour literal into a component.
+> Change a value in `brand/tokens.json`, run both generators, and the website,
+> the desktop GUI, the TUI, the README mark, the favicon and the social card all
+> move together. Never hand-edit a generated file, and never write a colour
+> literal into a component or an asset.
+
+> **The board.** `brand/brand-kit.svg` is the identity board — mark, construction,
+> product surface, essence, colour, type, physical application, image direction
+> and system detail on one 3×3 sheet. It is generated, so it cannot disagree
+> with the product it documents.
 
 ---
 
@@ -82,10 +89,14 @@ stroke width; cursor baseline aligns with chevron's lower vertex.
 
 ### 3.3 Files
 
+Both marks are drawn by `scripts/build-brand-kit.mjs` from the table above and
+the token palette — never by hand.
+
 | File | Use |
 |---|---|
-| `assets/logo.svg` | Primary mark: glyph on dark tile. Avatars, OG images, app icons. |
-| `assets/logo-icon.svg` | Bare glyph, transparent. Inline in UI, favicons, places that already have a container. |
+| `assets/logo.svg` | Primary mark: glyph on dark tile. README, avatars, OG images, app icons. |
+| `assets/logo-icon.svg` | Bare glyph, transparent. Inline in UI, places that already have a container. |
+| `docs/app/icon.svg` | The favicon — byte-identical to `assets/logo.svg`. |
 
 ### 3.4 Clear space & minimum sizes
 
@@ -193,7 +204,14 @@ tokens above rather than inventing their own.
 |---|---|---|
 | Website (`docs/`) | Next.js static export, Tailwind **v4** | `docs/app/brand-tokens.css`, mapped into `@theme inline` |
 | Desktop GUI (`frontend/`) | React + Vite, Tailwind **v3**, **shadcn/ui** on Radix | `frontend/src/styles/brand-tokens.css` |
-| CLI / TUI (Python) | Rich | the same hexes, by hand (no CSS available) |
+| CLI / TUI (Python) | Textual + Rich | `docharvest.brand_tokens` (generated) |
+
+The Python module is generated from the same JSON, so the TUI cannot hold a
+private copy of the palette the way it used to. `tui/theme.py` decides only
+*which* primitive plays *which* role (`CANVAS_DARK = token("bond")`,
+`ACCENT = token("match")`, `MONO_STACK = font_stack("mono")`); the PyWebView
+window backdrop reads `token("bond")` so the native chrome matches the canvas
+painted inside it.
 
 ### 6.1 Desktop GUI rules
 
@@ -276,7 +294,7 @@ Three hard rules:
 - Keep the mark geometric and flat — it must survive 16 px.
 - Use snapshots/screenshots of the real TUI or the real GUI when showing the product.
 - Add a token to `brand/tokens.json` and regenerate when a surface needs a new
-  colour; the guard tests will keep both surfaces honest.
+  colour; the guard tests will keep every surface honest.
 
 **Don't**
 
@@ -293,13 +311,30 @@ Three hard rules:
 
 ## 10. Asset inventory & export
 
+Every file below is **generated** by `node scripts/build-brand-kit.mjs` from
+`brand/tokens.json` and the geometry table in §3.2. Edit the generator, not the
+file — `--check` runs in CI and `tests/test_brand_assets.py` fails if one of them
+is hand-edited, uses a colour outside the palette, or grows a gradient.
+
 | Asset | Notes |
 |---|---|
-| `assets/logo.svg` | 512×512 tile mark |
-| `assets/logo-icon.svg` | Bare glyph, transparent, tight viewBox |
-| `assets/social-preview.svg` | 1280×640 social card; export PNG before upload (comment in file) |
+| `assets/logo.svg` | 512×512 tile mark — README, avatars, app icons |
+| `assets/logo-icon.svg` | Bare glyph, transparent, tight viewBox — inline UI |
+| `docs/app/icon.svg` | Website favicon (the tile mark, byte-identical to `logo.svg`) |
+| `docs/public/assets/logo.svg`, `logo-icon.svg` | The website's copies of the two marks |
+| `assets/social-preview.svg`, `docs/public/assets/social-preview.svg` | 1280×640 social card, version read from `pyproject.toml` |
+| `brand/brand-kit.svg` | 2400×1800 identity board, 3×3 |
+| `brand/brand-kit.png` | Raster of the board — drop-in for a deck. **Manual export** (see below) |
+| `assets/social-preview.png` | 1280×640 raster of the card — what GitHub actually uploads. **Manual export** |
 
-Exporting SVG → PNG: open in a browser at native size and screenshot at 2×, or
-`resvg --width 1280 --height 640 input.svg output.png`. Install Archivo and
-Geist Mono locally first for faithful rendering; fallbacks are defined but
-approximate.
+**PNG export.** The SVGs are the source; the PNGs are exports of them and are not
+regenerated by `--check`. Re-export after changing the SVG: open it in a browser
+at native size and screenshot 1:1, or
+`resvg --width 2400 --height 1800 brand/brand-kit.svg brand/brand-kit.png`. Install
+Archivo and Geist Mono locally first for faithful rendering; the fallbacks are
+defined but approximate.
+
+> **Owner step, still open:** upload `assets/social-preview.png` in the repo's
+> Settings → Social preview. Until that is done, every X/Slack/Discord share
+> renders whatever GitHub guesses. The card itself no longer advertises a dead
+> version — the generator reads it from `pyproject.toml`.
