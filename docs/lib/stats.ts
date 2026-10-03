@@ -31,12 +31,12 @@ export const PRODUCT_FACTS = {
 
 export const STATS = {
   // ── Generated from a real pytest run (do not hand-edit) ──────────────
-  testsCollected: 882,
-  testsPassing: 882,
+  testsCollected: 929,
+  testsPassing: 929,
   testsFailing: 0,
   testsSkipped: 0,
-  suiteSeconds: 200.367,
-  statsUpdated: '2026-09-28',
+  suiteSeconds: 124.197,
+  statsUpdated: '2026-10-03',
 
   // ── Reference capture (docs/SEO_GUIDE.md §3) ─────────────────────────
   pagesCaptured: 673,
