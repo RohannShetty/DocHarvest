@@ -22,7 +22,7 @@
     <line x1="374" y1="306" x2="412" y2="306" stroke="#F59E0B" stroke-width="28" stroke-linecap="round"/>
   </g>
   <text x="444" y="534" font-family="Archivo, ui-sans-serif, system-ui, sans-serif" font-size="44" font-weight="600" fill="#F4F4F5">DocHarvest</text>
-  <text x="444" y="566" text-anchor="middle" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="17" fill="#8A8A93">11.2.0</text>
+  <text x="444" y="566" text-anchor="middle" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="17" fill="#8A8A93">11.3.0</text>
 
   <rect x="836" y="80" width="728" height="528" fill="#101013" stroke="#27272A" stroke-width="1"/>
   <text x="864" y="126" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="18" font-weight="500" letter-spacing="2.6" fill="#8A8A93">02 CONSTRUCTION</text>
@@ -121,7 +121,7 @@
     <line x1="374" y1="306" x2="412" y2="306" stroke="#B45309" stroke-width="28" stroke-linecap="round"/>
   </g>
   <text x="276" y="1408" font-family="Archivo, ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="600" fill="#18181B">DocHarvest</text>
-  <text x="276" y="1438" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" fill="#6B6B74">11.2.0 &#183; MIT</text>
+  <text x="276" y="1438" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" fill="#6B6B74">11.3.0 &#183; MIT</text>
   <line x1="108" y1="1502" x2="780" y2="1502" stroke="#E4E4E7" stroke-width="1"/>
   <text x="108" y="1546" font-family="Archivo, ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="600" fill="#18181B">Capture, then cite.</text>
   <text x="108" y="1580" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" fill="#6B6B74">pip install docharvest</text>
@@ -174,6 +174,6 @@
   <text x="1636" y="1588" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="20" fill="#8A8A93">filter: <tspan fill="#F4F4F5">token</tspan></text>
   <text x="2276" y="1676" text-anchor="end" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" fill="#8A8A93">radius 0 &#183; border 1px &#183; no shadow</text>
 
-  <text x="80" y="1766" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="16" fill="#8A8A93">DocHarvest identity system &#183; 11.2.0</text>
+  <text x="80" y="1766" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="16" fill="#8A8A93">DocHarvest identity system &#183; 11.3.0</text>
   <text x="2320" y="1766" text-anchor="end" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="16" fill="#8A8A93">generated from brand/tokens.json</text>
 </svg>

@@ -22,7 +22,7 @@
     <line x1="374" y1="306" x2="412" y2="306" stroke="#F59E0B" stroke-width="28" stroke-linecap="round"/>
   </g>
   <text x="168" y="88" font-family="Archivo, ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="600" fill="#F4F4F5">DocHarvest</text>
-  <text x="168" y="118" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" fill="#8A8A93">v11.2.0 &#183; MIT &#183; CLI + TUI + GUI + MCP</text>
+  <text x="168" y="118" font-family="'Geist Mono', ui-monospace, SFMono-Regular, Consolas, monospace" font-size="15" fill="#8A8A93">v11.3.0 &#183; MIT &#183; CLI + TUI + GUI + MCP</text>
 
   <!-- the claim. Lines are kept short enough to clear the terminal panel at
        the fallback font, not just in Archivo. -->

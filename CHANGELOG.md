@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [11.3.0] - 2026-10-06
 
 ### 🧭 Brand System: one brand, generated everywhere
 
@@ -30,6 +30,11 @@ only have documented the drift.
   the documented geometry, the two marks are byte-identical across surfaces, no
   asset uses a colour outside the palette, no asset grows a gradient or glow,
   and the social card's headline cannot run under its terminal panel.
+- **OpenSpec SDD integration** — spec-driven development workflows via
+  `@fission-ai/openspec` added to the repository. Includes `openspec/` project
+  structure, slash command adapters and skills for Antigravity, Claude Code,
+  Cursor, Gemini CLI, GitHub Copilot, Codex, OpenCode, and Oh My Pi. Documented
+  in `AGENTS.md`. Run `npx @fission-ai/openspec list` for active changes.
 
 ### Fixed
 
@@ -54,9 +59,12 @@ only have documented the drift.
   app class `GitbookDownloaderApp` still said `gitbook`. They are now
   `docharvest-dark`/`docharvest-light` and `DocHarvestApp` (no shim). The
   `gitbook-dl` command alias is unchanged and still resolves.
+- **Test count re-synced.** Published test badge updated to 929 passing
+  (regenerated via `node docs/scripts/sync-stats.mjs --run`).
 
 > The `gitbook-dl` alias, `~/.gitbook-downloader/` and the historical CHANGELOG
 > entries keep the old name on purpose: they are migration facts, not branding.
+
 
 ## [11.2.0] - 2026-09-28
 
