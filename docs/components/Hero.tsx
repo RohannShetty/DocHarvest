@@ -100,7 +100,7 @@ export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
             </div>
             <span className="sheet-num text-xs text-ink-3">{indexData.provenance.totalRows} rows</span>
           </div>
-          <div className="mt-4 max-h-[330px] overflow-hidden">
+          <div className="mt-4">
             <IndexSheet rows={indexData.rows.slice(0, 14)} mode="specimen" provenance={indexData.provenance} />
           </div>
           <p className="sheet-label mt-4 text-ink-3">Rows are read from committed capture data, not a mock terminal.</p>

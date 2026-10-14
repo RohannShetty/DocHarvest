@@ -94,8 +94,11 @@ export function Header({ onOpenInstallModal }: HeaderProps) {
         </div>
       </div>
 
-      <nav aria-label="Sections (compact)" className="border-t border-rule lg:hidden bg-bond-2/60">
-        <ul className="flex gap-4 overflow-x-auto px-6 py-2">
+      <nav
+        aria-label="Sections (compact)"
+        className="relative border-t border-rule lg:hidden bg-bond-2/60 after:pointer-events-none after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-bond-2 after:to-transparent"
+      >
+        <ul className="flex gap-4 overflow-x-auto px-6 py-2 pr-10">
           {COMPACT_NAV.map((item) => (
             <li key={item.href}>
               <a

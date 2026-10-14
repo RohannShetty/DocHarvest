@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { CaptureProvenance, IndexProvenance, IndexRow } from '../lib/indexData';
 import { isoDate } from '../lib/indexData';
 
@@ -54,6 +54,7 @@ function highlight(text: string, needle: string): React.ReactNode {
 
 export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
   const listId = useId().replace(/:/g, '');
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
@@ -74,6 +75,36 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
     () => (mode === 'specimen' ? filtered.slice(0, SPECIMEN_ROWS) : filtered),
     [filtered, mode],
   );
+
+  // Debounce aria-live announcement so fast typing doesn't stutter on screen readers
+  const [liveAnnouncement, setLiveAnnouncement] = useState(`${visible.length} of ${rows.length} rows`);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLiveAnnouncement(`${visible.length} of ${rows.length} rows`);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [visible.length, rows.length]);
+
+  // Global '/' keyboard accelerator to focus search filter (specimen or full)
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        const target = event.target as HTMLElement | null;
+        const isEditable =
+          target &&
+          (target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable);
+        if (!isEditable && inputRef.current) {
+          event.preventDefault();
+          inputRef.current.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   const entries = useMemo<Entry[]>(() => {
     if (mode === 'specimen') {
@@ -97,6 +128,16 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
   const activeDescendant = activeEntry && activeEntry.kind === 'row' ? `${listId}-opt-${activeEntry.option}` : undefined;
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (query.length > 0) {
+        setQuery('');
+        setActiveIndex(0);
+      } else {
+        inputRef.current?.blur();
+      }
+      return;
+    }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       if (optionCount === 0) return;
@@ -121,6 +162,7 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
       <div className="flex items-center gap-3 border-b border-rule-strong pb-2.5">
         <span className="sheet-label shrink-0 text-ink-3 tracking-wider">FILTER:</span>
         <input
+          ref={inputRef}
           type="search"
           role="combobox"
           aria-expanded="true"
@@ -128,7 +170,7 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
           aria-controls={listId}
           aria-activedescendant={activeDescendant}
           aria-label="Filter the index"
-          placeholder="Filter the index…"
+          placeholder="Filter the index… (press / to focus)"
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -146,7 +188,7 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
       </div>
 
       <p className="sheet-label py-2 text-ink-3" aria-live="polite" aria-atomic="true">
-        {visible.length} of {rows.length} rows · {provenance.captures.length} captures · {pages} pages
+        {liveAnnouncement} · {provenance.captures.length} captures · {pages} pages
       </p>
 
       {visible.length === 0 ? (
