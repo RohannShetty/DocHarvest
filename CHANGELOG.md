@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [11.3.1] - 2026-10-14
+
+### 🛡️ Browser Fallback Grace & Full Test Suite Stabilization
+
+A stabilization and hardening release ensuring zero hard browser dependencies and complete test suite synchronization across all surfaces.
+
+### Fixed & Hardened
+
+- **Zero-dependency browser fallback.** `src/docharvest/gui/server.py` now gracefully falls back to the user's system default browser via standard Python `webbrowser` without requiring Zen Browser or Google Chrome binaries to be pre-installed.
+- **Version drift guards synchronized.** Re-aligned canonical version references across 18+ surfaces, including tests (`test_version_drift.py`, `test_gui_bridge.py`, `test_imports.py`), frontend components (`bridge.ts`, `version.ts`, `index.html`), docs constants, and the MCP registry manifest (`server.json`).
+- **Retired naming guard allowlist.** Added `RELEASE_NOTES.md` to historical naming drift exemption allowlist in `tests/test_naming_drift.py`.
+- **Git ignore anchoring.** Anchored root design and context notes (`/DESIGN.md`) in `.gitignore` so OpenSpec change designs and artifacts remain properly tracked in version control.
+- **Full test suite pass rate.** Re-verified the entire 930-test suite with zero failures (`930 passed, 0 failing`), and refreshed published stats and badges.
+- **Audit deliverables.** Standardized benchmark comparability reports, execution traces, and scientific changelog.
+
 ## [11.3.0] - 2026-10-06
 
 ### 🧭 Brand System: one brand, generated everywhere

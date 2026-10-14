@@ -35,7 +35,7 @@ export const STATS = {
   testsPassing: 930,
   testsFailing: 0,
   testsSkipped: 0,
-  suiteSeconds: 121.942,
+  suiteSeconds: 118.043,
   statsUpdated: '2026-10-14',
 
   // ── Reference capture (docs/SEO_GUIDE.md §3) ─────────────────────────
