@@ -27,7 +27,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 
 #: Files that may legitimately contain the retired name.
-HISTORY = {"CHANGELOG.md", "docs/CONSULTANT_REVIEW.md"}
+HISTORY = {"CHANGELOG.md", "docs/CONSULTANT_REVIEW.md", "RELEASE_NOTES.md"}
 MIGRATION = {
     "src/docharvest/paths.py",
     "tests/test_library_migration.py",

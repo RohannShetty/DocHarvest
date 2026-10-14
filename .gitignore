@@ -145,11 +145,11 @@ marketing/
 .cursor/
 .impeccable/
 skills-lock.json
-CONTEXT.md
-PRODUCT.md
-DESIGN.md
-PROJECT.md
-PROFILE_README.md
+/CONTEXT.md
+/PRODUCT.md
+/DESIGN.md
+/PROJECT.md
+/PROFILE_README.md
 docs/superpowers/
 docs/archive/
 

@@ -1,6 +1,6 @@
 {
   "name": "docharvest-gui",
-  "version": "11.2.0",
+  "version": "11.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

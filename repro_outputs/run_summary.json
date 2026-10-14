@@ -1,0 +1,29 @@
+{
+  "goal": "Execute local network-free retrieval benchmark and audit repository reproducibility status",
+  "command": "uv run docharvest bench",
+  "status": "verified",
+  "documented_command_status": "success",
+  "main_blocker": "None for benchmark execution; note test suite has 10 version-drift test failures from unupdated test assertions after v11.3.0 release.",
+  "execution_result": {
+    "returncode": 0,
+    "stdout": "{\n  \"answer_containment_at_k\": 1.0,\n  \"corpus_hash\": \"f6ea24a7b9ea2ec2322515eedd154b21bb18f481be9c7515adb65cc5a9778130\",\n  \"dataset_id\": \"fixture-v1\",\n  \"environment\": {\n    \"generated_at\": \"2026-10-14T05:25:39.463144+00:00\",\n    \"platform\": \"Windows-10-10.0.26200-SP0\",\n    \"python\": \"3.11.16\"\n  },\n  \"hit_at_k\": 1.0,\n  \"k\": 5,\n  \"latency_ms\": [\n    3.224,\n    2.476\n  ],\n  \"mrr\": 1.0\n}",
+    "stderr": ""
+  },
+  "metrics": {
+    "answer_containment_at_k": 1.0,
+    "corpus_hash": "f6ea24a7b9ea2ec2322515eedd154b21bb18f481be9c7515adb65cc5a9778130",
+    "dataset_id": "fixture-v1",
+    "environment": {
+      "generated_at": "2026-10-14T05:25:39.463144+00:00",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "python": "3.11.16"
+    },
+    "hit_at_k": 1.0,
+    "k": 5,
+    "latency_ms": [
+      3.224,
+      2.476
+    ],
+    "mrr": 1.0
+  }
+}

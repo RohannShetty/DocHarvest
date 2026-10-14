@@ -1,0 +1,23 @@
+COMMAND: uv run docharvest bench
+RETURN CODE: 0
+
+STDOUT:
+{
+  "answer_containment_at_k": 1.0,
+  "corpus_hash": "f6ea24a7b9ea2ec2322515eedd154b21bb18f481be9c7515adb65cc5a9778130",
+  "dataset_id": "fixture-v1",
+  "environment": {
+    "generated_at": "2026-10-14T05:25:39.463144+00:00",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.16"
+  },
+  "hit_at_k": 1.0,
+  "k": 5,
+  "latency_ms": [
+    3.224,
+    2.476
+  ],
+  "mrr": 1.0
+}
+
+STDERR:
