@@ -12,7 +12,7 @@
 |---:|---:|---:|
 | reference capture | reference capture | reference measurement |
 
-[![Version: 11.2.0](https://img.shields.io/badge/version-11.2.0-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
+[![Version: 11.3.0](https://img.shields.io/badge/version-11.3.0-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-71717a?style=flat-square&labelColor=18181b)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-a1a1aa?style=flat-square&labelColor=18181b)](pyproject.toml)
 [![Tests: 929 passing](https://img.shields.io/badge/tests-929%20passing%20(2026--10--03)-f59e0b?style=flat-square&labelColor=18181b)](docs/lib/stats.ts)
@@ -37,6 +37,8 @@ pip install docharvest && docharvest capture https://docs.example.com/
 
 - ⚡ **Ultra-Fast Throughput**: Reference capture of **673 pages in 18.2 seconds** (~37 pages/sec) directly into SQLite FTS5 BM25 search and semantic graphs.
 - 🎯 **~83% Token Reduction**: Eliminates boilerplate DOM trees, sidebars, anchor spam, and tracking wrappers, delivering high-density context directly to your LLMs.
+- 📐 **OpenSpec SDD Native**: Integrated spec-driven development harnesses and prompt commands (`opsx-*`) across 14+ agent environments.
+- 🖥️ **Universal Desktop & Browser GUI**: Seamless native window with zero-dependency standalone HTTP/SSE browser fallback across any default system browser.
 - 🧠 **Universal Agent Skill (`SKILL.md`)**: Bundled, harness-neutral intelligence that equips 14+ coding agents (Cursor, Claude Code, Windsurf, Gemini CLI, Oh My Pi, Codex) with self-orchestrated harvesting and retrieval workflows via a single install command (`docharvest skill install docharvest -o <dir>`).
 - 🔌 **Native FastMCP v2 Server**: 12 zero-friction tools in an opt-in full profile, with a smaller default profile for lower schema cost; MCP Resources (`docs://{domain}/book`), and MCP Prompts over stdio.
 - 🔒 **Deterministic SHA-256 Provenance**: Every page is stored with an exact SHA-256 content hash in YAML frontmatter for caching, version diffing, and citation verification.

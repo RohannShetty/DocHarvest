@@ -122,18 +122,20 @@ def find_zen_browser() -> str | None:
 
 
 def open_browser(url: str, browser_name: str | None = None) -> bool:
-    """Open *url* in the specified browser (defaults to Zen Browser if available)."""
+    """Open *url* in the user's browser, gracefully falling back to the system default."""
     target = (browser_name or "").strip().lower()
 
-    if target in ("zen", "zen-browser", ""):
+    # Explicit Zen request
+    if target in ("zen", "zen-browser"):
         zen_path = find_zen_browser()
         if zen_path:
             try:
                 subprocess.Popen([zen_path, url])
                 return True
             except Exception as exc:
-                print(f"Warning: Failed to launch Zen Browser ({exc}), trying default browser…", file=sys.stderr)
+                print(f"Note: Could not launch Zen Browser ({exc}), falling back to system default.", file=sys.stderr)
 
+    # Specific named browser requested (e.g. 'chrome', 'firefox', 'edge')
     if target and target not in ("default", "zen", "zen-browser"):
         custom_path = shutil.which(target) or (target if os.path.isfile(target) else None)
         if custom_path:
@@ -144,11 +146,17 @@ def open_browser(url: str, browser_name: str | None = None) -> bool:
                 pass
         try:
             b = webbrowser.get(target)
-            return b.open(url)
+            if b.open(url):
+                return True
         except Exception:
             pass
 
-    return webbrowser.open(url)
+    # Universal fallback: system default browser
+    try:
+        return webbrowser.open(url)
+    except Exception as exc:
+        print(f"Note: Could not open system default browser ({exc}). Please open {url} manually.", file=sys.stderr)
+        return False
 
 
 class GuiRequestHandler(BaseHTTPRequestHandler):
