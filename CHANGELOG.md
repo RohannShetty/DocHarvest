@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🚀 Universal Scraper Framing, Dynamic OpenGraph & 17-Harness SEO
+
+- **Universal Extraction Framing**: Refactored `SupportedPlatforms.tsx` to communicate that DocHarvest is a universal documentation compiler and crawler for any technical website, API portal, developer hub, or SPA, framing dedicated detectors as native AST extraction optimizations with a universal fallback.
+- **Dynamic OpenGraph Preview Card**: Implemented Next.js dynamic static OpenGraph image generator at `docs/app/opengraph-image.tsx` using `next/og`, showcasing live metrics (`930+ Tests Passing`, `12 FastMCP Tools`, `17 Agent Harnesses`, `~83% Token Reduction`).
+- **Comprehensive Agent Harness SEO Meta**: Expanded `layout.tsx` metadata with high-intent search keywords covering all 17 agent harnesses (Cursor, Claude Code, Windsurf, VS Code / Cline, Roo Code, Copilot Workspace, Antigravity, Gemini CLI, Oh My Pi, OpenCode, Codex, JetBrains, Zed, Continue, Kilo, Grok, Trae, Mistral Vibe) and universal doc scraping queries.
+- **Honest Test Stats Drift Guard**: Re-verified test sync drift guards and published claim consistency (`tests/test_stats_drift.py` and `tests/test_naming_drift.py` passing cleanly).
+
 ## [11.3.1] - 2026-10-14
 
 ### 🛡️ Browser Fallback Grace & Full Test Suite Stabilization
