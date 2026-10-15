@@ -16,10 +16,14 @@ import { VERSION } from '../lib/version';
 const NAV = [
   { href: '#product', label: 'Product' },
   { href: '#how-it-works', label: 'How it works' },
-  { href: '#outputs', label: 'Outputs' },
-  { href: '#integrations', label: 'Integrations' },
   { href: '#workflows', label: 'Workflows' },
+  { href: '#agents', label: 'FastMCP' },
+  { href: '#matrix', label: 'Comparison' },
+  { href: '#walkthrough', label: 'Walkthrough' },
+  { href: '#outputs', label: 'Outputs' },
+  { href: '#integrations', label: 'Connectivity' },
   { href: '#platforms', label: 'Platforms' },
+  { href: '#proof', label: 'Benchmarks' },
   { href: '#faq', label: 'FAQ' },
 ];
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { ClientContainer } from '@/components/ClientContainer';
 import { HowItWorks } from '@/components/HowItWorks';
 import { WorkflowPaths } from '@/components/WorkflowPaths';
+import { AgentTools } from '@/components/AgentTools';
+import { ComparisonTable } from '@/components/ComparisonTable';
 import { ProductWalkthrough } from '@/components/ProductWalkthrough';
 import { Outputs } from '@/components/Outputs';
 import { Connectivity } from '@/components/Connectivity';
@@ -22,6 +24,8 @@ export default async function Page() {
       <main>
         <HowItWorks />
         <WorkflowPaths />
+        <AgentTools />
+        <ComparisonTable />
         <ProductWalkthrough />
         <Outputs />
         <Connectivity />

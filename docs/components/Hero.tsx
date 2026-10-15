@@ -10,25 +10,46 @@ interface HeroProps {
   indexData: IndexData;
 }
 
-const CAPTURE_COMMAND = 'docharvest capture https://docs.openalgo.in/v/v2.0 --rag --pdf';
+type CommandTab = 'mcp' | 'skill' | 'cli';
+
+const COMMANDS: Record<CommandTab, { label: string; command: string; hint: string }> = {
+  mcp: {
+    label: 'Universal FastMCP',
+    command: 'uvx docharvest mcp',
+    hint: 'Add to Claude Desktop, Cursor, or Cline. 12 tools, zero cloud dependencies.',
+  },
+  skill: {
+    label: 'Agent Skill',
+    command: 'docharvest skill install docharvest -o .agents/skills',
+    hint: 'Installs universal retrieval instructions across 14+ agent harnesses.',
+  },
+  cli: {
+    label: 'CLI Capture',
+    command: 'docharvest capture https://docs.openalgo.in/v/v2.0 --rag --pdf',
+    hint: 'Compiles pages/, docs.md, llms.txt, and SQLite FTS5 search index.',
+  },
+};
 
 export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
+  const [activeTab, setActiveTab] = useState<CommandTab>('mcp');
   const [copied, setCopied] = useState(false);
 
-  const copyCommand = async () => {
+  const active = COMMANDS[activeTab];
+
+  const copyCommand = async (cmd: string) => {
     let didCopy = false;
     try {
       if (navigator.clipboard) {
-        await navigator.clipboard.writeText(CAPTURE_COMMAND);
+        await navigator.clipboard.writeText(cmd);
         didCopy = true;
       }
     } catch {
-      // Fall through to the synchronous browser fallback below.
+      // Fallback
     }
 
     if (!didCopy) {
       const textarea = document.createElement('textarea');
-      textarea.value = CAPTURE_COMMAND;
+      textarea.value = cmd;
       textarea.setAttribute('readonly', '');
       textarea.style.position = 'fixed';
       textarea.style.opacity = '0';
@@ -44,49 +65,71 @@ export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
   };
 
   return (
-    <section id="product" className="border-b border-rule-strong bg-bond px-5 py-10 sm:px-8 lg:px-12 lg:py-16">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(420px,1.1fr)] lg:items-end lg:gap-16">
+    <section id="product" className="border-b border-rule bg-bond px-5 py-12 sm:px-8 lg:px-12 lg:py-20">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(440px,1.1fr)] lg:items-end lg:gap-16">
         <div className="min-w-0">
-          <p className="sheet-label text-match">Documentation compiler for coding agents</p>
-          <h1 className="sheet-display mt-5 max-w-[12ch] text-ink">
-            Turn any docs site into context your agent can use.
+          <p className="sheet-label text-match tracking-wide">Universal Documentation Engine for AI Agents</p>
+          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
+            Clean, structured docs. Zero cloud lock-in.
           </h1>
-          <p className="sheet-body mt-6 max-w-[58ch] text-lg text-ink-2">
-            DocHarvest captures public documentation, removes page noise, and writes a local corpus with source URLs, search, snapshots, and exports.
+          <p className="mt-6 max-w-[54ch] text-lg leading-relaxed text-ink-2">
+            DocHarvest crawls developer portals and compiles pristine, token-dense Markdown, SQLite BM25 search, and FastMCP tools directly on your local machine.
           </p>
 
-          <div className="mt-8 max-w-2xl border border-rule-strong bg-bond-2 p-3">
-            <div className="flex items-start gap-3">
-              <code className="min-w-0 flex-1 break-words text-sm leading-relaxed text-ink">{CAPTURE_COMMAND}</code>
+          <div className="mt-8 rounded-none border border-rule-strong bg-bond-2 p-4">
+            <div className="flex gap-2 border-b border-rule pb-3">
+              {(Object.keys(COMMANDS) as CommandTab[]).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab);
+                    setCopied(false);
+                  }}
+                  className={`sheet-label cursor-pointer px-3 py-1.5 transition-colors ${
+                    activeTab === tab
+                      ? 'bg-match text-bond font-bold'
+                      : 'text-ink-3 hover:text-ink hover:bg-bond'
+                  }`}
+                >
+                  {COMMANDS[tab].label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <code className="min-w-0 flex-1 break-all font-mono text-sm leading-relaxed text-ink">
+                {active.command}
+              </code>
               <button
                 type="button"
-                onClick={copyCommand}
-                aria-label="Copy capture command"
-                className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-rule px-3 text-xs font-semibold text-ink-2 transition-colors hover:border-match hover:text-match active:translate-y-px"
+                onClick={() => copyCommand(active.command)}
+                aria-label={`Copy ${active.label} command`}
+                className="inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 border border-rule bg-bond px-3 text-xs font-semibold text-ink-2 transition-colors hover:border-match hover:text-match active:translate-y-px"
               >
                 {copied ? <Check aria-hidden="true" className="h-4 w-4 text-match" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
-            <p className="sheet-label mt-3 text-ink-3">One command. Local files. No account required.</p>
+            <p className="sheet-label mt-3 text-ink-3">{active.hint}</p>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={onOpenInstallModal}
-              className="inline-flex min-h-11 items-center gap-2 bg-match px-4 text-sm font-semibold text-bond transition-colors hover:bg-match-deep active:translate-y-px"
+              className="inline-flex min-h-11 items-center gap-2 bg-match px-5 text-sm font-semibold text-bond transition-colors hover:bg-match-deep active:translate-y-px"
             >
-              Install DocHarvest
+              Get Started / Install
               <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
             </button>
             <a
               href="https://github.com/RohannShetty/DocHarvest"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-11 items-center gap-2 border border-rule px-4 text-sm font-semibold text-ink-2 transition-colors hover:border-ink-2 hover:text-ink active:translate-y-px"
+              className="inline-flex min-h-11 items-center gap-2 border border-rule px-5 text-sm font-semibold text-ink-2 transition-colors hover:border-ink-2 hover:text-ink active:translate-y-px"
             >
-              Read the source
+              View on GitHub
               <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
             </a>
           </div>

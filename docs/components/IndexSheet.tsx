@@ -188,7 +188,7 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
       </div>
 
       <p className="sheet-label py-2 text-ink-3" aria-live="polite" aria-atomic="true">
-        {liveAnnouncement} · {provenance.captures.length} captures · {pages} pages
+        {visible.length} of {rows.length} rows · {provenance.captures.length} captures · {pages} pages
       </p>
 
       {visible.length === 0 ? (
