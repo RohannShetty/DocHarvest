@@ -52,7 +52,12 @@ export function Header({ onOpenInstallModal }: HeaderProps) {
           <span className="sheet-num text-[11px] font-medium text-match">v{VERSION}</span>
         </a>
 
-        <nav aria-label="Sections" className="hidden min-w-0 flex-1 items-center justify-center gap-4 lg:flex xl:gap-5">
+        {/* Eleven mono-caps labels at 0.1em tracking need roughly 1,200px once
+            the wordmark and the action cluster are measured. At `lg` (1024px)
+            the row overran its container and collided with the Install button,
+            so the full nav starts at `xl` and the scrolling compact row covers
+            everything below it. */}
+        <nav aria-label="Sections" className="hidden min-w-0 flex-1 items-center justify-center gap-4 xl:flex xl:gap-5">
           {NAV.map((item) => (
             <a
               key={item.href}
@@ -100,7 +105,7 @@ export function Header({ onOpenInstallModal }: HeaderProps) {
 
       <nav
         aria-label="Sections (compact)"
-        className="relative border-t border-rule lg:hidden bg-bond-2/60 after:pointer-events-none after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-bond-2 after:to-transparent"
+        className="relative border-t border-rule xl:hidden bg-bond-2/60 after:pointer-events-none after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-bond-2 after:to-transparent"
       >
         <ul className="flex gap-4 overflow-x-auto px-6 py-2 pr-10">
           {COMPACT_NAV.map((item) => (

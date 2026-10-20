@@ -105,6 +105,16 @@
 
 html {
   scroll-behavior: smooth;
+  /* The header is sticky (64px) and, below `lg`, carries a second scrolling
+     nav row (~44px). Without this every in-page anchor parks its heading
+     underneath the header. */
+  scroll-padding-top: 7rem;
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 5rem;
+  }
 }
 
 body {
@@ -189,10 +199,6 @@ pre {
   animation: fadeIn 180ms ease-out both;
 }
 
-.sr-only {
-  font-size: 0;
-  line-height: 0;
-}
 
 @media (prefers-reduced-motion: reduce) {
   html {

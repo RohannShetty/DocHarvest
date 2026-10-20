@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { VERSION } from "../lib/version";
+import { CANONICAL_URL, LLMS_URL, OG_IMAGE, SITE_ORIGIN } from "../lib/site";
 import { FAQ_ITEMS } from "../data/showcaseData";
 import { PRODUCT_FACTS, STATS } from "../lib/stats";
 import "./globals.css";
@@ -20,9 +21,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
 });
-
-const SITE_URL = "https://rohannshetty.github.io";
-const SITE_PATH = "/DocHarvest/";
 
 /**
  * The direction contract, emitted as a real HTML comment at the top of <body>.
@@ -52,7 +50,7 @@ const jsonLd = {
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Windows, macOS, Linux",
       softwareVersion: VERSION,
-      url: `${SITE_URL}${SITE_PATH}`,
+      url: SITE_ORIGIN,
       downloadUrl: "https://github.com/RohannShetty/DocHarvest/releases",
       description:
         "Local-first documentation compiler: turns any doc site into LLM-ready Markdown, RAG JSONL, llms.txt & offline PDFs. FastMCP v2 server for Cursor, Claude Code, Windsurf & 14+ AI coding agents. 100% local, MIT.",
@@ -81,7 +79,7 @@ const jsonLd = {
     {
       "@type": "WebSite",
       name: "DocHarvest Documentation Compiler",
-      url: `${SITE_URL}${SITE_PATH}`,
+      url: SITE_ORIGIN,
       description: "Compile web documentation into clean LLM context, RAG datasets, and FastMCP tools.",
     },
     {
@@ -93,7 +91,7 @@ const jsonLd = {
       },
       description:
         "Technical specification and benchmarks on eliminating 83% HTML noise from web docs to optimize LLM context economy and prevent hallucinations.",
-      url: `${SITE_URL}${SITE_PATH}#agents`,
+      url: `${SITE_ORIGIN}#agents`,
     },
     {
       "@type": "FAQPage",
@@ -106,12 +104,36 @@ const jsonLd = {
   ],
 };
 
+/**
+ * Declared separately from `metadata` because Next.js 13.2+ split the
+ * viewport-related tags out of the metadata object. Without this export the
+ * page ships no `theme-color`, so the browser chrome stays default-white above
+ * a near-black page on Android and iOS.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "dark light",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#09090B" },
+    { media: "(prefers-color-scheme: light)", color: "#FBFBFA" },
+  ],
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  // Only used to resolve what little stays relative (the favicon route). Every
+  // URL that matters below is absolute — see the note in lib/site.ts.
+  metadataBase: new URL(SITE_ORIGIN),
   title: "DocHarvest — Documentation Compiler for LLMs, RAG & MCP",
   description:
     "Stop burning context tokens on cookie banners. DocHarvest compiles any doc portal (GitBook, Mintlify, Docusaurus, VitePress, MkDocs, ReadMe, RTD) into LLM-ready Markdown, RAG JSONL, llms.txt & offline PDFs — 100% local, MIT, FastMCP included.",
-  alternates: { canonical: SITE_PATH },
+  alternates: {
+    canonical: CANONICAL_URL,
+    // The product's own manifest, advertised to agents and crawlers through
+    // <link rel="alternate" type="text/plain">. Declared here instead of a
+    // hand-written <link> so it cannot drift from the canonical URL.
+    types: { "text/plain": LLMS_URL },
+  },
   keywords: [
     // Universal doc scraper & compiler keywords
     "universal documentation scraper",
@@ -160,18 +182,19 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Rohan Shetty", url: "https://github.com/RohannShetty" }],
   openGraph: {
+    locale: "en_US",
     title: "DocHarvest — Documentation Compiler for LLMs, RAG & MCP",
     description:
       "Stop burning context tokens on cookie banners. Turn any doc portal into clean LLM context, RAG datasets & offline PDFs — 100% local, free & open source.",
-    url: SITE_PATH,
+    url: CANONICAL_URL,
     siteName: "DocHarvest",
     type: "website",
     images: [
       {
-        url: `${SITE_PATH}assets/og-sheet.png`,
-        width: 1280,
-        height: 640,
-        alt: "DocHarvest — documentation compiler for LLMs, RAG & FastMCP",
+        url: OG_IMAGE.url,
+        width: OG_IMAGE.width,
+        height: OG_IMAGE.height,
+        alt: OG_IMAGE.alt,
       },
     ],
   },
@@ -181,7 +204,10 @@ export const metadata: Metadata = {
     description:
       "Turn any doc site into clean LLM context, RAG JSONL & offline PDFs. 100% local, MIT, FastMCP included.",
     creator: "@rohan__shetty",
-    images: [`${SITE_PATH}assets/og-sheet.png`],
+    // Same card as Open Graph. These used to point at different files with
+    // different aspect ratios, so a link previewed differently on X than on
+    // Slack or LinkedIn.
+    images: [OG_IMAGE.url],
   },
   robots: {
     index: true,
@@ -204,7 +230,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <link rel="alternate" type="text/plain" href={`${SITE_PATH}llms.txt`} title="LLM Context Manifest" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

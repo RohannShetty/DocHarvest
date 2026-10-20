@@ -69,8 +69,13 @@ export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(440px,1.1fr)] lg:items-end lg:gap-16">
         <div className="min-w-0">
           <p className="sheet-label text-match tracking-wide">Universal Documentation Engine for AI Agents</p>
-          <h1 className="mt-4 text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-6xl">
-            Clean, structured docs. Zero cloud lock-in.
+          {/* Uses the design system's own display face (globals.css) instead of
+              a re-invented `text-4xl sm:text-5xl lg:text-6xl tracking-tight`
+              stack: the old utilities skipped the `-0.045em` tracking and
+              `text-wrap: balance` that every other display heading on the page
+              uses, so the hero read lighter than the sections beneath it. */}
+          <h1 className="sheet-display mt-4 text-ink">
+            Turn any docs site into context your agent can use.
           </h1>
           <p className="mt-6 max-w-[54ch] text-lg leading-relaxed text-ink-2">
             DocHarvest crawls developer portals and compiles pristine, token-dense Markdown, SQLite BM25 search, and FastMCP tools directly on your local machine.

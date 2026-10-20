@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 
+import { SITE_ORIGIN } from "../lib/site";
+
 export const dynamic = "force-static";
 
-const SITE = "https://rohannshetty.github.io/DocHarvest/";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -10,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: `${SITE}sitemap.xml`,
+    sitemap: `${SITE_ORIGIN}sitemap.xml`,
   };
 }
