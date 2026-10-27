@@ -10,9 +10,7 @@ import {
   ChevronRight,
   ChevronLeft,
   X,
-  CheckCircle2,
-
-  Search
+  CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -166,6 +164,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ open, onClose })
           </div>
           <button
             onClick={handleSkip}
+            aria-label="Skip onboarding tour"
             className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
           >
             <X className="h-4 w-4" />

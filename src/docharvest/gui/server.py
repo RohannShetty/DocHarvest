@@ -41,6 +41,27 @@ MIME_TYPES = {
     ".otf": "font/otf",
 }
 
+# Hostnames that may address this loopback server (DNS-rebinding defense).
+_LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+
+# Bounds for best-effort body draining on early rejections: never read an
+# untrusted or oversized body, and never wait indefinitely for a stalling
+# client. See GuiRequestHandler._drain_request_body.
+_MAX_DRAIN_BYTES = 64 * 1024
+_DRAIN_TIMEOUT_S = 2.0
+
+# Origins of the intentional Vite dev-proxy workflow: the frontend dev server
+# (frontend/vite.config.ts proxies /api -> http://127.0.0.1:<port> with
+# changeOrigin, so the Host header stays correct while Origin stays :5173).
+# This is a narrow allowlist for a fixed local dev port, not a wildcard.
+_DEV_PROXY_ORIGINS = frozenset(
+    {
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://[::1]:5173",
+    }
+)
+
 _SHIM_SCRIPT = """<script>
 (function() {
   if (!window.pywebview) {
@@ -80,6 +101,31 @@ _SHIM_SCRIPT = """<script>
 })();
 </script>
 """
+
+
+def _split_host(host_header: str) -> tuple[str, int | None]:
+    """Split a Host header into (lowercased hostname without brackets, port).
+
+    Returns ("", None) for empty or malformed values.
+    """
+    h = (host_header or "").strip().lower()
+    if not h:
+        return "", None
+    if h.startswith("["):  # IPv6 literal, e.g. [::1]:8765
+        end = h.find("]")
+        if end == -1:
+            return "", None
+        name = h[1:end]
+        rest = h[end + 1 :]
+        if rest.startswith(":") and rest[1:].isdigit():
+            return name, int(rest[1:])
+        return name, None
+    if ":" in h:
+        name, _, port_s = h.rpartition(":")
+        if name and port_s.isdigit():
+            return name, int(port_s)
+        return "", None
+    return h, None
 
 
 def find_zen_browser() -> str | None:
@@ -168,12 +214,112 @@ class GuiRequestHandler(BaseHTTPRequestHandler):
         # Suppress routine request spam, keep console clean
         pass
 
+    # ── Same-origin / Host protection ────────────────────────────────────
+    # The server exposes bridge methods that can read and open local files.
+    # Two attack routes must be closed without breaking the loopback app:
+    #   1. Cross-origin browser pages (CSRF/SOP bypass attempts). Browsers
+    #      always attach an Origin header to cross-origin fetch/EventSource,
+    #      so an Origin that is not ours means a foreign page -> 403.
+    #   2. DNS rebinding, where a foreign hostname resolves to 127.0.0.1 and
+    #      the browser sends Host: evil.example:<port>. Only loopback
+    #      hostnames (plus an explicit non-wildcard bind host) are accepted.
+    # Requests without an Origin (curl, native tools, tests) keep working:
+    # they are not cross-origin browser pages.
+
+    def _allowed_origins(self) -> set[str]:
+        """Exact origins allowed to call this server (no wildcards)."""
+        port = self.server.server_address[1]
+        origins = {
+            f"http://localhost:{port}",
+            f"http://127.0.0.1:{port}",
+            f"http://[::1]:{port}",
+        }
+        origins |= _DEV_PROXY_ORIGINS
+        return origins
+
+    def _host_allowed(self) -> bool:
+        """Validate the Host header against the bound address (anti-rebinding)."""
+        port = self.server.server_address[1]
+        name, host_port = _split_host(self.headers.get("Host", ""))
+        if not name:
+            return False
+        if host_port is None:
+            # Browsers always include a non-default port; bare hostnames are
+            # only valid for default ports.
+            if port not in (80, 443):
+                return False
+        elif host_port != port:
+            return False
+        allowed_names = set(_LOOPBACK_HOSTS)
+        bind_host = (self.server.server_address[0] or "").strip().lower()
+        if bind_host and bind_host not in ("0.0.0.0", "::"):
+            allowed_names.add(bind_host)
+        return name in allowed_names
+
+    def _origin_allowed(self) -> bool:
+        """True for same-origin, dev-proxy, or non-browser (no Origin) requests."""
+        origin = (self.headers.get("Origin") or "").strip().lower()
+        if not origin:
+            # Non-browser client (curl, native tools, urllib).
+            return True
+        if origin == "null":
+            # Opaque origin (sandboxed iframe, file:// page) — treat as foreign.
+            return False
+        return origin in self._allowed_origins()
+
+    def _drain_request_body(self) -> None:
+        """Best-effort bounded drain of an unread request body.
+
+        Early rejections respond before reading the body; closing a socket
+        that still has unread bytes in the receive buffer makes Windows reset
+        the connection (WSAECONNRESET / WinError 10053) and the client can
+        lose the response. Drain a small bounded amount so the close is
+        clean. Oversized or absent bodies are left alone — the drain never
+        reads more than _MAX_DRAIN_BYTES and never waits longer than
+        _DRAIN_TIMEOUT_S.
+        """
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            return
+        if length <= 0 or length > _MAX_DRAIN_BYTES:
+            return
+        old_timeout = self.connection.gettimeout()
+        try:
+            self.connection.settimeout(_DRAIN_TIMEOUT_S)
+            self.rfile.read(length)
+        except (OSError, ValueError):
+            pass
+        finally:
+            try:
+                self.connection.settimeout(old_timeout)
+            except OSError:
+                pass
+
+    def _request_allowed(self) -> bool:
+        """Shared gate for every request method; sends 403 when blocked."""
+        if not self._host_allowed():
+            self._drain_request_body()
+            self.send_error(403, "Invalid Host header")
+            return False
+        if not self._origin_allowed():
+            self._drain_request_body()
+            self.send_error(403, "Cross-origin requests are not allowed")
+            return False
+        return True
+
     def _send_cors(self) -> None:
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        """Echo the exact allowed origin (never a wildcard); nothing otherwise."""
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin and origin.lower() in self._allowed_origins():
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
     def do_OPTIONS(self) -> None:
+        if not self._request_allowed():
+            return
         self.send_response(204)
         self._send_cors()
         self.end_headers()
@@ -182,6 +328,8 @@ class GuiRequestHandler(BaseHTTPRequestHandler):
         self.do_GET()
 
     def do_GET(self) -> None:
+        if not self._request_allowed():
+            return
         parsed = urllib.parse.urlparse(self.path)
         clean_path = parsed.path
 
@@ -293,8 +441,11 @@ class GuiRequestHandler(BaseHTTPRequestHandler):
         self.send_error(404, "Not found")
 
     def do_POST(self) -> None:
+        if not self._request_allowed():
+            return
         clean_path = urllib.parse.urlparse(self.path).path
         if not clean_path.startswith("/api/"):
+            self._drain_request_body()
             self.send_error(404, "Unknown API route")
             return
 
@@ -302,6 +453,7 @@ class GuiRequestHandler(BaseHTTPRequestHandler):
         bridge = self.server.bridge
 
         if not hasattr(bridge, method_name) or method_name.startswith("_"):
+            self._drain_request_body()
             self._send_json(404, {"success": False, "error": f"API method '{method_name}' not found"})
             return
 

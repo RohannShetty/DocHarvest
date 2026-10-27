@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, } from "@/components/ui/card"
 import { formatBytes } from "@/lib/utils"
+import { computeSelectAll } from "@/lib/flow"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
 
@@ -153,11 +154,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   }
 
   const handleSelectAll = () => {
-    if (selectedDomains.length === filteredAndSorted.length) {
-      setSelectedDomains([])
-    } else {
-      setSelectedDomains(filteredAndSorted.map(i => i.domain))
-    }
+    setSelectedDomains(computeSelectAll(selectedDomains, filteredAndSorted.map((i) => i.domain)))
   }
 
   const handleOpenFolder = (folderPath?: string) => {
@@ -189,6 +186,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               </div>
               <button
                 onClick={() => setRenamingDomain(null)}
+                aria-label="Close rename dialog"
                 className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 <X className="h-4 w-4" />

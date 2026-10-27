@@ -12,10 +12,10 @@
 |---:|---:|---:|
 | reference capture | reference capture | reference measurement |
 
-[![Version: 11.3.1](https://img.shields.io/badge/version-11.3.1-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
+[![Version: 11.3.2](https://img.shields.io/badge/version-11.3.2-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-71717a?style=flat-square&labelColor=18181b)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-a1a1aa?style=flat-square&labelColor=18181b)](pyproject.toml)
-[![Tests: 930 passing](https://img.shields.io/badge/tests-930%20passing%20(2026--10--15)-f59e0b?style=flat-square&labelColor=18181b)](docs/lib/stats.ts)
+[![Tests: 964 passing](https://img.shields.io/badge/tests-964%20passing%20(2026--10--27)-f59e0b?style=flat-square&labelColor=18181b)](docs/lib/stats.ts)
 
 > Reference measurement, not a guarantee: 673 pages captured in 18.2 seconds with approximately 83% boilerplate-token reduction. Reproduce the local retrieval benchmark with `python benchmarks/run.py`; replace this capture reference only with a fresh end-to-end measurement.
 ```bash
@@ -114,6 +114,19 @@ The desktop application includes a dedicated **Document Library** for managing a
 - **In-App Renaming**: Organize project labels without breaking file paths.
 - **1-Click Export Studio**: Export selected docsets to Markdown, Vector JSONL, or PDF handbooks directly from the GUI.
 - **Direct Finder/Explorer Integration**: Open raw markdown source folders with a single click.
+
+### Reliable capture and local preferences
+
+Queue documentation URLs in **Capture Studio → Batch → Run Batch**. Captures run sequentially with your selected options; failed starts are reported rather than counted as successes. Cancellation waits for the worker to finish, and a stalled batch keeps the worker busy until it actually stops. **Force Reset does not terminate a Python thread** or release a live worker's locks.
+
+Open **Preferences** (`Ctrl+8`, outside form fields) to inspect merged configuration, review presets, and save capture settings to the global or project TOML file. Project settings override global settings. Capture Studio retains its own per-run controls; saved preferences do not automatically populate them.
+
+```bash
+docharvest gui                   # native desktop window
+docharvest gui --browser         # local browser companion
+```
+
+The browser companion validates local origins and Host headers. It is **not an authenticated network service**: keep it on loopback and do not expose its port publicly. See the [GUI guide](docs/GUI_GUIDE.md) for recovery, configuration, development, and regression-test commands.
 
 ---
 

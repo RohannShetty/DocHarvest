@@ -1,74 +1,53 @@
-# DocHarvest v11.3.0
+# DocHarvest v11.3.2
 
-**🧭 Brand System: one brand, generated everywhere**
-
-No feature change. This release exists because the product and its documentation
-
-had quietly become four different brands, and a brand kit drawn by hand would
-
-only have documented the drift.
+Reliable capture queues, safer local browser access, GUI preferences, and documentation updates. No breaking CLI or capture-facade changes.
 
 ### ✨ Features & Capabilities
 
-- **`brand/brand-kit.svg`** — the identity board: mark, construction, product
-  surface, essence, colour, type, physical application, image direction and
-  system detail on one generated 3×3 sheet. It is drawn from `brand/tokens.json`,
-  so it cannot disagree with the product it documents.
+- Refined Capture Studio hierarchy and control alignment, corrected semantic icon colors, improved icon-button labels, and distinguished added diff lines. Tab shortcuts no longer switch views while typing in form controls.
 
-- **`scripts/build-brand-kit.mjs`** — draws every asset from the tokens and the
-  geometry table in `docs/brand/BRAND.md` §3.2: `assets/logo.svg`,
-  `assets/logo-icon.svg`, `docs/app/icon.svg`, the `docs/public/assets/` copies,
-  and `assets/social-preview.svg` (version read from `pyproject.toml`). Runs with
-  `--check` in CI.
+- Replaced wildcard CORS with explicit local origins and Host validation. Foreign and opaque origins, including `Origin: null`, cannot invoke local bridge methods or subscribe to capture events. The existing local Vite development proxy remains supported.
 
-- **`src/docharvest/brand_tokens.py`** — generated from the same JSON for the
-  surfaces that have no CSS: the CLI/TUI and the PyWebView window chrome.
+- The browser GUI remains a local desktop companion, not an authenticated service for network deployment.
 
-- **`tests/test_brand_assets.py`** — 41 guards over the drawn assets: the mark is
-  the documented geometry, the two marks are byte-identical across surfaces, no
-  asset uses a colour outside the palette, no asset grows a gradient or glow,
-  and the social card's headline cannot run under its terminal panel.
+- Added dependency-free frontend regression tests for batch ordering, fast completion, rejected starts, cancellation, stalls, configured options, version selection, library selection, and diff classification.
 
-- **OpenSpec SDD integration** — spec-driven development workflows via
-  `@fission-ai/openspec` added to the repository. Includes `openspec/` project
-  structure, slash command adapters and skills for Antigravity, Claude Code,
-  Cursor, Gemini CLI, GitHub Copilot, Codex, OpenCode, and Oh My Pi. Documented
-  in `AGENTS.md`. Run `npx @fission-ai/openspec list` for active changes.
+- **Config bridge (`ApiBridge.get_config` / `save_config`).** Exposes the merged config and writes it back to the global (`~/.docharvest/config.toml`) or project (`./docharvest.toml`) file. Only capture-related keys are accepted, so the GUI cannot write arbitrary keys.
 
-- **The social card was off-brand.** `assets/social-preview.svg` still used
-  Inter + JetBrains Mono, a gradient headline, emerald/pink terminal output and
-  rounded corners — none of it in the brand. It is now set in Archivo + Geist
-  Mono on the bond, with one amber, square corners, and the package version read
-  from `pyproject.toml` so it cannot advertise a dead release.
+- **TOML writer (`utils.config.save_config_values`).** Line-preserving merge: comments, presets, and unknown keys survive, and a key that already lives in a legacy `[download]` / `[output]` / `[capture]` table is updated in place instead of shadowed by a duplicate in `[defaults]`.
 
-- **The TUI ran a private palette.** `tui/theme.py` hand-copied the colours and
-  had drifted from the tokens (`#111113` vs `#101013`, `#71717a` vs `#8A8A93`,
-  `#f85149`/`#3fb950` vs the brand's `#EF4444`/`#34D399`) and set type in Inter
-  and JetBrains Mono instead of Archivo and Geist Mono. It now reads the
-  generated module and names only roles.
-
-- **The window flashed the wrong colour.** The PyWebView chrome was hard-coded to
-  `#090d16`, an off-brand navy; the native backdrop is now `token("bond")`.
-
-- **The TUI carried the retired name.** Theme names `gb-dark`/`gb-light` and the
-  app class `GitbookDownloaderApp` still said `gitbook`. They are now
-  `docharvest-dark`/`docharvest-light` and `DocHarvestApp` (no shim). The
-  `gitbook-dl` command alias is unchanged and still resolves.
+- **Dynamic OpenGraph Preview Card**: Implemented Next.js dynamic static OpenGraph image generator at `docs/app/opengraph-image.tsx` using `next/og`, showcasing live metrics (`930+ Tests Passing`, `12 FastMCP Tools`, `17 Agent Harnesses`, `~83% Token Reduction`).
 
 
 ### 🐛 Bug Fixes & Hardening
 
-- **Two logos, one product.** `assets/logo.svg` — the mark the README ships — was
-  still the old hand-drawn cyan/indigo/emerald gradient with a rounded tile and a
-  glow, while `docs/app/icon.svg` carried the real zinc-and-amber glyph. The
-  README, the avatars and the favicon were visibly different brands. Both marks
-  are now drawn from one geometry table.
+- Batch capture now waits for each worker's completion before starting the next URL, including when completion arrives before the start acknowledgement. Each queued URL receives the configured capture options.
 
-- **Test count re-synced.** Published test badge updated to 929 passing
-  (regenerated via `node docs/scripts/sync-stats.mjs --run`).
-> The `gitbook-dl` alias, `~/.gitbook-downloader/` and the historical CHANGELOG
-> entries keep the old name on purpose: they are migration facts, not branding.
+- Rejected starts and failed captures are counted separately from successful completions. Cancellation stops the queue; a stalled worker stops the batch without falsely freeing its busy state.
+
+- Cancel and reset retain a live worker's slot and domain locks. Start/cancel/reset state transitions are synchronized to prevent overlapping capture workers.
+
+- Version selection cannot deselect the last explicit version and accidentally request all versions. Library select-all checks domain membership rather than matching selection counts.
+
+- Early rejected requests drain small request bodies with a size limit and socket timeout, preventing Windows connection resets from discarding the intended HTTP error response.
+
+- Added backend regression coverage for origin/Host rejection, Windows delayed-body responses, worker lifecycle, and domain-lock preservation. Refreshed the bundled GUI and synchronized release versions.
+
+- **New Preferences tab (`frontend/src/views/SettingsView.tsx`, `Ctrl+8`).** Edits persisted capture configuration — workers, timeout, max pages, retries, minimum content, output mode, snapshot, SPA rendering, path scope, and exclude paths — plus a read-only view of config file locations and `[presets.*]` tables. Capture Studio still supplies its own per-run options; saving preferences does not populate its controls automatically.
+
+
+### ⚡ Performance & Architecture
+
+- PyPI automation now runs on version-tag pushes (or manual dispatch), avoiding duplicate uploads when the binary workflow subsequently creates the GitHub release.
+
+- Run `uv run pytest -q -p no:cacheprovider` for Python tests and `node --experimental-strip-types --test src/lib/__tests__/flow.test.mjs src/lib/__tests__/batch.test.mts` from `frontend/` for frontend flow tests. Browser visual and end-to-end acceptance remain separate manual checks.
+
+- **Universal Extraction Framing**: Refactored `SupportedPlatforms.tsx` to communicate that DocHarvest is a universal documentation compiler and crawler for any technical website, API portal, developer hub, or SPA, framing dedicated detectors as native AST extraction optimizations with a universal fallback.
+
+- **Comprehensive Agent Harness SEO Meta**: Expanded `layout.tsx` metadata with high-intent search keywords covering all 17 agent harnesses (Cursor, Claude Code, Windsurf, VS Code / Cline, Roo Code, Copilot Workspace, Antigravity, Gemini CLI, Oh My Pi, OpenCode, Codex, JetBrains, Zed, Continue, Kilo, Grok, Trae, Mistral Vibe) and universal doc scraping queries.
+
+- **Honest Test Stats Drift Guard**: Re-verified test sync drift guards and published claim consistency (`tests/test_stats_drift.py` and `tests/test_naming_drift.py` passing cleanly).
 
 
 ---
-**Full Changelog**: https://github.com/RohannShetty/DocHarvest/compare/v11.2.0...v11.3.0
+**Full Changelog**: https://github.com/RohannShetty/DocHarvest/compare/v11.3.1...v11.3.2

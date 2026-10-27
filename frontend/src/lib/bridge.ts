@@ -55,10 +55,51 @@ declare global {
         get_lock_status: (domain?: string) => Promise<any>
         is_render_available: () => Promise<any>
         export_doc: (domain: string, format: string, customPath?: string) => Promise<any>
+        get_config: () => Promise<any>
+        save_config: (values: Record<string, any>, scope?: string) => Promise<any>
       }
     }
     onCaptureProgress?: (data: CaptureProgressPayload) => void
     onCaptureDone?: (data: CaptureDonePayload) => void
+  }
+}
+
+
+// In browser dev mode (e.g. Vite dev server), initialize a lightweight proxy shim
+// connecting window.pywebview.api to the Python backend over /api and SSE /api/events.
+if (typeof window !== "undefined" && !window.pywebview) {
+  window.pywebview = {
+    api: new Proxy({} as any, {
+      get: (_target, prop) => {
+        return async (...args: any[]) => {
+          const resp = await fetch("/api/" + String(prop), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(args),
+          })
+          if (!resp.ok) {
+            throw new Error(`API request failed with status ${resp.status}`)
+          }
+          return await resp.json()
+        }
+      },
+    }),
+  }
+
+  try {
+    const evt = new EventSource("/api/events")
+    evt.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data)
+        if (payload && payload.func && typeof (window as any)[payload.func] === "function") {
+          ;(window as any)[payload.func](payload.data)
+        }
+      } catch (err) {
+        console.warn("Failed to dispatch event", err)
+      }
+    }
+  } catch (err) {
+    console.warn("SSE connection failed", err)
   }
 }
 
@@ -141,8 +182,8 @@ export const pyApi = {
     if (window.pywebview?.api?.get_system_info) return await window.pywebview.api.get_system_info()
     return {
       name: 'DocHarvest',
-      version: '11.3.1',
-      engine: 'DocHarvest Engine v11.3.1 (AST + FastMCP v2 + fpdf2)',
+      version: '11.3.2',
+      engine: 'DocHarvest Engine v11.3.2 (AST + FastMCP v2 + fpdf2)',
       platform: 'win32',
       library_dir: '~/.docharvest/docs'
     }
@@ -154,5 +195,20 @@ export const pyApi = {
   exportDoc: async (domain: string, format: string, customPath?: string) => {
     if (window.pywebview?.api?.export_doc) return await window.pywebview.api.export_doc(domain, format, customPath)
     return { success: true, path: `exports/${domain}-docs.${format}`, format }
+  },
+  getConfig: async () => {
+    if (window.pywebview?.api?.get_config) return await window.pywebview.api.get_config()
+    return {
+      success: true,
+      values: { workers: 5, timeout: 20, max_pages: 0, snapshot: true, render: false, output_mode: "both" },
+      defaults: {},
+      presets: {},
+      sources: [],
+      paths: []
+    }
+  },
+  saveConfig: async (values: Record<string, any>, scope: string = "global") => {
+    if (window.pywebview?.api?.save_config) return await window.pywebview.api.save_config(values, scope)
+    return { success: true, path: "(browser preview)", values }
   }
 }

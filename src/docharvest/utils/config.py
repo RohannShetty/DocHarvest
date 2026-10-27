@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -347,4 +348,133 @@ def init_default_config(path: str | None = None) -> str:
 
     dest.write_text(_DEFAULT_TOML, encoding="utf-8")
     logger.info("Wrote default config to %s", dest)
+    return str(dest.resolve())
+
+
+# ── Writer: merge values back into a config file ───────────────────────
+
+_KEY_RE = re.compile(r"^[A-Za-z0-9_-]+$")
+_HEADER_RE = re.compile(r"^\s*\[([^\[\]]+)\]\s*(?:#.*)?$")
+
+
+def format_toml_value(value: Any) -> str:
+    """Render a Python value as a TOML literal.
+
+    Only the shapes a config file actually holds are supported: booleans,
+    numbers, strings, and flat arrays of those. Anything else raises
+    ``TypeError`` rather than silently writing a broken file.
+    """
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return repr(value)
+    if isinstance(value, str):
+        escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+        return f'"{escaped}"'
+    if isinstance(value, (list, tuple)):
+        return "[" + ", ".join(format_toml_value(item) for item in value) + "]"
+    raise TypeError(f"Cannot write {type(value).__name__} to a config file")
+
+
+def _section_spans(lines: list[str]) -> list[tuple[str, int, int]]:
+    """Return ``(name, header_index, end_index)`` for every table header."""
+    spans: list[list[Any]] = []
+    for index, line in enumerate(lines):
+        match = _HEADER_RE.match(line)
+        if match:
+            spans.append([match.group(1).strip(), index, len(lines)])
+    for index in range(len(spans) - 1):
+        spans[index][2] = spans[index + 1][1]
+    return [(name, start, end) for name, start, end in spans]
+
+
+def _append_to_section(lines: list[str], section: str, entries: list[str]) -> None:
+    """Append *entries* to *section*, creating the table when absent."""
+    for name, start, end in _section_spans(lines):
+        if name.lower() != section.lower():
+            continue
+        # Keep new keys inside the block, above its trailing blank lines and
+        # comments, so a visually grouped table stays grouped.
+        insert_at = end
+        while insert_at > start + 1 and (
+            not lines[insert_at - 1].strip() or lines[insert_at - 1].lstrip().startswith("#")
+        ):
+            insert_at -= 1
+        lines[insert_at:insert_at] = entries
+        return
+    if lines and lines[-1].strip():
+        lines.append("")
+    lines.append(f"[{section}]")
+    lines.extend(entries)
+
+
+def merge_into_toml(text: str, values: dict[str, Any], *, section: str = "defaults") -> str:
+    """Merge *values* into TOML *text*, preserving comments and other tables.
+
+    A key that already exists in any flattened capture section (``[defaults]``
+    or the legacy ``[download]`` / ``[output]`` / ``[capture]`` tables) is
+    updated where it lives — writing a second copy into ``[defaults]`` would
+    lose to the legacy section whenever that section appears later in the file.
+    Remaining keys are appended to *section*.
+    """
+    lines = text.splitlines()
+    rendered = {key: f"{key} = {format_toml_value(value)}" for key, value in values.items()}
+    pending = dict(rendered)
+
+    for name, start, end in _section_spans(lines):
+        if name.lower() not in _FLATTEN_SECTIONS:
+            continue
+        for index in range(start + 1, end):
+            for key in list(pending):
+                if re.match(rf"^\s*{re.escape(key)}\s*=", lines[index]):
+                    lines[index] = pending.pop(key)
+                    break
+
+    if pending:
+        _append_to_section(lines, section, [rendered[key] for key in values if key in pending])
+
+    return "\n".join(lines) + "\n"
+
+
+def save_config_values(values: dict[str, Any], *, path: str | Path | None = None) -> str:
+    """Merge *values* into the ``[defaults]`` table of a config file.
+
+    Defaults to the global config (``~/.docharvest/config.toml``) and creates
+    it when missing. Existing comments, presets, and unknown keys survive
+    untouched; only the keys given here are rewritten.
+
+    Args:
+        values: Config keys to set. ``None`` values are skipped, so callers can
+            pass a partially filled form.
+        path: Override the destination file (project config, tests).
+
+    Returns:
+        The absolute path written.
+
+    Raises:
+        ValueError: A key contains characters TOML bare keys cannot hold.
+        TypeError: A value is a shape the writer does not support.
+    """
+    dest = Path(os.path.expanduser(str(path))) if path else Path(os.path.expanduser(GLOBAL_CONFIG_PATH))
+
+    cleaned: dict[str, Any] = {}
+    for key, value in values.items():
+        if not isinstance(key, str) or not _KEY_RE.match(key):
+            raise ValueError(f"Invalid config key: {key!r}")
+        if value is None:
+            continue
+        format_toml_value(value)  # validate before touching the file
+        cleaned[key] = value
+
+    if not cleaned:
+        return str(dest.resolve())
+
+    existing = dest.read_text(encoding="utf-8") if dest.is_file() else ""
+    updated = merge_into_toml(existing, cleaned)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    from docharvest.storage.manager import atomic_write_text
+
+    atomic_write_text(dest, updated)
+    logger.info("Saved %d config key(s) to %s", len(cleaned), dest)
     return str(dest.resolve())

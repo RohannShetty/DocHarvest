@@ -38,6 +38,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Progress } from "@/components/ui/progress"
 import { pyApi, CaptureProgressPayload, CaptureDonePayload } from "@/lib/bridge"
 import { toast } from "sonner"
+import { toggleVersionSelection } from "@/lib/flow"
+import { BatchController } from "@/lib/batch"
+import { APP_VERSION } from "@/lib/version"
 
 interface CaptureStudioProps {
   onCaptureCompleted: () => void
@@ -92,7 +95,6 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
   // Lock State & Banner
   const [lockStatus, setLockStatus] = useState<any>(null)
-  const [checkingLock, setCheckingLock] = useState<boolean>(false)
 
   // Logs & Filters
   const [logs, setLogs] = useState<LogEntry[]>([])
@@ -103,10 +105,15 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
   
   const timerRef = useRef<any>(null)
   const logScrollRef = useRef<HTMLDivElement>(null)
+  const capturingRef = useRef<boolean>(false)
+  // Persists across the batch loop so the global onCaptureDone callback can
+  // resolve the controller's in-flight completion promise without stale
+  // React-state closures.
+  const batchControllerRef = useRef<BatchController>(new BatchController())
+  const batchRunningRef = useRef<boolean>(false)
 
   // Check lock status
   const refreshLockStatus = async (targetDomain?: string) => {
-    setCheckingLock(true)
     try {
       const res = await pyApi.getLockStatus(targetDomain || url)
       if (res && res.success) {
@@ -114,8 +121,6 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
       }
     } catch {
       // Ignore
-    } finally {
-      setCheckingLock(false)
     }
   }
 
@@ -161,7 +166,8 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
       if (typeof data.discovered === "number") setDiscoveredCount(data.discovered)
       if (typeof data.downloaded === "number") setDownloadedCount(data.downloaded)
       if (typeof data.failed === "number") setFailedCount(data.failed)
-      if (typeof data.percent === "number") setProgressPercent(Math.min(100, Math.max(0, data.percent)))
+      if (typeof data.percent === "number")
+        setProgressPercent(Math.min(100, Math.max(0, data.percent)))
 
       const now = new Date().toLocaleTimeString()
       let level: LogEntry["level"] = "info"
@@ -180,16 +186,25 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
           level,
           url: data.url,
           title: data.title,
-          message: msg
+          message: msg,
         }
       ])
     }
 
     window.onCaptureDone = (data: CaptureDonePayload) => {
-      setIsCapturing(false)
       clearInterval(timerRef.current)
-      refreshLockStatus()
+      // The current worker is done regardless of single/batch mode.
+      capturingRef.current = false
 
+      if (batchRunningRef.current) {
+        // Resume the dependency-injected batch loop. React state / toasts for
+        // batch completion are owned by handleRunBatch once run() resolves.
+        batchControllerRef.current.markComplete(data)
+        return
+      }
+
+      // Single-capture finalization (not part of a batch).
+      setIsCapturing(false)
       if (data.success) {
         setIsComplete(true)
         setCaptureError(null)
@@ -206,7 +221,6 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
           toast.error(`Capture failed: ${err}`)
         }
       }
-
       onCaptureCompleted()
     }
 
@@ -215,6 +229,12 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
       window.onCaptureDone = undefined
     }
   }, [onCaptureCompleted])
+
+  // Keep a ref in sync with batchRunning so the callback effect above never
+  // reads a stale closure value.
+  useEffect(() => {
+    batchRunningRef.current = batchRunning
+  }, [batchRunning])
 
   // Auto-scroll logs
   useEffect(() => {
@@ -238,6 +258,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
     }
 
     setIsCapturing(true)
+    capturingRef.current = true
     setIsComplete(false)
     setCaptureError(null)
     setProgressPercent(0)
@@ -269,6 +290,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
       if (!res.success) {
         toast.error(`Could not start capture: ${res.error}`)
         setIsCapturing(false)
+        capturingRef.current = false
         setCaptureError(res.error)
         clearInterval(timerRef.current)
         refreshLockStatus(crawlUrl)
@@ -278,6 +300,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
     } catch (err: any) {
       toast.error(`Error: ${err.message}`)
       setIsCapturing(false)
+      capturingRef.current = false
       setCaptureError(err.message)
       clearInterval(timerRef.current)
       refreshLockStatus(crawlUrl)
@@ -291,7 +314,8 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
     } catch {
       // Ignore
     }
-    setIsCapturing(false)
+    // Stay "capturing" until onCaptureDone fires with cancelled:true, so the
+    // UI keeps its busy state and the batch loop can observe real completion.
     clearInterval(timerRef.current)
     setTimeout(() => refreshLockStatus(), 600)
   }
@@ -300,9 +324,24 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
     try {
       const res = await pyApi.resetCapture()
       if (res.success) {
+        // If the worker is still alive we must NOT clear state — clearing the
+        // slot while a worker runs would let a subsequent capture replace the
+        // live worker and run two captures concurrently (sharing one cancel
+        // event). Retain busy state and let the user know.
+        if (res.worker_still_running) {
+          capturingRef.current = true
+          setIsCapturing(true)
+          setIsComplete(false)
+          setCaptureError(null)
+          toast.warning(
+            "A capture worker is still running. State kept busy and locks preserved; try again shortly."
+          )
+          return
+        }
         toast.success(`Cleared capture state and released ${res.cleared_locks ?? 0} active lock(s).`)
         setCaptureError(null)
         setIsCapturing(false)
+        capturingRef.current = false
         clearInterval(timerRef.current)
         refreshLockStatus()
       } else {
@@ -336,36 +375,143 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
 
   const handleRunBatch = async () => {
     if (batchUrls.length === 0) return
+    // Refuse concurrent runs: an in-flight single capture or an already
+    // running batch owns the worker slot.
+    if (capturingRef.current || batchRunningRef.current) {
+      toast.error("A capture is already running. Wait for it to finish or cancel it first.")
+      return
+    }
+    // Claim the batch slot SYNCHRONOUSLY: the effect mirroring batchRunning
+    // state into this ref only runs after paint, so an early onCaptureDone
+    // would otherwise miss markComplete and hang the loop.
+    batchRunningRef.current = true
     setBatchRunning(true)
     setBatchIndex(0)
     batchCancelRef.current = false
-    for (let i = 0; i < batchUrls.length; i++) {
-      if (batchCancelRef.current) break
-      setBatchIndex(i)
-      const u = batchUrls[i].trim()
-      if (!u) continue
-      // Wait for the in-flight single capture (which sets isCapturing) to finish
-      // before starting the next URL. The existing pyApi.startCapture returns
-      // immediately and runs in background; onCaptureDone will flip isCapturing.
-      await new Promise<void>((resolve) => {
-        const check = () => {
-          if (batchCancelRef.current || !isCapturing) {
-            // give onCaptureDone a tick to clear state
-            setTimeout(resolve, 250)
-          } else {
-            setTimeout(check, 200)
-          }
-        }
-        handleStartCapture(u)
-        check()
-      })
+
+    // Busy UI immediately + per-run state reset.
+    setIsCapturing(true)
+    setIsComplete(false)
+    setCaptureError(null)
+    setProgressPercent(0)
+    setDiscoveredCount(0)
+    setDownloadedCount(0)
+    setFailedCount(0)
+    setElapsedSeconds(0)
+    setLogs([])
+
+    // lastDomain for the post-batch read action (first batch URL).
+    try {
+      const u = new URL(batchUrls[0].trim())
+      setLastDomain(u.hostname.replace("www.", ""))
+    } catch {
+      setLastDomain(batchUrls[0].trim())
     }
+
+    clearInterval(timerRef.current)
+    const startTime = Date.now()
+    timerRef.current = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000))
+    }, 1000)
+
+    const options: any = {
+      max_pages: maxPages ? parseInt(String(maxPages), 10) : null,
+      workers: workers || 5,
+      path_scope: pathScope.trim() || null,
+      exclude_paths: excludePaths.trim() || null,
+      output_mode: outputMode || "library",
+      site_versions: selectedVersions.length > 0 ? selectedVersions : null,
+      render: renderSpa,
+    }
+
+    // Dependency-injected driver: the controller owns sequencing, so this only
+    // talks to the backend. Capture options are baked into the closure so
+    // every batch URL runs with the same configured options. capturingRef is
+    // kept in sync so the UI busy flag never lies about whether a worker is
+    // alive.
+    const driver = {
+      start: async (batchUrl: string) => {
+        capturingRef.current = true
+        try {
+          const res = await pyApi.startCapture(batchUrl, options)
+          if (!res.success) capturingRef.current = false
+          return res
+        } catch (err) {
+          capturingRef.current = false
+          throw err
+        }
+      },
+      cancel: async () => {
+        try {
+          await pyApi.cancelCapture()
+        } catch {
+          // ignore
+        }
+      },
+    }
+
+    const outcome = await batchControllerRef.current.run(batchUrls, driver, {
+      timeoutMs: 10 * 60 * 1000,
+      isCancelled: () => batchCancelRef.current,
+      onEvent: (event) => {
+        setBatchIndex(event.index)
+        if (event.kind === "started") {
+          const now = new Date().toLocaleTimeString()
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: Math.random().toString(36).substring(2, 9),
+              time: now,
+              level: "discovered",
+              url: event.url,
+              message: `Batch: started ${event.url}`,
+            },
+          ])
+        }
+      },
+    })
+
+    // Release the batch slot synchronously (mirrors setBatchRunning below).
+    batchRunningRef.current = false
     setBatchRunning(false)
     setBatchIndex(0)
-    if (batchCancelRef.current) {
+    clearInterval(timerRef.current)
+
+    if (outcome.stoppedEarly && outcome.busy) {
+      // Stall: the worker is still alive. Retain busy state so the UI does not
+      // lie, and never start the next URL. The user must Force Reset.
+      capturingRef.current = true
+      setIsCapturing(true)
+      setIsComplete(false)
+      toast.warning(
+        `Batch stopped: capture of ${outcome.results[outcome.results.length - 1]?.url} stalled and the worker is still running. Use Force Reset.`
+      )
+    } else if (outcome.cancelled) {
+      capturingRef.current = false
+      setIsCapturing(false)
+      setIsComplete(false)
+      if (outcome.completed > 0) {
+        // Captures that finished before the cancel are real — refresh library.
+        onCaptureCompleted()
+      }
       toast.warning("Batch cancelled.")
+    } else if (outcome.failed > 0) {
+      capturingRef.current = false
+      setIsCapturing(false)
+      setIsComplete(false)
+      if (outcome.completed > 0) {
+        // Partial success: some captures landed in the library — refresh it.
+        onCaptureCompleted()
+      }
+      toast.warning(
+        `Batch finished with ${outcome.failed} failed capture(s) and ${outcome.completed} succeeded.`
+      )
     } else {
-      toast.success(`Batch complete: ${batchUrls.length} captures finished.`)
+      capturingRef.current = false
+      setIsCapturing(false)
+      setIsComplete(true)
+      toast.success(`Batch complete: ${outcome.completed} capture(s) finished.`)
+      onCaptureCompleted()
     }
   }
 
@@ -405,17 +551,19 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Download className="h-6 w-6 text-primary" />
-              <span>Capture Studio</span>
-            </h1>
-            <Badge variant="outline" className="text-xs font-mono font-medium border-primary/30 text-primary bg-primary/10">
-              v11.0 Engine
-            </Badge>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold tracking-tight text-foreground font-mono flex items-center gap-2">
+                <Download className="h-5 w-5 text-primary" />
+                <span>Capture Studio</span>
+              </h2>
+              <Badge variant="outline" className="text-xs font-mono font-medium border-primary/30 text-primary bg-primary/10">
+                v{APP_VERSION}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+              Turn GitBook, Docusaurus, ReadTheDocs, Mintlify, and generic SPA documentation websites into clean offline Markdown & RAG vector datasets.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Turn GitBook, Docusaurus, ReadTheDocs, Mintlify, and generic SPA documentation websites into clean offline Markdown & RAG vector datasets.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -556,11 +704,14 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                         variant={selectedVersions.includes(v) ? "default" : "outline"}
                         className="cursor-pointer text-xs py-0.5 px-2 font-mono transition-all interactive-scale"
                         onClick={() => {
-                          if (selectedVersions.includes(v)) {
-                            setSelectedVersions(selectedVersions.filter(x => x !== v))
-                          } else {
-                            setSelectedVersions([...selectedVersions, v])
+                          const next = toggleVersionSelection(selectedVersions, v)
+                          if (next === selectedVersions) {
+                            // Blocked: removing the last selected version would
+                            // contradict the "null = all versions" semantic.
+                            toast.error("At least one version must be selected")
+                            return
                           }
+                          setSelectedVersions(next)
                         }}
                       >
                         {v}
@@ -607,7 +758,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                     value={workers}
                     onChange={(e) => setWorkers(Number(e.target.value))}
                     disabled={isCapturing}
-                    className="bg-background border border-border text-foreground text-xs rounded-md px-2.5 py-1 focus:ring-1 focus:ring-primary outline-none font-medium"
+                    className="h-9 bg-background border border-border text-foreground text-xs rounded-md px-2.5 py-0.5 focus:ring-1 focus:ring-primary outline-none font-medium"
                   >
                     <option value={1}>1 worker (safe)</option>
                     <option value={3}>3 workers</option>

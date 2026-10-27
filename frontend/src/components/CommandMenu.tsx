@@ -16,7 +16,8 @@ import {
   FileUp, 
   Activity, 
   FolderOpen,
-  Sparkles 
+  Sparkles,
+  Settings
 } from "lucide-react"
 import { TabId } from "./AppSidebar"
 import { pyApi } from "@/lib/bridge"
@@ -98,7 +99,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <Search className="mr-2 h-4 w-4 text-primary600" />
+            <Search className="mr-2 h-4 w-4 text-primary" />
             <span>Search Studio</span>
             <CommandShortcut>3</CommandShortcut>
           </CommandItem>
@@ -130,6 +131,17 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
           >
             <Activity className="mr-2 h-4 w-4 text-destructive" />
             <span>Diagnostics &amp; System</span>
+            <CommandShortcut>7</CommandShortcut>
+          </CommandItem>
+          <CommandItem
+            onSelect={() => {
+              onSelectTab("settings")
+              onOpenChange(false)
+            }}
+          >
+            <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span>Preferences (config defaults)</span>
+            <CommandShortcut>8</CommandShortcut>
           </CommandItem>
         </CommandGroup>
 
@@ -162,7 +174,7 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({
               onOpenChange(false)
             }}
           >
-            <FolderOpen className="mr-2 h-4 w-4 text-primary600" />
+            <FolderOpen className="mr-2 h-4 w-4 text-primary" />
             <span>Open Library Storage Folder in Explorer</span>
           </CommandItem>
 

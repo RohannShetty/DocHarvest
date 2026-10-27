@@ -13,7 +13,8 @@ name: Publish to PyPI
 #     Workflow filename:  publish.yml
 #     Environment:        pypi
 # After that, run this workflow (Actions → Publish to PyPI → Run workflow)
-# or publish any GitHub release — uploads authenticate via OIDC.
+# or push a version tag — uploads authenticate via OIDC. GitHub release creation
+# must not trigger a second upload of the same immutable PyPI version.
 #
 # The published metadata comes from pyproject.toml [project.urls] + README.md, so
 # both must point at the DocHarvest repo/showcase before a release. 11.1.1 exists
@@ -21,8 +22,6 @@ name: Publish to PyPI
 # `docharvest` slug and a GitHub Pages path that 404s.
 
 on:
-  release:
-    types: [published]
   push:
     tags:
       - 'v*'

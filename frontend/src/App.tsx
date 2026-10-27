@@ -10,6 +10,7 @@ import { DiffView } from "@/views/DiffView"
 import { ExportView } from "@/views/ExportView"
 import { DiagnosticsView } from "@/views/DiagnosticsView"
 import { InAppDocsView } from "@/views/InAppDocsView"
+import { SettingsView } from "@/views/SettingsView"
 import { OnboardingTour } from "@/components/OnboardingTour"
 import { Toaster } from "@/components/ui/sonner"
 import { pyApi } from "@/lib/bridge"
@@ -136,7 +137,8 @@ export function App() {
         if (e.key === "5") { setActiveTab("export"); return }
         if (e.key === "6") { setActiveTab("docs"); return }
         if (e.key === "7") { setActiveTab("diagnostics"); return }
-      } else if (e.ctrlKey || e.metaKey) {
+        if (e.key === "8") { setActiveTab("settings"); return }
+      } else if (!isInput && (e.ctrlKey || e.metaKey)) {
         if (e.key === "1") { e.preventDefault(); setActiveTab("capture"); return }
         if (e.key === "2") { e.preventDefault(); setActiveTab("library"); return }
         if (e.key === "3") { e.preventDefault(); setActiveTab("search"); return }
@@ -144,6 +146,7 @@ export function App() {
         if (e.key === "5") { e.preventDefault(); setActiveTab("export"); return }
         if (e.key === "6") { e.preventDefault(); setActiveTab("docs"); return }
         if (e.key === "7") { e.preventDefault(); setActiveTab("diagnostics"); return }
+        if (e.key === "8") { e.preventDefault(); setActiveTab("settings"); return }
       }
     }
     document.addEventListener("keydown", down)
@@ -204,6 +207,9 @@ export function App() {
         )}
         {activeTab === "diagnostics" && (
           <DiagnosticsView />
+        )}
+        {activeTab === "settings" && (
+          <SettingsView />
         )}
       </main>
 

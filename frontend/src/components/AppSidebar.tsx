@@ -16,12 +16,13 @@ import {
   Heart,
 
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  Settings
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-export type TabId = "capture" | "library" | "search" | "diff" | "export" | "docs" | "diagnostics"
+export type TabId = "capture" | "library" | "search" | "diff" | "export" | "docs" | "diagnostics" | "settings"
 
 interface AppSidebarProps {
   activeTab: TabId
@@ -53,6 +54,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     { id: "export" as TabId, label: "Export Studio", icon: FileUp, badge: "RAG" },
     { id: "docs" as TabId, label: "Documentation", icon: BookOpen, badge: null },
     { id: "diagnostics" as TabId, label: "Diagnostics", icon: Activity, badge: null },
+    { id: "settings" as TabId, label: "Preferences", icon: Settings, badge: null },
   ]
 
   return (

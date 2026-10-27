@@ -38,6 +38,10 @@ class ApiBridge:
         self._cancel_requested = False
         self._cancel_event = threading.Event()
         self._active_thread: threading.Thread | None = None
+        # Guards the start/cancel/reset transitions on _active_thread so a
+        # concurrent HTTP request (ThreadingHTTPServer) or a reset with a
+        # still-alive worker cannot falsely replace or double-spawn workers.
+        self._capture_state_lock = threading.Lock()
         self._last_run: dict[str, Any] | None = None
         # Phase 4 step 3: marshal _emit_to_js calls onto the UI thread.
         # PyWebView's `window.evaluate_js` must be called from the UI thread;
@@ -185,15 +189,6 @@ class ApiBridge:
 
     def start_capture(self, url: str, options: dict[str, Any]) -> dict[str, Any]:
         """Launch a capture job in a dedicated background worker thread."""
-        if self._active_thread and self._active_thread.is_alive():
-            if self._cancel_requested:
-                self._active_thread.join(timeout=1.5)
-            if self._active_thread.is_alive():
-                return {"success": False, "error": "A capture is already running"}
-
-        self._cancel_requested = False
-        self._cancel_event.clear()
-
         raw_scope = options.get("path_scope") or ""
         parsed_scope = tuple(
             s.strip() for s in str(raw_scope).split(",") if s.strip()
@@ -338,27 +333,62 @@ class ApiBridge:
                     },
                 )
 
-        self._active_thread = threading.Thread(target=worker, daemon=True)
-        self._active_thread.start()
+        with self._capture_state_lock:
+            if self._active_thread and self._active_thread.is_alive():
+                if self._cancel_requested:
+                    self._active_thread.join(timeout=1.5)
+                if self._active_thread.is_alive():
+                    return {"success": False, "error": "A capture is already running"}
+            self._cancel_requested = False
+            self._cancel_event.clear()
+            self._active_thread = threading.Thread(target=worker, daemon=True)
+            self._active_thread.start()
         return {"success": True}
 
     def cancel_capture(self) -> dict[str, Any]:
-        """Request the current capture to cancel immediately."""
-        self._cancel_requested = True
-        self._cancel_event.set()
-        if self._active_thread and self._active_thread.is_alive():
-            self._active_thread.join(timeout=1.0)
+        """Request the current capture to cancel immediately.
+
+        Flag mutations happen under the same lock that start_capture uses to
+        clear them, so a cancel can never be silently wiped mid-start; the
+        (bounded) join stays outside the lock to avoid blocking state
+        transitions on a slow worker.
+        """
+        with self._capture_state_lock:
+            self._cancel_requested = True
+            self._cancel_event.set()
+            thread = self._active_thread
+        if thread and thread.is_alive():
+            thread.join(timeout=1.0)
         return {"success": True}
 
     def reset_capture(self) -> dict[str, Any]:
-        """Forcefully reset the capture thread state and clear all active locks."""
-        self._cancel_requested = True
-        self._cancel_event.set()
-        if self._active_thread and self._active_thread.is_alive():
-            self._active_thread.join(timeout=1.0)
-        self._active_thread = None
-        cleared = self._storage.clear_all_locks(force=True)
-        return {"success": True, "cleared_locks": cleared}
+        """Request cancel, clear locks, and drop the worker reference only when it stopped.
+
+        If the worker is still alive after the join times out it must keep
+        its slot in ``_active_thread`` — clearing it would let a subsequent
+        ``start_capture`` falsely replace the live worker and run two
+        captures concurrently (sharing one cancel event). Its DomainLock is
+        also preserved: force-clearing locks under a live worker would let
+        another process acquire the domain and corrupt the capture.
+        """
+        with self._capture_state_lock:
+            self._cancel_requested = True
+            self._cancel_event.set()
+            thread = self._active_thread
+            still_running = bool(thread and thread.is_alive())
+            if still_running:
+                thread.join(timeout=1.0)
+                still_running = thread.is_alive()
+            if still_running:
+                cleared = 0
+            else:
+                self._active_thread = None
+                cleared = self._storage.clear_all_locks(force=True)
+        return {
+            "success": True,
+            "cleared_locks": cleared,
+            "worker_still_running": still_running,
+        }
 
 
     # ── Library Management ───────────────────────────────────────────────
@@ -847,3 +877,59 @@ class ApiBridge:
             return {"available": is_render_available()}
         except Exception:
             return {"available": False}
+
+    # ── Configuration ────────────────────────────────────────────────────
+
+    def _config_snapshot(self) -> dict[str, Any]:
+        """Resolved config values plus where they came from."""
+        from ..utils.config import DEFAULTS, config_search_paths, load_full_config
+
+        cfg = load_full_config()
+        paths = [
+            {"label": label, "path": str(path), "exists": path.is_file()}
+            for label, path in config_search_paths()
+        ]
+        return {
+            "values": cfg.values,
+            "defaults": DEFAULTS,
+            "presets": cfg.presets,
+            "sources": cfg.sources,
+            "paths": paths,
+        }
+
+    def get_config(self) -> dict[str, Any]:
+        """Return the merged configuration the next capture would use."""
+        try:
+            snapshot = self._config_snapshot()
+            return {"success": True, **snapshot}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+
+    def save_config(self, values: dict[str, Any], scope: str = "global") -> dict[str, Any]:
+        """Persist *values* to the global or project config file.
+
+        Only capture-related keys are accepted — the GUI must not be able to
+        write arbitrary keys into a user's config file.
+        """
+        from ..utils.config import _CAPTURE_OPTION_KEYS, config_search_paths, save_config_values
+
+        allowed = set(_CAPTURE_OPTION_KEYS) | {"retry_attempts", "min_content_chars"}
+        if not isinstance(values, dict):
+            return {"success": False, "error": "values must be an object"}
+
+        unknown = sorted(set(values) - allowed)
+        if unknown:
+            return {"success": False, "error": f"Unsupported config keys: {', '.join(unknown)}"}
+
+        targets = dict(config_search_paths())
+        if scope not in targets:
+            return {"success": False, "error": f"Unknown scope: {scope}"}
+
+        try:
+            written = save_config_values(values, path=targets[scope])
+            snapshot = self._config_snapshot()
+            return {"success": True, "path": written, **snapshot}
+        except (ValueError, TypeError) as exc:
+            return {"success": False, "error": str(exc)}
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}

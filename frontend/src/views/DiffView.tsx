@@ -46,7 +46,6 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
   const [loadingGraph, setLoadingGraph] = useState<boolean>(false)
   const [selectedNodeType, setSelectedNodeType] = useState<string>("all")
   const [selectedNode, setSelectedNode] = useState<any>(null)
-  const [copiedGraph, setCopiedGraph] = useState<boolean>(false)
   const mermaidContainerRef = useRef<HTMLDivElement>(null)
 
   const currentItem = library.find((item) => item.domain === selectedDomain)
@@ -582,7 +581,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                               <div
                                 key={lIdx}
                                 className={`px-1.5 py-0.5 rounded font-mono ${
-                                  isAdd ? "bg-muted text-muted-foreground" :
+                                  isAdd ? "bg-success/15 text-success font-medium" :
                                   isDel ? "bg-destructive/15 text-destructive" :
                                   isHdr ? "text-primary/80 font-bold bg-primary/5" :
                                   "text-muted-foreground"

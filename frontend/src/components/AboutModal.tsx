@@ -57,6 +57,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
         {/* Close Button */}
         <button
           onClick={() => onOpenChange(false)}
+          aria-label="Close About dialog"
           className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" />
@@ -117,7 +118,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
 
           <div className="p-3 rounded-xl border border-border/60 bg-muted/40 flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary600" />
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
               <span>License &amp; Privacy</span>
             </div>
             <span className="font-mono text-xs font-semibold text-foreground truncate">

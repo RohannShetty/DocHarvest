@@ -55,6 +55,8 @@ PYTHON_TO_TS = [
     ("get_diagnostics", "getDiagnostics"),
     ("get_system_info", "getSystemInfo"),
     ("is_render_available", "isRenderAvailable"),
+    ("get_config", "getConfig"),
+    ("save_config", "saveConfig"),
 ]
 
 

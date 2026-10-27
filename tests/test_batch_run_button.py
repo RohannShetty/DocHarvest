@@ -40,7 +40,8 @@ def test_capture_studio_batch_handler_iterates_urls() -> None:
     text = CAPTURE_STUDIO.read_text(encoding="utf-8")
     # The handler must reference batchUrls and startCapture.
     assert "handleRunBatch" in text
-    body_start = text.index("handleRunBatch")
+    # Match the declaration, not a reference in a callback comment.
+    body_start = text.index("const handleRunBatch = async () =>")
     # 100 lines is generous enough to cover the body.
     body = text[body_start : body_start + 4000]
     assert "batchUrls" in body, (
