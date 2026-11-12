@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, } from "@/components/ui/tabs"
 import { pyApi } from "@/lib/bridge"
 import { toast } from "sonner"
-import mermaid from "mermaid"
+import { initMermaid, loadMermaid } from "@/components/MarkdownViewer"
 
 interface DiffViewProps {
   library: any[]
@@ -134,6 +134,11 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
     let cancelled = false
     void (async () => {
       try {
+        const mermaid = await loadMermaid()
+        if (cancelled) return
+        initMermaid(
+          document.documentElement.classList.contains("dark") ? "dark" : "light"
+        )
         const id = `docgraph-svg-${Date.now()}`
         const { svg } = await mermaid.render(id, mermaidGraphCode)
         if (!cancelled && mermaidContainerRef.current) {
