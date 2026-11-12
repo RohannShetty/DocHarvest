@@ -22,10 +22,8 @@ from docharvest.providers.base import (
     same_domain,
     strip_www_prefix,
 )
-from docharvest.storage import StorageManager
 from docharvest.utils import create_session
 from docharvest.utils.discovery import discover_from_llms_txt, discover_from_sitemap
-from docharvest.search import SearchIndex
 
 logger = logging.getLogger(__name__)
 
@@ -275,7 +273,7 @@ def stream_download(
     timeout: float = 20.0,
     cancel_check: Optional[callable] = None,
     render: bool = False,
-) -> str:
+) -> dict:
     """Download an entire documentation site.
 
     Auto-detects the documentation platform, discovers all pages,
@@ -453,6 +451,19 @@ def stream_download(
     lock = threading.Lock()
     url_content: dict[str, str] = {}
 
+    # Playwright's sync API is thread-bound, so render mode uses one shared
+    # browser on the calling thread; the non-render path stays parallel.
+    renderer = None
+    if render:
+        from .utils.renderer import HeadlessRenderer, is_render_available
+
+        if not is_render_available():
+            raise RuntimeError(
+                "Headless rendering requires Playwright. Install with: "
+                "pip install \"docharvest[render]\" && playwright install chromium"
+            )
+        renderer = HeadlessRenderer()
+
     def download_one(url_to_fetch: str) -> tuple[Optional[str], str, Optional[str]]:
         """Download a single URL, return (content, url, error)."""
         nonlocal pages_downloaded, pages_errored, total_size_kb
@@ -462,13 +473,6 @@ def stream_download(
             content = ""
             if render:
                 try:
-                    from .utils.renderer import HeadlessRenderer, is_render_available
-                    if not is_render_available():
-                        raise RuntimeError(
-                            "Headless rendering requires Playwright. Install with: "
-                            "pip install \"docharvest[render]\" && playwright install chromium"
-                        )
-                    renderer = HeadlessRenderer()
                     html = renderer.render_url(url_to_fetch)
                     if hasattr(provider, "_extract_md_from_html"):
                         content = provider._extract_md_from_html(html)
@@ -533,15 +537,27 @@ def stream_download(
                 })
             return None, url_to_fetch, error_msg
 
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = {executor.submit(download_one, u): u for u in crawl_urls}
-        for future in as_completed(futures):
-            if cancel_check and cancel_check():
-                executor.shutdown(wait=False, cancel_futures=True)
-                raise RuntimeError("Capture aborted by user")
-            content, fetched_url, error = future.result()
-            if content:
-                url_content[fetched_url] = content
+    if render:
+        try:
+            for u in crawl_urls:
+                if cancel_check and cancel_check():
+                    raise RuntimeError("Capture aborted by user")
+                content, fetched_url, error = download_one(u)
+                if content:
+                    url_content[fetched_url] = content
+        finally:
+            if renderer is not None:
+                renderer.close()
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {executor.submit(download_one, u): u for u in crawl_urls}
+            for future in as_completed(futures):
+                if cancel_check and cancel_check():
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    raise RuntimeError("Capture aborted by user")
+                content, fetched_url, error = future.result()
+                if content:
+                    url_content[fetched_url] = content
 
     # ── Assemble content ─────────────────────────────────────────
     # Deterministic order: follow crawl_urls order (discovery/BFS order),
@@ -552,17 +568,18 @@ def stream_download(
         if content:
             ordered_pages.append((u, content))
 
-    entry_title = ""
-    combined_parts: list[str] = []
-    for i, (u, raw_content) in enumerate(ordered_pages):
-        if i == 0:
-            entry_title = provider.extract_title(raw_content, u)
+    page_dicts: list[dict] = []
+    for u, raw_content in ordered_pages:
         rewritten = rewrite_markdown_links(raw_content, u)
-        combined_parts.append(f"Source: {u}\n\n{rewritten}")
+        page_dicts.append(
+            {
+                "url": u,
+                "title": provider.extract_title(raw_content, u),
+                "content": rewritten,
+            }
+        )
 
-    combined = "\n\n---\n\n".join(combined_parts)
-
-    if not combined.strip():
+    if not page_dicts or not any(p["content"].strip() for p in page_dicts):
         # Diagnostic detection for empty crawl
         err_msg = "No content downloaded"
         try:
@@ -585,38 +602,11 @@ def stream_download(
                 "error": err_msg,
             })
         logger.warning("Download produced 0 pages for %s: %s", url, err_msg)
-        return ""
+        return {"pages": [], "provider": provider.name}
 
-    # ── Save to storage ──────────────────────────────────────────
-    # Snapshotting is owned solely by api.capture(), which records the
-    # pre-capture state exactly once before the crawl starts. The engine used
-    # to snapshot here as well, which wrote metadata.json twice per capture
-    # and raced the facade's version id.
-    storage = StorageManager()
-
-    storage.save_doc(
-        domain=domain,
-        content=combined,
-        url=url,
-        title=entry_title or provider.extract_title(combined, url),
-        pages=pages_downloaded,
-        provider=provider.name,
-        new_pages=pages_downloaded,
-        size_kb=round(total_size_kb, 1),
-    )
-
-    # ── Index for search ─────────────────────────────────────────
-    try:
-        search = SearchIndex()
-        # Index the granular page tree when it exists so hit URLs point at the
-        # page that holds the text instead of a domain-root anchor.
-        try:
-            pages_dir = storage.pages_dir(domain)
-        except Exception:  # noqa: BLE001 — a storage without a page tree is fine
-            pages_dir = None
-        search.index_domain(domain, combined, domain_url=url, pages_dir=pages_dir)
-    except Exception as e:
-        logger.warning("Search indexing failed: %s", e)
+    # Persistence is owned solely by api.capture(): the facade snapshots
+    # before the crawl and publishes the page tree/book/index afterwards.
+    # The engine must not write the library or the search index itself.
 
     if progress_callback:
         progress_callback({
@@ -627,7 +617,12 @@ def stream_download(
             "provider": provider.name,
         })
 
-    return combined
+    return {
+        "pages": page_dicts,
+        "provider": provider.name,
+        "discovered": len(crawl_urls),
+        "failed": pages_errored,
+    }
 
 
 def download_urls(

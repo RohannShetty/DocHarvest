@@ -235,6 +235,16 @@ class TestPublishRouting:
         assert outcome.book_file is not None
         assert outcome.manifest_file.name == "llms.txt"
 
+    def test_both_mode_book_bytes_are_identical(self, tmp_path):
+        """The book is destination-independent: both copies must match."""
+        local = tmp_path / "local"
+        library = tmp_path / "library"
+        publish(make_pages(), domain="docs.example.com",
+                source_url="https://docs.example.com/",
+                provider="gitbook", output_mode="both",
+                local_dir=local, library_dir=library)
+        assert (local / "book.md").read_bytes() == (library / "docs.md").read_bytes()
+
     def test_local_only(self, tmp_path):
         outcome = publish(make_pages(), domain="d", source_url="u",
                           provider="p", output_mode="local",

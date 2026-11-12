@@ -221,6 +221,21 @@ class SearchIndex:
 
         conn = _get_connection(self.base_dir)
         try:
+            # Scoped FTS5 maintenance: an external-content table needs the
+            # original indexed values for every rowid we delete. Global
+            # 'rebuild' re-tokenizes the whole library, so avoid it entirely.
+            old = conn.execute(
+                "SELECT rowid, title, content, section_heading "
+                "FROM pages_meta WHERE domain = ?",
+                (domain,),
+            ).fetchall()
+            for rowid, title, content, heading in old:
+                conn.execute(
+                    "INSERT INTO pages_fts(pages_fts, rowid, title, content, section_heading) "
+                    "VALUES('delete', ?, ?, ?, ?)",
+                    (rowid, title, content, heading),
+                )
+
             # Clear existing entries for this domain so a re-index is clean.
             conn.execute("DELETE FROM pages_meta WHERE domain = ?", (domain,))
             conn.execute("DELETE FROM domains WHERE name = ?", (domain,))
@@ -250,8 +265,17 @@ class SearchIndex:
                 (domain,),
             ).fetchone()[0]
 
-            # Rebuild the FTS5 index from the updated content table.
-            conn.execute("INSERT INTO pages_fts(pages_fts) VALUES('rebuild')")
+            # Insert exactly the surviving rows into the FTS index.
+            new = conn.execute(
+                "SELECT rowid, title, content, section_heading "
+                "FROM pages_meta WHERE domain = ?",
+                (domain,),
+            ).fetchall()
+            conn.executemany(
+                "INSERT INTO pages_fts(rowid, title, content, section_heading) "
+                "VALUES (?, ?, ?, ?)",
+                new,
+            )
 
             # Upsert domain record.
             conn.execute(
@@ -511,15 +535,26 @@ class SearchIndex:
     def remove_domain(self, domain: str) -> None:
         """Remove a domain's rows from ``pages_meta`` and ``domains``.
 
-        Deletes every row for *domain* and rebuilds the FTS index. This is
-        the supported way to purge stale or orphaned domains (domains whose
-        ``docs/<domain>/`` directory no longer exists) from the index.
+        Scoped FTS5 maintenance: only this domain's rowids are deleted from
+        the external-content index (a global rebuild would re-tokenize the
+        whole library). This is the supported way to purge stale or orphaned
+        domains (domains whose ``docs/<domain>/`` directory no longer exists).
         """
         conn = _get_connection(self.base_dir)
         try:
+            old = conn.execute(
+                "SELECT rowid, title, content, section_heading "
+                "FROM pages_meta WHERE domain = ?",
+                (domain,),
+            ).fetchall()
+            for rowid, title, content, heading in old:
+                conn.execute(
+                    "INSERT INTO pages_fts(pages_fts, rowid, title, content, section_heading) "
+                    "VALUES('delete', ?, ?, ?, ?)",
+                    (rowid, title, content, heading),
+                )
             conn.execute("DELETE FROM pages_meta WHERE domain = ?", (domain,))
             conn.execute("DELETE FROM domains WHERE name = ?", (domain,))
-            conn.execute("INSERT INTO pages_fts(pages_fts) VALUES('rebuild')")
             conn.commit()
         finally:
             conn.close()

@@ -21,7 +21,14 @@ from docharvest.utils import create_session
 
 
 @pytest.fixture()
-def fake_storage(monkeypatch):
+def fake_storage():
+    """Compatibility fixture: the engine no longer writes storage itself.
+
+    Kept so existing test signatures keep working while pinning the boundary:
+    if the engine ever regains hidden persistence, tests that assert on the
+    facade's storage will catch it.
+    """
+
     class FakeStorage:
         def __init__(self):
             self.saved = []
@@ -32,22 +39,27 @@ def fake_storage(monkeypatch):
         def save_doc(self, **kw):
             self.saved.append(kw)
 
-    class FakeSearch:
-        def __init__(self):
-            pass
-
-        def index_domain(self, *a, **k):
-            pass
-
-    store = FakeStorage()
-    monkeypatch.setattr(engine, "StorageManager", lambda: store)
-    monkeypatch.setattr(engine, "SearchIndex", FakeSearch)
-    return store
+    return FakeStorage()
 
 
 @pytest.fixture()
 def session():
     return create_session()
+
+
+def _pages(raw):
+    """The engine now returns structured pages; keep assertions on that shape."""
+    assert isinstance(raw, dict), f"expected structured result, got {type(raw)!r}"
+    assert "pages" in raw, raw
+    return raw["pages"]
+
+
+def _urls(raw) -> list[str]:
+    return [p["url"] for p in _pages(raw)]
+
+
+def _text(raw) -> str:
+    return "\n".join(p["content"] for p in _pages(raw))
 
 
 # ── Fix #6: soft-200 HTML-as-md hardening ────────────────────────
@@ -83,7 +95,7 @@ class TestStreamDownloadSignature:
     def test_accepts_path_scope_exclude_timeout_and_none_max_pages(
         self, fixture_server, session, fake_storage
     ):
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/"),
             max_pages=None,
             workers=4,
@@ -92,38 +104,41 @@ class TestStreamDownloadSignature:
             exclude_paths=None,
             timeout=5.0,
         )
-        assert combined, "root crawl should produce content"
-        assert "/docs/intro" in combined
+        urls = _urls(raw)
+        assert urls, "root crawl should produce content"
+        assert any(u.endswith("/docs/intro") for u in urls)
 
     def test_max_pages_zero_still_unlimited(self, fixture_server, session, fake_storage):
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/"), max_pages=0, workers=4, session=session
         )
-        assert "/docs/guide" in combined
+        assert any("/docs/guide" in u for u in _urls(raw))
 
     def test_path_scope_restricts_crawl(self, fixture_server, session, fake_storage):
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/"),
             max_pages=None,
             workers=4,
             session=session,
             path_scope=("/docs/",),
         )
-        assert "/docs/intro" in combined
-        assert "/gitbook" not in combined
+        urls = _urls(raw)
+        assert any("/docs/intro" in u for u in urls)
+        assert not any("/gitbook" in u for u in urls)
 
     def test_exclude_paths_enforced_on_discovered_urls(
         self, fixture_server, session, fake_storage
     ):
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/"),
             max_pages=None,
             workers=4,
             session=session,
             exclude_paths=("guide",),
         )
-        assert "/docs/intro" in combined
-        assert "/docs/guide" not in combined
+        urls = _urls(raw)
+        assert any("/docs/intro" in u for u in urls)
+        assert not any("/docs/guide" in u for u in urls)
 
 
 # ── Fix #8: deterministic book order + entry-page title ──────────
@@ -146,7 +161,7 @@ class TestDeterministicOrder:
         monkeypatch.setattr(provider, "extract_content", slow_first)
 
         events = []
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/"),
             max_pages=None,
             workers=4,
@@ -155,15 +170,16 @@ class TestDeterministicOrder:
             progress_callback=events.append,
         )
 
-        intro_pos = combined.find("Source:")
-        assert intro_pos != -1
-        first_source_line = combined[intro_pos:combined.find("\n", intro_pos)]
-        assert "/docs/guide" in first_source_line, (
-            f"first crawled page must come first regardless of completion order; got {first_source_line}"
+        pages = _pages(raw)
+        assert pages, "crawl should produce pages"
+        first_url = pages[0]["url"]
+        assert "/docs/guide" in first_url, (
+            f"first crawled page must come first regardless of completion order; got {first_url}"
         )
-        # Stored title comes from the entry page, not whichever page finished first.
-        assert fake_storage.saved, "save_doc must be called"
-        assert fake_storage.saved[0]["title"] == "Guide"
+        # The engine no longer writes storage; persistence is the facade's job.
+        assert fake_storage.saved == [], (
+            "the engine must not persist; api.capture owns storage writes"
+        )
 
 
 # ── Fix #9: link rewriting ───────────────────────────────────────
@@ -187,14 +203,15 @@ class TestLinkRewriting:
         assert "anchor" in out
 
     def test_docusaurus_flow_rewrites_links(self, fixture_server, session, fake_storage):
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/docusaurus"),
             max_pages=None,
             workers=2,
             session=session,
         )
-        assert "[Usage](usage)" in combined
-        assert "](./usage)" not in combined
+        text = _text(raw)
+        assert "[Usage](usage)" in text
+        assert "](./usage)" not in text
 
 
 # ── Fix #10: language filter + BFS excludes ──────────────────────
@@ -204,11 +221,12 @@ class TestLanguageFilterAndBfs:
     def test_bare_zh_filtered_from_discovered_set(
         self, fixture_server, session, fake_storage
     ):
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/"), max_pages=None, workers=4, session=session
         )
-        assert "/docs/zh-cn/page" not in combined
-        assert "/docs/intro" in combined
+        urls = _urls(raw)
+        assert not any("/docs/zh-cn/page" in u for u in urls)
+        assert any("/docs/intro" in u for u in urls)
 
     def test_empty_after_filter_is_empty_with_warning_not_fallback(
         self, fixture_server, session, fake_storage, monkeypatch
@@ -220,7 +238,7 @@ class TestLanguageFilterAndBfs:
             lambda base_url, sess: {fixture_server.url("/docs/zh-cn/page")},
         )
         events = []
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/docs"),
             max_pages=None,
             workers=2,
@@ -228,7 +246,7 @@ class TestLanguageFilterAndBfs:
             provider=provider,
             progress_callback=events.append,
         )
-        assert combined == ""
+        assert _pages(raw) == []
         warnings = [
             e for e in events if e.get("phase") == "warning" or e.get("type") == "warning"
         ]
@@ -247,15 +265,16 @@ class TestLanguageFilterAndBfs:
                 fixture_server.url("/docsx/page"),
             },
         )
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/docs"),
             max_pages=None,
             workers=2,
             session=session,
             provider=provider,
         )
-        assert "/docs/intro" in combined
-        assert "/docsx/page" not in combined
+        urls = _urls(raw)
+        assert any("/docs/intro" in u for u in urls)
+        assert not any("/docsx/page" in u for u in urls)
 
     def test_bfs_honors_exclude_paths_and_strips_anchor_links(
         self, fixture_server, session, fake_storage, monkeypatch
@@ -268,7 +287,7 @@ class TestLanguageFilterAndBfs:
         monkeypatch.setattr(disc, "discover_from_llms_txt", lambda b, s: set())
         monkeypatch.setattr(disc, "discover_from_sitemap", lambda b, s: set())
 
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/gitbook"),
             max_pages=None,
             workers=2,
@@ -277,8 +296,9 @@ class TestLanguageFilterAndBfs:
             path_scope="/",
             exclude_paths=("guide",),
         )
-        assert "/docs/intro" in combined       # nav link followed
-        assert "/docs/guide" not in combined   # excluded
+        urls = _urls(raw)
+        assert any("/docs/intro" in u for u in urls)  # nav link followed
+        assert not any("/docs/guide" in u for u in urls)  # excluded
 
     def test_leaf_doc_url_auto_expands_to_doc_root(
         self, fixture_server, session, fake_storage, monkeypatch
@@ -294,16 +314,17 @@ class TestLanguageFilterAndBfs:
                 fixture_server.url("/blog/post-1"),
             },
         )
-        combined = engine.stream_download(
+        raw = engine.stream_download(
             fixture_server.url("/docs/installation"),
             max_pages=None,
             workers=2,
             session=session,
             provider=provider,
         )
-        assert "/docs/intro" in combined
-        assert "/docs/guide" in combined
-        assert "/blog/post-1" not in combined
+        urls = _urls(raw)
+        assert any("/docs/intro" in u for u in urls)
+        assert any("/docs/guide" in u for u in urls)
+        assert not any("/blog/post-1" in u for u in urls)
 
 # ── Snapshot ownership: api.capture snapshots, the engine must not ──
 
@@ -323,13 +344,11 @@ class TestEngineDoesNotSnapshot:
     live ``docs.md``."""
 
     def test_stream_download_creates_no_version_file(
-        self, fixture_server, session, tmp_path, monkeypatch
+        self, fixture_server, session, tmp_path
     ):
         from urllib.parse import urlparse
 
         store = StorageManager(base_dir=tmp_path)
-        monkeypatch.setattr(engine, "StorageManager", lambda: store)
-        monkeypatch.setattr(engine, "SearchIndex", _NullSearch)
 
         start_url = fixture_server.url("/")
         domain = urlparse(start_url).netloc

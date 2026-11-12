@@ -268,6 +268,81 @@ class TestOutputRouting:
         assert result.local_path.exists()
         assert not library.domain_exists("docs.example.com")
 
+    def test_local_mode_does_not_write_library(self, tmp_path, library):
+        """`local` must leave no domain artifacts in the library (engine writes
+        used to leak here because the engine constructed its own storage)."""
+        options = CaptureOptions(output_mode="local",
+                                 local_dir=tmp_path / "out")
+        run_capture(tmp_path, options=options)
+        docs = tmp_path / "library" / "docs"
+        leftovers = list(docs.glob("*")) if docs.exists() else []
+        assert leftovers == [], f"local mode wrote library artifacts: {leftovers}"
+
+
+# ── Batch capture (capture_many) ────────────────────────────────────────
+
+
+class TestCaptureMany:
+    def test_two_urls_succeed_in_order(self, tmp_path, library, monkeypatch):
+        engine = FakeEngine()
+        monkeypatch.setattr(api, "_load_stream_download", lambda: engine)
+        monkeypatch.setattr(api, "_configured_min_content_chars", lambda: 0)
+
+        batch = api.capture_many(
+            ["https://a.example.com/", "https://b.example.com/"],
+            CaptureOptions(local_dir=tmp_path / "out"),
+        )
+
+        assert batch.succeeded == 2 and batch.failed == 0
+        assert not batch.cancelled
+        assert [i.url for i in batch.items] == [
+            "https://a.example.com/",
+            "https://b.example.com/",
+        ]
+        assert all(i.ok and i.result is not None for i in batch.items)
+
+    def test_failure_recorded_batch_continues(self, tmp_path, library, monkeypatch):
+        engine = FakeEngine()
+        monkeypatch.setattr(api, "_load_stream_download", lambda: engine)
+        monkeypatch.setattr(api, "_configured_min_content_chars", lambda: 0)
+
+        batch = api.capture_many(
+            # The middle URL is invalid, so capture() raises CaptureError.
+            ["https://a.example.com/", "not-a-url", "https://c.example.com/"],
+            CaptureOptions(local_dir=tmp_path / "out"),
+        )
+
+        assert batch.succeeded == 2 and batch.failed == 1
+        assert [i.ok for i in batch.items] == [True, False, True]
+        assert batch.items[1].error
+
+    def test_cancel_after_first_stops_batch(self, tmp_path, library, monkeypatch):
+        class FirstThenDone(FakeEngine):
+            def __init__(self):
+                super().__init__()
+                self.count = 0
+
+            def __call__(self, url, **kwargs):
+                result = super().__call__(url, **kwargs)
+                self.count += 1
+                return result
+
+        engine = FirstThenDone()
+        monkeypatch.setattr(api, "_load_stream_download", lambda: engine)
+        monkeypatch.setattr(api, "_configured_min_content_chars", lambda: 0)
+
+        batch = api.capture_many(
+            ["https://a.example.com/", "https://b.example.com/"],
+            CaptureOptions(
+                local_dir=tmp_path / "out",
+                cancel_check=lambda: engine.count > 0,
+            ),
+        )
+
+        assert batch.cancelled is True
+        assert len(batch.items) == 1
+        assert batch.items[0].url == "https://a.example.com/"
+
 
 # ── Site versions ───────────────────────────────────────────────────────
 

@@ -140,6 +140,36 @@ def _print_capture_result(result) -> None:
 # ── Commands ────────────────────────────────────────────────────────────
 
 
+def _read_url_file(path: str) -> list[str]:
+    """Read one URL per line, skipping blanks and ``#`` comments."""
+    p = Path(path).expanduser()
+    if not p.exists():
+        raise FileNotFoundError(f"URL file not found: {p}")
+    urls: list[str] = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        urls.append(line)
+    return urls
+
+
+def _cmd_capture_batch(urls: list[str], options) -> int:
+    """Capture several URLs sequentially and print a per-item summary."""
+    from .api import capture_many
+
+    print(f"\nCapturing {len(urls)} site(s), one at a time...\n")
+    result = capture_many(urls, options, progress=_print_progress)
+    for item in result.items:
+        if item.ok and item.result is not None:
+            print(f"  OK   {item.url}  ({item.result.pages_captured} pages)")
+        else:
+            print(f"  FAIL {item.url}  {item.error}", file=sys.stderr)
+    suffix = " (batch aborted by cancel)" if result.cancelled else ""
+    print(f"\n{result.succeeded} ok, {result.failed} failed{suffix}")
+    return 0 if result.failed == 0 and not result.cancelled else 1
+
+
 def cmd_capture(args) -> int:
     """Capture a documentation site via the facade."""
     from .api import LATEST_ONLY, CaptureError, _default_storage, capture
@@ -180,14 +210,25 @@ def cmd_capture(args) -> int:
               "(omit it for unlimited).", file=sys.stderr)
         return 2
 
-    target = args.url
-    if not target:
+    urls = list(args.url or [])
+    if getattr(args, "file", None):
+        try:
+            urls.extend(_read_url_file(args.file))
+        except OSError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 2
+    if not urls:
         preset_table = cfg.preset(args.preset or "")
         if not preset_table or not preset_table.get("url"):
             print("Error: a URL (or a --preset with a url) is required.",
                   file=sys.stderr)
             return 2
-        target = str(preset_table["url"])
+        urls = [str(preset_table["url"])]
+
+    if len(urls) > 1:
+        return _cmd_capture_batch(urls, options)
+
+    target = urls[0]
 
     top, title, bottom = _banner(f"Capturing {target}", char="=", width=50)
     print()
@@ -670,8 +711,10 @@ def build_parser() -> argparse.ArgumentParser:
         "capture", aliases=["dl", "crawl"],
         help="Capture a documentation site (URL or --preset name)",
     )
-    cap.add_argument("url", nargs="?", default=None,
-                     help="URL of the documentation site (or omit with --preset)")
+    cap.add_argument("url", nargs="*", default=None,
+                     help="URL(s) of the documentation site (or omit with --preset)")
+    cap.add_argument("--file", default=None, metavar="PATH",
+                     help="Read URLs from a file (one per line; # comments skipped)")
     cap.add_argument("--scope", action="append", metavar="P",
                      help="Only pages under this URL path prefix (repeatable)")
     cap.add_argument("--exclude", action="append", metavar="P",
