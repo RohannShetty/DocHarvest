@@ -383,7 +383,7 @@ class ApiBridge:
                 cleared = 0
             else:
                 self._active_thread = None
-                cleared = self._storage.clear_all_locks(force=True)
+                cleared = self._storage.clear_all_locks(force=False)
         return {
             "success": True,
             "cleared_locks": cleared,

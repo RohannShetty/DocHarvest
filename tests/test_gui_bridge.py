@@ -241,7 +241,7 @@ def test_reset_capture_keeps_locks_while_worker_alive(tmp_path, monkeypatch):
     res2 = bridge.reset_capture()
     assert res2["success"] is True
     assert res2["worker_still_running"] is False
-    assert clear_calls == [True]
+    assert clear_calls == [False]
 
 
 def test_cancel_capture_never_clears_locks(tmp_path, monkeypatch):

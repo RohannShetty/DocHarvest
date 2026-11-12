@@ -223,3 +223,30 @@ def test_open_folder_domain_name_opens_confined_path(tmp_path, monkeypatch):
         any(str(ddir) in str(a) for a in args) for args in calls["popen"]
     )
 
+
+def test_reset_capture_keeps_foreign_live_lock(tmp_path):
+    """The cancel path must not delete another process's live domain lock."""
+    import os
+    import subprocess
+    import sys
+
+    storage, bridge = _bridge_with_tmp_library(tmp_path)
+    locks_dir = storage.locks_dir()
+    locks_dir.mkdir(parents=True, exist_ok=True)
+
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        foreign = locks_dir / "foreign.com.lock"
+        foreign.write_text(f"pid={child.pid} at=2026-01-01T00:00:00\n", encoding="utf-8")
+        own = locks_dir / "own.com.lock"
+        own.write_text(f"pid={os.getpid()} at=2026-01-01T00:00:00\n", encoding="utf-8")
+
+        res = bridge.reset_capture()
+
+        assert foreign.exists(), "a foreign live lock must survive the cancel path"
+        assert not own.exists(), "this process's own lock should be cleared"
+        assert res.get("cleared_locks", 0) >= 1
+    finally:
+        child.kill()
+        child.wait(timeout=5)
+
