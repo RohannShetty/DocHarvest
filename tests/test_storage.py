@@ -756,3 +756,55 @@ class TestCaptureStampIsHeaderScoped:
 
         assert not _same_ignoring_capture_stamp(a, b)
 
+
+class TestLoadPageTraversal:
+    def test_load_page_returns_content(self, tmp_path):
+        from docharvest.storage import StorageManager
+        storage = StorageManager(base_dir=tmp_path)
+        domain = "example.com"
+        pages_dir = storage._domain_dir(domain) / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
+        (pages_dir / "index.md").write_text("# Index\nhello", encoding="utf-8")
+        assert storage.load_page(domain, "index.md") == "# Index\nhello"
+
+    def test_load_page_traversal_dotdot_returns_none(self, tmp_path):
+        from docharvest.storage import StorageManager
+        storage = StorageManager(base_dir=tmp_path)
+        domain = "example.com"
+        pages_dir = storage._domain_dir(domain) / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
+        (pages_dir / "index.md").write_text("# Index", encoding="utf-8")
+        secret = storage._domain_dir(domain).parent / "secret.md"
+        secret.write_text("SECRET", encoding="utf-8")
+        assert storage.load_page(domain, "../../secret.md") is None
+
+    def test_load_page_traversal_backslash_returns_none(self, tmp_path):
+        from docharvest.storage import StorageManager
+        storage = StorageManager(base_dir=tmp_path)
+        domain = "example.com"
+        pages_dir = storage._domain_dir(domain) / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
+        (pages_dir / "index.md").write_text("# Index", encoding="utf-8")
+        secret = storage._domain_dir(domain).parent / "secret.md"
+        secret.write_text("SECRET", encoding="utf-8")
+        assert storage.load_page(domain, "..\\..\\secret.md") is None
+
+    def test_load_page_absolute_returns_none(self, tmp_path):
+        from docharvest.storage import StorageManager
+        storage = StorageManager(base_dir=tmp_path)
+        domain = "example.com"
+        pages_dir = storage._domain_dir(domain) / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
+        (pages_dir / "index.md").write_text("# Index", encoding="utf-8")
+        assert storage.load_page(domain, "/absolute/outside.md") is None
+
+    def test_load_page_nested_traversal_returns_none(self, tmp_path):
+        from docharvest.storage import StorageManager
+        storage = StorageManager(base_dir=tmp_path)
+        domain = "example.com"
+        pages_dir = storage._domain_dir(domain) / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
+        (pages_dir / "index.md").write_text("# Index", encoding="utf-8")
+        secret = storage._domain_dir(domain).parent / "outside.md"
+        secret.write_text("SECRET", encoding="utf-8")
+        assert storage.load_page(domain, "sub/dir/../../../outside.md") is None

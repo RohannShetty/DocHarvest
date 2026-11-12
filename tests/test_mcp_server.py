@@ -761,6 +761,35 @@ async def test_download_docs_does_not_block_other_requests(monkeypatch, no_searc
 
 
 @pytest.mark.asyncio
+async def test_search_docs_does_not_block_other_requests(monkeypatch):
+    """SQLite FTS is blocking; a slow query must not stall the event loop."""
+    search_seconds = 0.6
+    search_finished: list[float] = []
+
+    class SlowSearch:
+        def search(self, query, domain=None, limit=10):
+            time.sleep(search_seconds)
+            search_finished.append(time.monotonic())
+            return []
+
+    monkeypatch.setattr(server, "_search", SlowSearch())
+
+    task = asyncio.create_task(server.search_docs("anything"))
+    await asyncio.sleep(0.05)  # let the search task enter the sync seam
+
+    await server.list_domains()
+    served_at = time.monotonic()
+
+    await task
+
+    assert search_finished, "the fake search must have run"
+    assert served_at < search_finished[0], (
+        "a concurrent request was served only after the search finished; the "
+        "blocking FTS query must run off the event loop"
+    )
+
+
+@pytest.mark.asyncio
 async def test_download_docs_reports_search_index_failure_in_warnings(monkeypatch):
     """A silent re-index failure leaves search serving stale hits, so the
     reason must travel back with the capture result."""
@@ -812,3 +841,29 @@ def test_extract_topic_bounded_keeps_whole_word_heading_first():
     out = server._extract_topic_bounded(content, "OAuth", max_tokens=4000)
 
     assert out.index("the actual auth section") < out.index("long heading body")
+
+import asyncio
+
+
+def test_read_doc_traversal_does_not_leak_secret(tmp_path, monkeypatch):
+    from docharvest.storage import StorageManager
+    from docharvest.mcp import server
+
+    domain = "docs.traversal.test"
+    storage = StorageManager(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_storage", storage)
+    monkeypatch.setattr(server, "_versioning", None)
+    monkeypatch.setattr(server, "_search", None)
+
+    pages_dir = storage._domain_dir(domain) / "pages"
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    (pages_dir / "index.md").write_text("# Index\nhello", encoding="utf-8")
+    secret_path = storage._domain_dir(domain).parent / "secret.md"
+    secret_path.write_text("TOPSECRET_VALUE_123", encoding="utf-8")
+
+    res = asyncio.run(server.read_doc(domain=domain, path="../../secret.md"))
+    # Should not contain the secret bytes.
+    dumped = str(res)
+    assert "TOPSECRET_VALUE_123" not in dumped
+    # Either not found or no content.
+    assert res.get("found") is not True or "TOPSECRET_VALUE_123" not in (res.get("content") or "")

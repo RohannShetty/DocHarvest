@@ -515,7 +515,12 @@ class StorageManager:
         Returns None if the page file does not exist.
         """
         clean_rel = str(relpath).lstrip("/\\")
-        page_path = self._domain_dir(domain) / "pages" / clean_rel
+        pages_root = (self._domain_dir(domain) / "pages").resolve()
+        page_path = (pages_root / clean_rel).resolve()
+        try:
+            page_path.relative_to(pages_root)
+        except ValueError:
+            return None
         return page_path.read_text(encoding="utf-8") if page_path.exists() and page_path.is_file() else None
 
     def list_pages(self, domain: str) -> list[str]:
