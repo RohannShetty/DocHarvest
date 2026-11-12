@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Software Development :: Documentation",
     "Topic :: Text Processing :: Markup",
@@ -103,5 +104,20 @@ tmp_path_retention_policy = "none"
 tmp_path_retention_count = 0
 markers = [
     "real_min_content_config: opt out of the autouse min_content_chars stub so the real config-reading path is exercised",
+]
+
+[tool.coverage.run]
+source = ["src/docharvest"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# Baseline ratchet (measured 71% at 2026-11-12); raise deliberately, never lower.
+fail_under = 70
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
 ]
 

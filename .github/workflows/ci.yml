@@ -34,7 +34,7 @@ jobs:
         pip install -e ".[dev,mcp]"
 
     - name: Run tests
-      run: python -m pytest tests/ -q --tb=short --timeout=120
+      run: python -m pytest tests/ -q --tb=short --timeout=120 --cov=src/docharvest --cov-report=term-missing
 
     - name: Test CLI help
       run: docharvest --help
