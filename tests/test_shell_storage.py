@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
 from pathlib import Path
 
@@ -263,6 +264,76 @@ class TestDomainLock:
             assert f"pid={os.getpid()}" in payload
 
 
+class TestDomainLockContention:
+    """O_EXCL is the arbiter: simultaneous acquires must yield one holder."""
+
+    def test_contending_acquires_one_wins(self, sm):
+        lock_a = sm.domain_lock("race.com")
+        lock_b = sm.domain_lock("race.com")
+        barrier = threading.Barrier(2)
+        results: list[tuple[str, DomainLock]] = []
+
+        def worker(lock: DomainLock) -> None:
+            barrier.wait()
+            try:
+                lock.acquire()
+                results.append(("ok", lock))
+            except LockHeldError:
+                results.append(("held", lock))
+
+        t1 = threading.Thread(target=worker, args=(lock_a,))
+        t2 = threading.Thread(target=worker, args=(lock_b,))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+
+        winners = [r for r in results if r[0] == "ok"]
+        held = [r for r in results if r[0] == "held"]
+        assert len(winners) == 1 and len(held) == 1
+
+        winners[0][1].release()
+        # After the winner releases, the loser must be able to acquire.
+        held[0][1].acquire()
+        held[0][1].release()
+
+    def test_lock_storm_serializes(self, sm):
+        n_threads = 8
+        attempts = 25
+        barrier = threading.Barrier(n_threads)
+        counter = threading.Lock()
+        acquires = 0
+        held = 0
+        errors: list[Exception] = []
+
+        def worker() -> None:
+            nonlocal acquires, held
+            barrier.wait()
+            for _ in range(attempts):
+                try:
+                    lock = sm.domain_lock("storm.com")
+                    lock.acquire()
+                    with counter:
+                        acquires += 1
+                    lock.release()
+                except LockHeldError:
+                    with counter:
+                        held += 1
+                except Exception as exc:  # noqa: BLE001 - surface unexpected failures
+                    errors.append(exc)
+
+        threads = [threading.Thread(target=worker) for _ in range(n_threads)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert not errors, f"unexpected exceptions during lock storm: {errors}"
+        assert acquires + held == n_threads * attempts, (acquires, held)
+        # Every attempt either acquired or was correctly refused; the lock is clean.
+        assert not sm.domain_lock("storm.com").path.exists()
+
+
 # ── Rollback without version inflation ──────────────────────────────────
 
 
@@ -340,3 +411,71 @@ class TestBaseDirEnvOverride:
         monkeypatch.delenv("DOCHARVEST_HOME", raising=False)
         manager = StorageManager()
         assert manager.base == Path.home() / ".docharvest"
+
+# ── Windows liveness tri-state (plan 017) ─────────────────────────────
+
+
+@pytest.mark.skipif(__import__("sys").platform != "win32", reason="Windows-only path")
+class TestWindowsProcessState:
+    def _patch_kernel32(self, monkeypatch, fake):
+        import ctypes
+
+        monkeypatch.setattr(ctypes, "windll", type("W", (), {"kernel32": fake})())
+
+    def test_access_denied_means_running(self, monkeypatch):
+        from docharvest.storage.manager import _process_state, is_process_running
+
+        self._patch_kernel32(
+            monkeypatch,
+            type(
+                "K",
+                (),
+                {"OpenProcess": staticmethod(lambda *a, **k: 0), "GetLastError": staticmethod(lambda: 5)},
+            )(),
+        )
+        assert _process_state(1234) == "running"
+        assert is_process_running(1234) is True
+
+    def test_invalid_parameter_means_not_running(self, monkeypatch):
+        from docharvest.storage.manager import _process_state, is_process_running
+
+        self._patch_kernel32(
+            monkeypatch,
+            type(
+                "K",
+                (),
+                {"OpenProcess": staticmethod(lambda *a, **k: 0), "GetLastError": staticmethod(lambda: 87)},
+            )(),
+        )
+        assert _process_state(1234) == "not_running"
+        assert is_process_running(1234) is False
+
+    def test_exit_code_query_failure_means_running(self, monkeypatch):
+        from docharvest.storage.manager import _process_state
+
+        self._patch_kernel32(
+            monkeypatch,
+            type(
+                "K",
+                (),
+                {
+                    "OpenProcess": staticmethod(lambda *a, **k: 1),
+                    "GetExitCodeProcess": staticmethod(lambda *a, **k: 0),
+                    "CloseHandle": staticmethod(lambda h: None),
+                },
+            )(),
+        )
+        assert _process_state(1234) == "running"
+
+    def test_probe_exception_means_unknown_and_alive(self, monkeypatch):
+        from docharvest.storage.manager import _process_state, is_process_running
+
+        def boom(*a, **k):
+            raise OSError("probe failed")
+
+        self._patch_kernel32(
+            monkeypatch,
+            type("K", (), {"OpenProcess": staticmethod(boom)})(),
+        )
+        assert _process_state(1234) == "unknown"
+        assert is_process_running(1234) is True

@@ -400,3 +400,40 @@ class TestMultiPageStringNormalization:
         assert (tmp_path / "out" / "llms.txt").exists()
 
 
+
+# ── Capture cancellation (GUI Cancel button path) ──────────────────────
+
+
+class TestCancelCheck:
+    def test_cancel_before_crawl_raises_and_does_not_invoke_engine(
+        self, tmp_path, library
+    ):
+        engine = FakeEngine()
+        options = CaptureOptions(
+            local_dir=tmp_path / "out", cancel_check=lambda: True
+        )
+        with pytest.raises(CaptureError, match="aborted"):
+            run_capture(tmp_path, options, engine=engine)
+        assert engine.calls == []
+        # Nothing was written into the library root.
+        docs = tmp_path / "library" / "docs"
+        assert not docs.exists() or not any(docs.iterdir())
+
+    def test_cancel_check_passed_to_engine(self, tmp_path, library):
+        engine = FakeEngine()
+        check = lambda: False  # noqa: E731
+        options = CaptureOptions(local_dir=tmp_path / "out", cancel_check=check)
+        run_capture(tmp_path, options, engine=engine)
+        assert engine.calls, "engine must have been invoked"
+        assert engine.calls[0]["cancel_check"] is check
+
+    def test_engine_cancel_runtime_error_propagates(self, tmp_path, library):
+        def _raise():
+            raise RuntimeError("Capture aborted by user")
+
+        engine = FakeEngine(on_start=_raise)
+        options = CaptureOptions(local_dir=tmp_path / "out")
+        # Current facade behavior: only TypeError is converted to CaptureError;
+        # an engine RuntimeError propagates unchanged.
+        with pytest.raises(RuntimeError, match="Capture aborted by user"):
+            run_capture(tmp_path, options, engine=engine)

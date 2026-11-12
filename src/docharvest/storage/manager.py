@@ -150,29 +150,48 @@ def format_semver(parts: tuple[int, int, int]) -> str:
 import atexit
 import sys
 
+def _process_state(pid: int) -> str:
+    """Windows liveness probe returning ``"running" | "not_running" | "unknown"``.
+
+    Access-denied means the process exists but cannot be interrogated, so it
+    must never be reported as dead (that would let a second capture steal a
+    live lock). Errors are ``"unknown"`` for the same conservative reason.
+    """
+    try:
+        import ctypes
+
+        kernel32 = ctypes.windll.kernel32
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        SYNCHRONIZE = 0x00100000
+        handle = kernel32.OpenProcess(
+            PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, False, pid
+        )
+        if not handle:
+            err = kernel32.GetLastError()
+            ERROR_ACCESS_DENIED = 5
+            if err == ERROR_ACCESS_DENIED:
+                return "running"  # exists; we just cannot interrogate it
+            return "not_running"  # ERROR_INVALID_PARAMETER (87) and friends
+        exit_code = ctypes.c_ulong()
+        STILL_ACTIVE = 259
+        if kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+            alive = exit_code.value == STILL_ACTIVE
+        else:
+            alive = True  # cannot interrogate: do not authorize lock theft
+        kernel32.CloseHandle(handle)
+        return "running" if alive else "not_running"
+    except Exception:
+        return "unknown"
+
+
 def is_process_running(pid: int) -> bool:
     """Check whether a process with the given PID is currently active."""
     if pid <= 0:
         return False
     if sys.platform == "win32":
-        try:
-            import ctypes
-            kernel32 = ctypes.windll.kernel32
-            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
-            SYNCHRONIZE = 0x00100000
-            handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE, False, pid)
-            if not handle:
-                return False
-            exit_code = ctypes.c_ulong()
-            STILL_ACTIVE = 259
-            if kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
-                alive = (exit_code.value == STILL_ACTIVE)
-            else:
-                alive = False
-            kernel32.CloseHandle(handle)
-            return alive
-        except Exception:
-            return False
+        # Conservative: "unknown" counts as running so a probe error never
+        # authorizes stealing a live lock.
+        return _process_state(pid) != "not_running"
     else:
         try:
             os.kill(pid, 0)
@@ -281,10 +300,19 @@ class DomainLock:
     def release(self) -> None:
         if not self._acquired:
             return
-        try:
-            self.path.unlink()
-        except OSError:
-            pass
+        # Windows briefly refuses to delete a file another thread is reading
+        # (the staleness probe in `_is_stale`). Retry for a bounded window so
+        # a contended release cannot leak the lock and wedge the domain.
+        for attempt in range(50):
+            try:
+                self.path.unlink()
+                break
+            except FileNotFoundError:
+                break
+            except OSError:
+                if attempt == 49:
+                    break
+                time.sleep(0.02)
         self._acquired = False
 
     def __enter__(self) -> "DomainLock":
