@@ -730,14 +730,18 @@ def capture_many(
             break
         try:
             result = capture(url, options, progress=progress)
-        except CaptureError as exc:
+        except (CaptureError, RuntimeError) as exc:
+            # The facade raises CaptureError; a mid-crawl cancel surfaces as
+            # RuntimeError("Capture aborted by user") from the engine.
             if "aborted by user" in str(exc) or (
                 options.cancel_check and options.cancel_check()
             ):
                 cancelled = True
                 break
-            items.append(BatchItemResult(url=url, ok=False, error=str(exc)))
-            continue
+            if isinstance(exc, CaptureError):
+                items.append(BatchItemResult(url=url, ok=False, error=str(exc)))
+                continue
+            raise
         items.append(BatchItemResult(url=url, ok=True, result=result))
 
     succeeded = sum(1 for item in items if item.ok)

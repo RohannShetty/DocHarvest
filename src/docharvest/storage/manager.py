@@ -224,9 +224,22 @@ class DomainLock:
     def acquire(self) -> "DomainLock":
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = f"pid={os.getpid()} at={time.strftime('%Y-%m-%dT%H:%M:%S')}\n"
+        transient_retries = 0
         while True:
             try:
                 fd = os.open(str(self.path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            except PermissionError:
+                # Windows sharing violation: a contender is creating/deleting
+                # the lock file right now. Retry briefly rather than surfacing
+                # a permission error to the caller.
+                transient_retries += 1
+                if transient_retries > 200:
+                    raise LockHeldError(
+                        f"Could not acquire the lock for '{self.domain}' "
+                        f"(lock: {self.path}) after repeated contention."
+                    ) from None
+                time.sleep(0.005)
+                continue
             except FileExistsError:
                 if self._is_stale():
                     # Steal the abandoned / dead lock and retry once.

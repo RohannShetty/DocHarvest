@@ -140,36 +140,6 @@ def _print_capture_result(result) -> None:
 # ── Commands ────────────────────────────────────────────────────────────
 
 
-def _read_url_file(path: str) -> list[str]:
-    """Read one URL per line, skipping blanks and ``#`` comments."""
-    p = Path(path).expanduser()
-    if not p.exists():
-        raise FileNotFoundError(f"URL file not found: {p}")
-    urls: list[str] = []
-    for line in p.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        urls.append(line)
-    return urls
-
-
-def _cmd_capture_batch(urls: list[str], options) -> int:
-    """Capture several URLs sequentially and print a per-item summary."""
-    from .api import capture_many
-
-    print(f"\nCapturing {len(urls)} site(s), one at a time...\n")
-    result = capture_many(urls, options, progress=_print_progress)
-    for item in result.items:
-        if item.ok and item.result is not None:
-            print(f"  OK   {item.url}  ({item.result.pages_captured} pages)")
-        else:
-            print(f"  FAIL {item.url}  {item.error}", file=sys.stderr)
-    suffix = " (batch aborted by cancel)" if result.cancelled else ""
-    print(f"\n{result.succeeded} ok, {result.failed} failed{suffix}")
-    return 0 if result.failed == 0 and not result.cancelled else 1
-
-
 def cmd_capture(args) -> int:
     """Capture a documentation site via the facade."""
     from .api import LATEST_ONLY, CaptureError, _default_storage, capture
@@ -204,6 +174,17 @@ def cmd_capture(args) -> int:
     except KeyError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 2
+
+    if getattr(options, "render", False):
+        from .utils.renderer import is_render_available
+
+        if not is_render_available():
+            print(
+                'Error: --render requires Playwright. Install with: '
+                'pip install "docharvest[render]" && playwright install chromium',
+                file=sys.stderr,
+            )
+            return 2
 
     if args.max_pages is not None and args.max_pages <= 0:
         print("Error: --max-pages must be a positive number "
@@ -309,6 +290,36 @@ def cmd_capture(args) -> int:
     if result.pages_captured == 0:
         return 1
     return 0
+
+
+def _read_url_file(path: str) -> list[str]:
+    """Read one URL per line, skipping blanks and ``#`` comments."""
+    p = Path(path).expanduser()
+    if not p.exists():
+        raise FileNotFoundError(f"URL file not found: {p}")
+    urls: list[str] = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        urls.append(line)
+    return urls
+
+
+def _cmd_capture_batch(urls: list[str], options) -> int:
+    """Capture several URLs sequentially and print a per-item summary."""
+    from .api import capture_many
+
+    print(f"\nCapturing {len(urls)} site(s), one at a time...\n")
+    result = capture_many(urls, options, progress=_print_progress)
+    for item in result.items:
+        if item.ok and item.result is not None:
+            print(f"  OK   {item.url}  ({item.result.pages_captured} pages)")
+        else:
+            print(f"  FAIL {item.url}  {item.error}", file=sys.stderr)
+    suffix = " (batch aborted by cancel)" if result.cancelled else ""
+    print(f"\n{result.succeeded} ok, {result.failed} failed{suffix}")
+    return 0 if result.failed == 0 and not result.cancelled else 1
 
 
 def _export_root(result) -> Path:

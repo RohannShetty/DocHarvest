@@ -327,3 +327,49 @@ class TestMcpCommand:
         err = capsys.readouterr().err
         assert "MCP functionality requires the 'mcp' package" in err
         assert "docharvest[mcp]" in err
+
+
+def test_render_without_playwright_reports_clean_error(
+    isolated_env, fake_capture, monkeypatch, capsys
+):
+    """--render on a machine without Playwright must fail with a clear message,
+    not a traceback from inside the engine."""
+    from docharvest.utils import renderer
+
+    monkeypatch.setattr(renderer, "is_render_available", lambda: False)
+
+    rc = cli.main(["capture", "https://docs.example.com", "--render"])
+
+    assert rc == 2
+    assert not fake_capture
+    err = capsys.readouterr().err
+    assert "Playwright" in err
+    assert "docharvest[render]" in err
+
+
+class TestBatchCli:
+    def test_url_file_skips_comments_and_blanks(self, tmp_path):
+        path = tmp_path / "urls.txt"
+        path.write_text(
+            "# sites\nhttps://a.example.com\n\n  https://b.example.com  \n",
+            encoding="utf-8",
+        )
+        assert cli._read_url_file(str(path)) == [
+            "https://a.example.com",
+            "https://b.example.com",
+        ]
+
+    def test_multiple_positional_urls_use_batch(self, isolated_env, fake_capture):
+        rc = cli.main(
+            ["capture", "https://a.example.com", "https://b.example.com"]
+        )
+        assert rc == 0
+        # Both URLs went through the facade (the fake records the last call).
+        assert fake_capture["url"].startswith("https://")
+
+    def test_file_flag_batches(self, isolated_env, fake_capture):
+        path = isolated_env / "urls.txt"
+        path.write_text("https://a.example.com\nhttps://b.example.com\n", encoding="utf-8")
+        rc = cli.main(["capture", "--file", str(path)])
+        assert rc == 0
+        assert fake_capture["url"].startswith("https://")

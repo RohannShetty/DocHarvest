@@ -250,3 +250,68 @@ def test_reset_capture_keeps_foreign_live_lock(tmp_path):
         child.kill()
         child.wait(timeout=5)
 
+
+def test_export_destination_outside_library_stays_openable(tmp_path, monkeypatch):
+    """Exporting to a user-chosen folder must keep Open File/Show in Folder
+    working: the app produced that path, so it joins the allowed roots."""
+    storage, bridge = _bridge_with_tmp_library(tmp_path)
+    ddir = storage._domain_dir("example.com")
+    ddir.mkdir(parents=True, exist_ok=True)
+    (ddir / "docs.md").write_text("# Example\n\nBody", encoding="utf-8")
+
+    out = tmp_path / "user-chosen" / "exports"
+    res = bridge.export_doc("example.com", "md", custom_path=str(out))
+    assert res.get("success") is True, res
+    exported = res["path"]
+
+    calls = {"startfile": [], "popen": []}
+    monkeypatch.setattr(
+        "docharvest.gui.bridge.subprocess.Popen",
+        lambda args, *a, **k: calls["popen"].append(args) or MagicMock(),
+    )
+    monkeypatch.setattr(
+        "docharvest.gui.bridge.os.startfile",
+        lambda p: calls["startfile"].append(p),
+        raising=False,
+    )
+
+    assert bridge.open_file(exported).get("success") is True
+    assert bridge.open_folder(exported).get("success") is True
+
+
+def test_start_capture_render_without_playwright_is_rejected(tmp_path, monkeypatch):
+    """A render toggle without Playwright must fail fast, not after discovery."""
+    from docharvest.utils import renderer
+
+    monkeypatch.setattr(renderer, "is_render_available", lambda: False)
+    _storage, bridge = _bridge_with_tmp_library(tmp_path)
+
+    res = bridge.start_capture("https://docs.example.com", {"render": True})
+
+    assert res.get("success") is False
+    assert "Playwright" in (res.get("error") or "")
+
+
+def test_config_locations_are_openable(tmp_path, monkeypatch):
+    """Both config files (global and project) must be reachable by the
+    Settings 'Open folder' action, even when the project config is outside
+    the library base."""
+    from docharvest.utils.config import config_search_paths
+
+    _storage, bridge = _bridge_with_tmp_library(tmp_path)
+    monkeypatch.setattr(
+        "docharvest.gui.bridge.subprocess.Popen",
+        lambda *a, **k: MagicMock(),
+    )
+    monkeypatch.setattr(
+        "docharvest.gui.bridge.os.startfile",
+        lambda p: None,
+        raising=False,
+    )
+
+    for _label, path in config_search_paths():
+        parent = str(Path(path).parent)
+        assert bridge.open_folder(parent).get("success") is True, parent
+        if Path(path).is_file():
+            assert bridge.open_file(str(path)).get("success") is True, path
+

@@ -343,6 +343,22 @@ class TestCaptureMany:
         assert len(batch.items) == 1
         assert batch.items[0].url == "https://a.example.com/"
 
+    def test_mid_crawl_cancel_is_marked_cancelled(self, tmp_path, library, monkeypatch):
+        class CancellingEngine(FakeEngine):
+            def __call__(self, url, **kwargs):
+                raise RuntimeError("Capture aborted by user")
+
+        monkeypatch.setattr(api, "_load_stream_download", lambda: CancellingEngine())
+        monkeypatch.setattr(api, "_configured_min_content_chars", lambda: 0)
+
+        batch = api.capture_many(
+            ["https://a.example.com/"],
+            CaptureOptions(local_dir=tmp_path / "out"),
+        )
+
+        assert batch.cancelled is True
+        assert batch.items == ()
+
 
 # ── Site versions ───────────────────────────────────────────────────────
 

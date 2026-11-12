@@ -52,6 +52,10 @@ class ApiBridge:
         self._emit_drain_stop = threading.Event()
         self._emit_drain_thread: threading.Thread | None = None
         self._event_listeners: list[Any] = []
+        # Roots the app itself produced (export destinations) or exposes as
+        # config locations; file-open/read calls may target these in addition
+        # to the library base. Populated at runtime, never from client input.
+        self._extra_roots: set[Path] = set()
 
     def add_event_listener(self, listener: Any) -> None:
         """Register a callback (func_name, data) for progress and completion events."""
@@ -233,6 +237,18 @@ class ApiBridge:
             render=render,
             cancel_check=lambda: self._cancel_event.is_set(),
         )
+
+        if capture_opts.render:
+            from ..utils.renderer import is_render_available
+
+            if not is_render_available():
+                return {
+                    "success": False,
+                    "error": (
+                        "Headless rendering requires Playwright. Install with: "
+                        'pip install "docharvest[render]" && playwright install chromium'
+                    ),
+                }
 
         def worker():
             start_time = time.monotonic()
@@ -483,8 +499,39 @@ class ApiBridge:
             return {"success": False, "error": str(exc)}
 
     def _allowed_roots(self) -> list[Path]:
-        """Roots that API-reachable file access is confined to."""
-        return [Path(self._storage.base)]
+        """Roots that API-reachable file access is confined to.
+
+        The library base is the default. Export destinations are added when
+        the app writes them; config-file parents are included so the Settings
+        "open config folder" action works for the project config too.
+        """
+        roots: list[Path] = [Path(self._storage.base)]
+        roots.extend(self._extra_roots)
+        return roots
+
+    def _is_config_target(self, path_like: str, *, allow_parent: bool) -> bool:
+        """Whether *path_like* is one of the app's config files (or its dir).
+
+        Config lives outside the library (project config in the CWD), so the
+        Settings "open config" action needs this narrow exception instead of
+        widening `_allowed_roots()` to the whole working directory.
+        """
+        try:
+            resolved = Path(path_like).expanduser().resolve()
+        except (OSError, ValueError):
+            return False
+        try:
+            from ..utils.config import config_search_paths
+
+            for _label, config_path in config_search_paths():
+                candidate = Path(config_path).expanduser().resolve()
+                if resolved == candidate:
+                    return True
+                if allow_parent and resolved == candidate.parent:
+                    return True
+        except Exception:
+            pass
+        return False
 
     def _resolve_under(self, path_like: str, roots: list[Path] | None = None) -> Path | None:
         """Resolve *path_like* and return it only if it lands under one of *roots*.
@@ -569,7 +616,13 @@ class ApiBridge:
             else:
                 p = self._resolve_under(target)
                 if p is None:
-                    return {"success": False, "error": "Path is outside the docharvest library"}
+                    if self._is_config_target(target, allow_parent=True):
+                        p = Path(target).expanduser().resolve()
+                    else:
+                        return {
+                            "success": False,
+                            "error": "Path is outside the docharvest library",
+                        }
 
             if not p.exists():
                 if p.parent.exists():
@@ -606,7 +659,13 @@ class ApiBridge:
                 return {"success": False, "error": "Path is outside the docharvest library"}
             p = self._resolve_under(target)
             if p is None:
-                return {"success": False, "error": "Path is outside the docharvest library"}
+                if self._is_config_target(target, allow_parent=False):
+                    p = Path(target).expanduser().resolve()
+                else:
+                    return {
+                        "success": False,
+                        "error": "Path is outside the docharvest library",
+                    }
             if not p.exists():
                 return {"success": False, "error": f"File not found: {p}"}
 
@@ -815,6 +874,12 @@ class ApiBridge:
                     out_base = Path.cwd() / "exports"
 
             out_base.mkdir(parents=True, exist_ok=True)
+            # The app is about to write here; allow open_file/open_folder on
+            # the produced artifacts, which may live outside the library.
+            try:
+                self._extra_roots.add(Path(out_base).resolve())
+            except OSError:
+                pass
 
             if fmt == "md":
                 dest = out_base / f"{domain_to_path_name(domain)}-book.md"
@@ -829,6 +894,10 @@ class ApiBridge:
                     return {"success": False, "error": "No markdown content found to convert to PDF"}
                 dest = out_base / f"{domain_to_path_name(domain)}-docs.pdf"
                 actual_path = export_to_pdf(book_path, dest)
+                try:
+                    self._extra_roots.add(Path(actual_path).resolve().parent)
+                except OSError:
+                    pass
                 return {"success": True, "path": str(actual_path), "format": "pdf"}
 
             elif fmt == "jsonl":
