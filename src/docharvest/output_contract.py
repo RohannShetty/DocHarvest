@@ -381,11 +381,21 @@ def publish(
         targets.append(("docs.md", Path(library_dir)))
         outcome.library_path = Path(library_dir)
 
+    # The book and the full manifest depend only on (pages, crawl context),
+    # never on the destination root: build them once per capture.
+    book_text = assemble_book(
+        pages, site_title=site_title, source_url=source_url, crawl_date=crawl_date
+    )
+    full_manifest_text = build_full_manifest(
+        pages,
+        site_title=site_title,
+        source_url=source_url,
+        provider=provider,
+        crawl_date=crawl_date,
+    )
+
     for book_name, root in targets:
         page_files, nbytes = write_page_tree(root, pages, crawl_date=crawl_date)
-        book_text = assemble_book(
-            pages, site_title=site_title, source_url=source_url, crawl_date=crawl_date
-        )
         manifest_text = build_manifest(
             pages,
             site_title=site_title,
@@ -393,13 +403,6 @@ def publish(
             provider=provider,
             crawl_date=crawl_date,
             book_name=book_name,
-        )
-        full_manifest_text = build_full_manifest(
-            pages,
-            site_title=site_title,
-            source_url=source_url,
-            provider=provider,
-            crawl_date=crawl_date,
         )
         book_file = atomic_write_text(root / book_name, book_text)
         manifest_file = atomic_write_text(root / "llms.txt", manifest_text)
