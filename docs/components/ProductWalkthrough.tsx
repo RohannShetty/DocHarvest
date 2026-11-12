@@ -5,12 +5,12 @@ const ASSET_BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 export function ProductWalkthrough() {
   return (
-    <section id="walkthrough" className="border-b border-rule-strong bg-bond-2 px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-      <div className="mx-auto max-w-7xl">
-        <div className="max-w-2xl">
-          <p className="sheet-label text-match">Product walkthrough</p>
-          <h2 className="sheet-head mt-4 text-ink">See the capture before you install it.</h2>
-          <p className="sheet-body mt-4 text-ink-2">These are real desktop surfaces from the shipped GUI. The browser showcase explains the same flow without pretending to be the application.</p>
+    <section id="walkthrough" className="border-b border-rule">
+      <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8 sm:py-24">
+        <div className="max-w-[52ch]">
+          <p className="sheet-label text-match">03 — In the app</p>
+          <h2 className="sheet-head mt-4 text-ink">The same capture, with the work visible.</h2>
+          <p className="sheet-body mt-4">Two real screenshots of the desktop app. The browser page you are reading runs none of this; it explains what the app does and shows it.</p>
         </div>
 
         <div className="mt-12 grid gap-10 lg:grid-cols-[1.35fr_0.65fr] lg:items-start">

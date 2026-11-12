@@ -2,8 +2,6 @@ import React from 'react';
 import { ClientContainer } from '@/components/ClientContainer';
 import { HowItWorks } from '@/components/HowItWorks';
 import { WorkflowPaths } from '@/components/WorkflowPaths';
-import { AgentTools } from '@/components/AgentTools';
-import { ComparisonTable } from '@/components/ComparisonTable';
 import { ProductWalkthrough } from '@/components/ProductWalkthrough';
 import { Outputs } from '@/components/Outputs';
 import { Connectivity } from '@/components/Connectivity';
@@ -11,21 +9,19 @@ import { SupportedPlatforms } from '@/components/SupportedPlatforms';
 import { Proof } from '@/components/Proof';
 import { Faq } from '@/components/Faq';
 import { SiteFooter } from '@/components/SiteFooter';
-import { getDocHarvestGithubData } from '@/lib/github';
 import { INDEX_DATA } from '@/lib/indexData';
 
-export const revalidate = 3600;
-
-export default async function Page() {
-  const githubData = await getDocHarvestGithubData();
-
+/**
+ * Section order is the argument order: what it is (hero) → how a capture works
+ * → the four ways to run it → the GUI → what lands on disk → how an agent reads
+ * it → which sites it understands → what was measured → open questions.
+ */
+export default function Page() {
   return (
-    <ClientContainer githubData={githubData} indexData={INDEX_DATA}>
+    <ClientContainer indexData={INDEX_DATA}>
       <main>
         <HowItWorks />
         <WorkflowPaths />
-        <AgentTools />
-        <ComparisonTable />
         <ProductWalkthrough />
         <Outputs />
         <Connectivity />

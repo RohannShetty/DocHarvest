@@ -7,78 +7,118 @@ import { GithubIcon } from './Icons';
 import { VERSION } from '../lib/version';
 
 /**
- * The sheet's sticky head.
+ * The sticky head.
  *
- * Typeset wordmark, section anchors as mono caps, GitHub star count,
- * theme toggle, and primary Install action.
+ * Wordmark, the five section anchors, Docs and GitHub as outbound links, the
+ * theme toggle, and the Install action. The anchors also carry the current
+ * section: an IntersectionObserver marks the one in view with aria-current and
+ * a rule under the label, so the head says where you are instead of only where
+ * you can go.
  */
 
 const NAV = [
   { href: '#product', label: 'Product' },
   { href: '#how-it-works', label: 'How it works' },
-  { href: '#workflows', label: 'Workflows' },
-  { href: '#agents', label: 'FastMCP' },
-  { href: '#matrix', label: 'Comparison' },
-  { href: '#walkthrough', label: 'Walkthrough' },
   { href: '#outputs', label: 'Outputs' },
-  { href: '#integrations', label: 'Connectivity' },
-  { href: '#platforms', label: 'Platforms' },
-  { href: '#proof', label: 'Benchmarks' },
-  { href: '#faq', label: 'FAQ' },
+  { href: '#integrations', label: 'Integrations' },
+  { href: '#workflows', label: 'Workflows' },
 ];
 
-/** Mobile compact nav */
-const COMPACT_NAV = NAV;
+const DOCS_URL = 'https://github.com/RohannShetty/DocHarvest#readme';
+const GITHUB_URL = 'https://github.com/RohannShetty/DocHarvest';
 
 interface HeaderProps {
-  stars?: number;
   onOpenInstallModal: () => void;
+}
+
+function useActiveSection(): string {
+  const [active, setActive] = React.useState<string>('');
+
+  React.useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    const sections = NAV.map((item) => document.getElementById(item.href.slice(1))).filter(
+      (node): node is HTMLElement => node !== null,
+    );
+    if (sections.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActive('#' + visible.target.id);
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: [0, 0.25, 0.5] },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
+  return active;
 }
 
 export function Header({ onOpenInstallModal }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const active = useActiveSection();
   const nextThemeLabel = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-rule bg-bond transition-colors duration-200">
-      <div className="flex min-h-16 items-center justify-between gap-6 px-5 sm:px-8 lg:px-12">
+    <header className="sticky top-0 z-40 border-b border-rule bg-bond">
+      <div className="mx-auto flex min-h-16 w-full max-w-[1200px] items-center justify-between gap-6 px-5 sm:px-8">
         <a
           href="#product"
-          className="group flex shrink-0 cursor-pointer items-baseline gap-2 focus-visible:outline-2 focus-visible:outline-match"
+          className="flex min-h-11 shrink-0 cursor-pointer items-center gap-2 focus-visible:outline-2 focus-visible:outline-match"
         >
-          <span className="sheet-term text-base font-bold tracking-tight text-ink transition-colors group-hover:text-match">
-            DocHarvest
-          </span>
+          <span className="sheet-term text-base font-bold tracking-tight text-ink">DocHarvest</span>
           <span className="sheet-num text-[11px] font-medium text-match">v{VERSION}</span>
         </a>
 
-        {/* Eleven mono-caps labels at 0.1em tracking need roughly 1,200px once
-            the wordmark and the action cluster are measured. At `lg` (1024px)
-            the row overran its container and collided with the Install button,
-            so the full nav starts at `xl` and the scrolling compact row covers
-            everything below it. */}
-        <nav aria-label="Sections" className="hidden min-w-0 flex-1 items-center justify-center gap-4 xl:flex xl:gap-5">
-          {NAV.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="sheet-label whitespace-nowrap text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
-            >
-              {item.label}
-            </a>
-          ))}
+        {/* Five labels plus two outbound links need the full row; below that
+            the compact scrolling row carries the anchors. */}
+        <nav
+          aria-label="Sections"
+          className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:flex"
+        >
+          {NAV.map((item) => {
+            const isActive = active === item.href;
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? 'location' : undefined}
+                className={
+                  'sheet-label cursor-pointer whitespace-nowrap border-b-2 py-5 transition-colors focus-visible:outline-2 focus-visible:outline-match ' +
+                  (isActive
+                    ? 'border-match text-ink'
+                    : 'border-transparent text-ink-3 hover:text-ink')
+                }
+              >
+                {item.label}
+              </a>
+            );
+          })}
+          <a
+            href={DOCS_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="sheet-label cursor-pointer whitespace-nowrap border-b-2 border-transparent py-5 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+          >
+            Docs
+          </a>
         </nav>
 
         <div className="flex shrink-0 items-center gap-3">
           <a
-            href="https://github.com/RohannShetty/DocHarvest"
+            href={GITHUB_URL}
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub repository"
-            className="sheet-num inline-flex min-h-11 items-center gap-2 text-xs text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+            className="sheet-num inline-flex min-h-11 items-center gap-2 px-1 text-xs text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
           >
             <GithubIcon aria-hidden="true" className="h-4 w-4" />
-            <span className="hidden xl:inline">GitHub</span>
+            <span className="hidden sm:inline">GitHub</span>
           </a>
 
           <button
@@ -96,7 +136,7 @@ export function Header({ onOpenInstallModal }: HeaderProps) {
 
           <button
             onClick={onOpenInstallModal}
-            className="sheet-num inline-flex min-h-11 items-center cursor-pointer bg-match px-4 text-[12px] font-semibold text-bond transition-all hover:bg-match-deep active:translate-y-px focus-visible:outline-2 focus-visible:outline-match"
+            className="sheet-num inline-flex min-h-11 cursor-pointer items-center bg-match px-4 text-[12px] font-semibold text-bond transition-colors hover:bg-match-deep focus-visible:outline-2 focus-visible:outline-match"
           >
             Install
           </button>
@@ -105,19 +145,33 @@ export function Header({ onOpenInstallModal }: HeaderProps) {
 
       <nav
         aria-label="Sections (compact)"
-        className="relative border-t border-rule xl:hidden bg-bond-2/60 after:pointer-events-none after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-bond-2 after:to-transparent"
+        className="nav-fade relative border-t border-rule bg-bond-2 lg:hidden"
       >
-        <ul className="flex gap-4 overflow-x-auto px-6 py-2 pr-10">
-          {COMPACT_NAV.map((item) => (
+        <ul className="flex gap-4 overflow-x-auto px-5 py-1 pr-10 sm:px-8">
+          {NAV.map((item) => (
             <li key={item.href}>
               <a
                 href={item.href}
-                className="sheet-label block cursor-pointer whitespace-nowrap text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+                aria-current={active === item.href ? 'location' : undefined}
+                className={
+                  'sheet-label block min-h-11 cursor-pointer whitespace-nowrap py-4 transition-colors focus-visible:outline-2 focus-visible:outline-match ' +
+                  (active === item.href ? 'text-ink' : 'text-ink-3 hover:text-ink')
+                }
               >
                 {item.label}
               </a>
             </li>
           ))}
+          <li>
+            <a
+              href={DOCS_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="sheet-label block min-h-11 cursor-pointer whitespace-nowrap py-4 text-ink-3 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
+            >
+              Docs
+            </a>
+          </li>
         </ul>
       </nav>
     </header>

@@ -10,31 +10,11 @@ interface HeroProps {
   indexData: IndexData;
 }
 
-type CommandTab = 'mcp' | 'skill' | 'cli';
-
-const COMMANDS: Record<CommandTab, { label: string; command: string; hint: string }> = {
-  mcp: {
-    label: 'Universal FastMCP',
-    command: 'uvx docharvest mcp',
-    hint: 'Add to Claude Desktop, Cursor, or Cline. 12 tools, zero cloud dependencies.',
-  },
-  skill: {
-    label: 'Agent Skill',
-    command: 'docharvest skill install docharvest -o .agents/skills',
-    hint: 'Installs universal retrieval instructions across 14+ agent harnesses.',
-  },
-  cli: {
-    label: 'CLI Capture',
-    command: 'docharvest capture https://docs.openalgo.in/v/v2.0 --rag --pdf',
-    hint: 'Compiles pages/, docs.md, llms.txt, and SQLite FTS5 search index.',
-  },
-};
+/** One command, one meaning: capture a site into the local library. */
+const CAPTURE_COMMAND = 'docharvest capture https://docs.example.com';
 
 export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
-  const [activeTab, setActiveTab] = useState<CommandTab>('mcp');
   const [copied, setCopied] = useState(false);
-
-  const active = COMMANDS[activeTab];
 
   const copyCommand = async (cmd: string) => {
     let didCopy = false;
@@ -44,7 +24,7 @@ export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
         didCopy = true;
       }
     } catch {
-      // Fallback
+      // Fall through to the execCommand path below.
     }
 
     if (!didCopy) {
@@ -65,93 +45,83 @@ export function Hero({ onOpenInstallModal, indexData }: HeroProps) {
   };
 
   return (
-    <section id="product" className="border-b border-rule bg-bond px-5 py-12 sm:px-8 lg:px-12 lg:py-20">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(440px,1.1fr)] lg:items-end lg:gap-16">
+    <section id="product" className="border-b border-rule">
+      <div className="mx-auto grid w-full max-w-[1200px] gap-12 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:items-start lg:gap-16">
         <div className="min-w-0">
-          <p className="sheet-label text-match tracking-wide">Universal Documentation Engine for AI Agents</p>
-          {/* Uses the design system's own display face (globals.css) instead of
-              a re-invented `text-4xl sm:text-5xl lg:text-6xl tracking-tight`
-              stack: the old utilities skipped the `-0.045em` tracking and
-              `text-wrap: balance` that every other display heading on the page
-              uses, so the hero read lighter than the sections beneath it. */}
-          <h1 className="sheet-display mt-4 text-ink">
+          <p className="sheet-label text-match">Local documentation capture</p>
+
+          <h1 className="sheet-display mt-5 text-ink">
             Turn any docs site into context your agent can use.
           </h1>
-          <p className="mt-6 max-w-[54ch] text-lg leading-relaxed text-ink-2">
-            DocHarvest crawls developer portals and compiles pristine, token-dense Markdown, SQLite BM25 search, and FastMCP tools directly on your local machine.
+
+          <p className="sheet-body mt-6 max-w-[52ch] text-lg">
+            DocHarvest reads a documentation site and writes it to disk as Markdown: one file per
+            page, a combined book, an llms.txt manifest, and a searchable index. Everything happens
+            on your machine, and the files are yours to feed to an agent.
           </p>
 
-          <div className="mt-8 rounded-none border border-rule-strong bg-bond-2 p-4">
-            <div className="flex gap-2 border-b border-rule pb-3">
-              {(Object.keys(COMMANDS) as CommandTab[]).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab);
-                    setCopied(false);
-                  }}
-                  className={`sheet-label cursor-pointer px-3 py-1.5 transition-colors ${
-                    activeTab === tab
-                      ? 'bg-match text-bond font-bold'
-                      : 'text-ink-3 hover:text-ink hover:bg-bond'
-                  }`}
-                >
-                  {COMMANDS[tab].label}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="mt-8 border-y border-rule py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <code className="min-w-0 flex-1 break-all font-mono text-sm leading-relaxed text-ink">
-                {active.command}
+                {CAPTURE_COMMAND}
               </code>
               <button
                 type="button"
-                onClick={() => copyCommand(active.command)}
-                aria-label={`Copy ${active.label} command`}
-                className="inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 border border-rule bg-bond px-3 text-xs font-semibold text-ink-2 transition-colors hover:border-match hover:text-match active:translate-y-px"
+                onClick={() => copyCommand(CAPTURE_COMMAND)}
+                aria-label="Copy capture command"
+                className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 border border-rule px-3 text-xs font-semibold text-ink-2 transition-colors hover:border-match hover:text-match focus-visible:outline-2 focus-visible:outline-match"
               >
-                {copied ? <Check aria-hidden="true" className="h-4 w-4 text-match" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+                {copied ? (
+                  <Check aria-hidden="true" className="h-4 w-4 text-match" />
+                ) : (
+                  <Copy aria-hidden="true" className="h-4 w-4" />
+                )}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
-            <p className="sheet-label mt-3 text-ink-3">{active.hint}</p>
+            <p className="sheet-label mt-3 text-ink-3">
+              The CLI is installed by pip, uv, Docker, or the Windows installer — no account.
+            </p>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={onOpenInstallModal}
-              className="inline-flex min-h-11 items-center gap-2 bg-match px-5 text-sm font-semibold text-bond transition-colors hover:bg-match-deep active:translate-y-px"
+              className="inline-flex min-h-11 cursor-pointer items-center gap-2 bg-match px-5 text-sm font-semibold text-bond transition-colors hover:bg-match-deep focus-visible:outline-2 focus-visible:outline-match"
             >
-              Get Started / Install
+              Install DocHarvest
               <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
             </button>
             <a
               href="https://github.com/RohannShetty/DocHarvest"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-11 items-center gap-2 border border-rule px-5 text-sm font-semibold text-ink-2 transition-colors hover:border-ink-2 hover:text-ink active:translate-y-px"
+              className="inline-flex min-h-11 items-center gap-2 border border-rule px-5 text-sm font-semibold text-ink-2 transition-colors hover:border-rule-strong hover:text-ink focus-visible:outline-2 focus-visible:outline-match"
             >
-              View on GitHub
+              Read the source
               <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
             </a>
           </div>
         </div>
 
-        <div className="min-w-0 border border-rule-strong bg-bond-2 p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-4 border-b border-rule pb-3">
-            <div>
-              <p className="sheet-label text-match">Live capture specimen</p>
-              <p className="mt-1 text-sm font-semibold text-ink">The output starts as a source-backed index.</p>
-            </div>
-            <span className="sheet-num text-xs text-ink-3">{indexData.provenance.totalRows} rows</span>
+        <div className="min-w-0 border-t border-rule-strong pt-5 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
+          <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-3">
+            <p className="sheet-label text-match">Capture specimen</p>
+            <span className="sheet-num text-xs text-ink-3">
+              {indexData.provenance.totalRows} indexed lines
+            </span>
           </div>
           <div className="mt-4">
-            <IndexSheet rows={indexData.rows.slice(0, 14)} mode="specimen" provenance={indexData.provenance} />
+            <IndexSheet
+              rows={indexData.rows.slice(0, 14)}
+              mode="specimen"
+              provenance={indexData.provenance}
+            />
           </div>
-          <p className="sheet-label mt-4 text-ink-3">Rows are read from committed capture data, not a mock terminal.</p>
+          <p className="sheet-label mt-4 text-ink-3">
+            Rows are read from committed capture data, not a mock terminal.
+          </p>
         </div>
       </div>
     </section>

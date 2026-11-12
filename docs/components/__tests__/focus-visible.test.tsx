@@ -2,18 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { AgentTools } from '../AgentTools';
-import { Colophon } from '../Colophon';
-import { ComparisonTable } from '../ComparisonTable';
-import { FaqSheet } from '../FaqSheet';
+import { Connectivity } from '../Connectivity';
+import { Faq } from '../Faq';
 import { Header } from '../Header';
+import { Hero } from '../Hero';
 import { InstallModal } from '../InstallModal';
-import { ManifestTree } from '../ManifestTree';
-import { Masthead } from '../Masthead';
-import { ProviderTable } from '../ProviderTable';
-import { Releases } from '../Releases';
+import { Outputs } from '../Outputs';
 import { ThemeProvider } from '../ThemeProvider';
-import { GITHUB_FIXTURE, INDEX_PROVENANCE, INDEX_ROWS, MANIFEST_FIXTURE } from './sheetFixtures';
+import { WorkflowPaths } from '../WorkflowPaths';
+import { INDEX_PROVENANCE, INDEX_ROWS } from './sheetFixtures';
 
 /**
  * Every control that looks clickable must carry the keyboard ring: the square
@@ -21,7 +18,7 @@ import { GITHUB_FIXTURE, INDEX_PROVENANCE, INDEX_ROWS, MANIFEST_FIXTURE } from '
  * — a component with no pointer controls must fail rather than pass vacuously.
  */
 function verifyFocusVisibleControls(container: HTMLElement, componentName: string): void {
-  const controls = container.querySelectorAll('button, a[href]');
+  const controls = container.querySelectorAll('button, a[href], summary');
   let cursorControls = 0;
 
   controls.forEach((control, index) => {
@@ -50,26 +47,29 @@ function verifyFocusVisibleControls(container: HTMLElement, componentName: strin
 const indexData = { provenance: INDEX_PROVENANCE, rows: INDEX_ROWS };
 
 describe('focus-visible outline on every pointer control', () => {
-  it('AgentTools', () => {
-    verifyFocusVisibleControls(render(<AgentTools />).container, 'AgentTools');
+  it('Connectivity', () => {
+    verifyFocusVisibleControls(render(<Connectivity />).container, 'Connectivity');
   });
 
-  it('Colophon', () => {
-    verifyFocusVisibleControls(render(<Colophon />).container, 'Colophon');
-  });
-
-  it('FaqSheet', () => {
-    verifyFocusVisibleControls(render(<FaqSheet />).container, 'FaqSheet');
+  it('Faq', () => {
+    verifyFocusVisibleControls(render(<Faq />).container, 'Faq');
   });
 
   it('Header', () => {
     verifyFocusVisibleControls(
       render(
         <ThemeProvider>
-          <Header stars={128} onOpenInstallModal={() => {}} />
+          <Header onOpenInstallModal={() => {}} />
         </ThemeProvider>,
       ).container,
       'Header',
+    );
+  });
+
+  it('Hero', () => {
+    verifyFocusVisibleControls(
+      render(<Hero onOpenInstallModal={() => {}} indexData={indexData} />).container,
+      'Hero',
     );
   });
 
@@ -80,34 +80,14 @@ describe('focus-visible outline on every pointer control', () => {
     );
   });
 
-  it('ManifestTree', () => {
-    verifyFocusVisibleControls(
-      render(<ManifestTree manifest={MANIFEST_FIXTURE} />).container,
-      'ManifestTree',
-    );
-  });
-
-  it('Masthead', () => {
-    verifyFocusVisibleControls(
-      render(<Masthead onOpenInstallModal={() => {}} indexData={indexData} />).container,
-      'Masthead',
-    );
-  });
-
-  it('ProviderTable', () => {
-    verifyFocusVisibleControls(render(<ProviderTable />).container, 'ProviderTable');
-  });
-
-  it('Releases', () => {
-    verifyFocusVisibleControls(render(<Releases data={GITHUB_FIXTURE} />).container, 'Releases');
+  it('WorkflowPaths', () => {
+    verifyFocusVisibleControls(render(<WorkflowPaths />).container, 'WorkflowPaths');
   });
 });
 
 describe('focus-visible guard', () => {
   it('throws when a component renders no pointer controls', () => {
-    const { container } = render(<ComparisonTable />);
-    expect(() => verifyFocusVisibleControls(container, 'ComparisonTable')).toThrow(
-      /guard against false positives/,
-    );
+    const { container } = render(<Outputs />);
+    expect(() => verifyFocusVisibleControls(container, 'Outputs')).toThrow(/guard against false positives/);
   });
 });

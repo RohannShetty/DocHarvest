@@ -107,14 +107,14 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-bond/95 p-4 animate-fadeIn"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Install DocHarvest v${VERSION}`}
-        className="relative w-full max-w-2xl border border-rule-strong bg-bond p-6 sm:p-8 shadow-2xl"
+        className="relative w-full max-w-2xl border border-rule-strong bg-bond p-6 sm:p-8"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-rule pb-4">
@@ -150,8 +150,8 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
                 aria-selected={isActive}
                 aria-controls={`install-panel-${option.id}`}
                 onClick={() => setActiveTab(option)}
-                className={`sheet-num inline-flex cursor-pointer items-center gap-2 border-r border-rule px-4 py-2.5 text-[11px] tracking-[0.14em] transition-all focus-visible:outline-2 focus-visible:outline-match ${
-                  isActive ? 'text-match bg-bond-2 border-t-2 border-t-match font-semibold' : 'text-ink-3 hover:text-ink hover:bg-bond-2/40'
+                className={`sheet-num inline-flex min-h-11 cursor-pointer items-center gap-2 border-r border-rule px-4 py-2.5 text-[11px] tracking-[0.14em] transition-colors focus-visible:outline-2 focus-visible:outline-match ${
+                  isActive ? 'text-ink bg-bond-2 font-semibold underline decoration-match decoration-2 underline-offset-4' : 'text-ink-3 hover:text-ink hover:bg-bond-2'
                 }`}
               >
                 <option.Icon className="h-3.5 w-3.5" />
@@ -188,9 +188,12 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
               )}
             </button>
           </div>
-          <pre className="mt-2 overflow-x-auto text-[12px] leading-relaxed border border-rule bg-bond-2 p-3.5 font-mono shadow-sm">
+          <pre className="mt-2 overflow-x-auto border border-rule bg-bond-2 p-3.5 font-mono text-[12px] leading-relaxed text-ink">
             {activeTab.command}
           </pre>
+          <span role="status" aria-live="polite" className="sr-only">
+            {copied ? `${activeTab.title} command copied` : ''}
+          </span>
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-4 border-t border-rule pt-4">
@@ -198,7 +201,7 @@ export function InstallModal({ isOpen, onClose }: InstallModalProps) {
             href={activeTab.ctaUrl}
             target="_blank"
             rel="noreferrer"
-            className="sheet-num cursor-pointer bg-match px-4 py-2 text-[12px] font-semibold text-bond transition-all hover:bg-match-deep active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-match"
+            className="sheet-num inline-flex min-h-11 cursor-pointer items-center bg-match px-4 text-[12px] font-semibold text-bond transition-colors hover:bg-match-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-match"
           >
             {activeTab.ctaLabel}
           </a>

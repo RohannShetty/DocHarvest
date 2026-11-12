@@ -1,60 +1,81 @@
 import React from 'react';
-import { STATS } from '../lib/stats';
+import { RETRIEVAL_BENCHMARK } from '../data/benchmark';
+import { PRODUCT_FACTS, STATS } from '../lib/stats';
+
+function Tile({
+  label,
+  value,
+  unit,
+  children,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  unit?: string;
+  children: React.ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <div className="border-b border-rule-strong py-6 sm:border-r sm:px-6 sm:first:pl-0 sm:last:border-r-0">
+      <dt className="sheet-label text-ink-3">{label}</dt>
+      <dd className={`sheet-num mt-3 text-3xl font-semibold ${accent ? 'text-match' : 'text-ink'}`}>
+        {value}
+        {unit ? <span className="ml-1.5 text-base font-normal text-ink-2">{unit}</span> : null}
+      </dd>
+      <p className="sheet-body mt-2 text-sm">{children}</p>
+    </div>
+  );
+}
 
 export function Proof() {
-  // The test numbers are generated from a real run (docs/scripts/sync-stats.mjs).
-  // If a run is red, the page says so — an honest "798 of 804" is worth more than
-  // a tidy number nobody can reproduce.
-  //
-  // `STATS` is `as const`, so `testsFailing` is a literal type. Comparing a
-  // literal straight against 0 is a TS2367 error the moment a red run writes a
-  // non-zero count — i.e. the build broke precisely when the suite was failing.
-  // Widen to `number` first; the claim is about the value, not its type.
   const testsFailing: number = STATS.testsFailing;
   const testsClean = testsFailing === 0;
-  const testsValue = testsClean
-    ? `${STATS.testsPassing}`
-    : `${STATS.testsPassing} of ${STATS.testsCollected}`;
-  const testsNote = testsClean
-    ? `tests passing in the root suite, ${STATS.statsUpdated}`
-    : `${STATS.testsFailing} currently failing in the root suite, ${STATS.statsUpdated}`;
 
   return (
-    <section id="proof" className="border-b border-rule-strong bg-bond-2 px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-10 lg:grid-cols-[0.65fr_1.35fr] lg:gap-16">
-          <div>
-            <p className="sheet-label text-match">Proof and benchmarks</p>
-            <h2 className="sheet-head mt-4 max-w-[12ch] text-ink">Numbers with a stated context.</h2>
-            <p className="sheet-body mt-5 max-w-[40ch] text-ink-2">These values describe a reference capture and the current repository. They are not a promise about every source site.</p>
+    <section id="proof" className="border-b border-rule bg-bond-2">
+      <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8 sm:py-24">
+        <div className="grid gap-10 lg:grid-cols-[0.65fr_1.35fr] lg:gap-14">
+          <div className="max-w-[44ch]">
+            <p className="sheet-label text-match">07 — Checked values</p>
+            <h2 className="sheet-head mt-4 text-ink">Two checks you can rerun yourself.</h2>
+            <p className="sheet-body mt-5">
+              Neither number is a projection. The retrieval figure comes from the checked-in fixture corpus, and the
+              test figure comes from the repository suite at{' '}
+              <span className="font-mono text-ink">{STATS.statsUpdated}</span>.
+            </p>
           </div>
 
-          <div>
-            <dl className="grid border-y border-rule-strong sm:grid-cols-2">
-              <div className="border-b border-rule-strong py-6 sm:border-r sm:pr-8">
-                <dt className="sheet-label text-ink-3">Reference capture</dt>
-                <dd className="sheet-num mt-3 text-3xl font-semibold text-ink">{STATS.pagesCaptured} pages</dd>
-                <p className="sheet-body mt-2 text-sm text-ink-2">in {STATS.captureTimeSec} seconds, about {STATS.speedPagesPerSec} pages per second</p>
-              </div>
-              <div className="border-b border-rule-strong py-6 sm:pl-8">
-                <dt className="sheet-label text-ink-3">Measured reduction</dt>
-                <dd className="sheet-num mt-3 text-3xl font-semibold text-match">~{STATS.reductionPct}%</dd>
-                <p className="sheet-body mt-2 text-sm text-ink-2">fewer tokens than the raw HTML comparison</p>
-              </div>
-              <div className="py-6 sm:border-r sm:pr-8">
-                <dt className="sheet-label text-ink-3">Agent surface</dt>
-                <dd className="sheet-num mt-3 text-3xl font-semibold text-ink">{STATS.mcpTools} tools</dd>
-                <p className="sheet-body mt-2 text-sm text-ink-2">plus resources and prompts over stdio</p>
-              </div>
-              <div className="py-6 sm:pl-8">
-                <dt className="sheet-label text-ink-3">Repository verification</dt>
-                <dd className="sheet-num mt-3 text-3xl font-semibold text-ink">{testsValue}</dd>
-                <p className="sheet-body mt-2 text-sm text-ink-2">{testsNote}</p>
-              </div>
-            </dl>
-            <p className="sheet-label mt-5 text-ink-3">Source: `uv run pytest` ({STATS.statsUpdated}) and the reference capture in docs/SEO_GUIDE.md §3. Test counts are regenerated by docs/scripts/sync-stats.mjs; benchmark values are reference measurements, not guarantees.</p>
+          <div className="grid border-y border-rule-strong sm:grid-cols-2">
+            <Tile
+              label="Fixture retrieval"
+              value={RETRIEVAL_BENCHMARK.hitAtK.toFixed(2)}
+              unit="hit@5"
+              accent
+            >
+              {RETRIEVAL_BENCHMARK.queries} questions over {RETRIEVAL_BENCHMARK.datasetId}; mean reciprocal rank{' '}
+              {RETRIEVAL_BENCHMARK.mrr.toFixed(2)}. Corpus hash{' '}
+              <span className="font-mono text-ink">{RETRIEVAL_BENCHMARK.corpusHash.slice(0, 12)}…</span>
+            </Tile>
+            <Tile label="Repository suite" value={testsClean ? String(STATS.testsPassing) : `${STATS.testsPassing}/${STATS.testsCollected}`} unit="tests">
+              {testsClean
+                ? `passing, ${STATS.testsFailing} failing, ${STATS.testsSkipped} skipped on ${STATS.statsUpdated}.`
+                : `${STATS.testsFailing} currently failing in the root suite.`}
+            </Tile>
+            <Tile label="Agent surface" value={String(STATS.mcpTools)} unit="MCP tools">
+              Plus {PRODUCT_FACTS.mcpResources} resources and {PRODUCT_FACTS.mcpPrompts} prompts over stdio, with no
+              network hop of its own.
+            </Tile>
+            <Tile label="Account required" value="None" accent>
+              No login, no quota, no telemetry. Output stays under {PRODUCT_FACTS.libraryRoot}.
+            </Tile>
           </div>
         </div>
+
+        <p className="sheet-label mt-6 text-ink-3">
+          Retrieval: <span className="text-ink-2">{RETRIEVAL_BENCHMARK.command}</span>, {RETRIEVAL_BENCHMARK.generatedAt}.
+          Tests: <span className="text-ink-2">node docs/scripts/sync-stats.mjs --run</span>, which runs the suite and
+          writes this page’s number.
+        </p>
       </div>
     </section>
   );

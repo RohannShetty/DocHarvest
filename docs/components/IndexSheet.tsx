@@ -76,14 +76,20 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
     [filtered, mode],
   );
 
-  // Debounce aria-live announcement so fast typing doesn't stutter on screen readers
-  const [liveAnnouncement, setLiveAnnouncement] = useState(`${visible.length} of ${rows.length} rows`);
+  const pages = provenance.captures.reduce((sum, capture) => sum + capture.pages, 0);
+
+  // Debounced aria-live announcement so fast typing doesn't stutter on screen readers.
+  // The visible count updates immediately; only the sr-only live region is throttled
+  // per showcase-ui spec (300ms pause).
+  const [liveAnnouncement, setLiveAnnouncement] = useState(
+    `${visible.length} of ${rows.length} rows · ${provenance.captures.length} captures · ${pages} pages`,
+  );
   useEffect(() => {
     const timer = setTimeout(() => {
-      setLiveAnnouncement(`${visible.length} of ${rows.length} rows`);
+      setLiveAnnouncement(`${visible.length} of ${rows.length} rows · ${provenance.captures.length} captures · ${pages} pages`);
     }, 300);
     return () => clearTimeout(timer);
-  }, [visible.length, rows.length]);
+  }, [visible.length, rows.length, provenance.captures.length, pages]);
 
   // Global '/' keyboard accelerator to focus search filter (specimen or full)
   useEffect(() => {
@@ -155,8 +161,6 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
     }
   };
 
-  const pages = provenance.captures.reduce((sum, capture) => sum + capture.pages, 0);
-
   return (
     <div className="w-full">
       <div className="flex items-center gap-3 border-b border-rule-strong pb-2.5">
@@ -187,8 +191,11 @@ export function IndexSheet({ rows, mode, provenance }: IndexSheetProps) {
         )}
       </div>
 
-      <p className="sheet-label py-2 text-ink-3" aria-live="polite" aria-atomic="true">
+      <p data-testid="index-count" className="sheet-label py-2 text-ink-3">
         {visible.length} of {rows.length} rows · {provenance.captures.length} captures · {pages} pages
+      </p>
+      <p data-testid="index-live" className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveAnnouncement}
       </p>
 
       {visible.length === 0 ? (

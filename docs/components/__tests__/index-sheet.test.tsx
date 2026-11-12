@@ -36,7 +36,7 @@ describe('IndexSheet filtering', () => {
     const user = userEvent.setup();
     render(<IndexSheet rows={INDEX_ROWS} mode="full" provenance={INDEX_PROVENANCE} />);
 
-    const countLine = () => screen.getByText(/of \d+ rows/);
+    const countLine = () => screen.getByTestId('index-count');
     const renderedCount = () => Number(countLine().textContent?.match(/^(\d+)/)?.[1]);
 
     expect(renderedCount()).toBe(screen.getAllByRole('option').length);
@@ -44,6 +44,48 @@ describe('IndexSheet filtering', () => {
     await user.type(screen.getByRole('combobox'), 'oauth');
     expect(renderedCount()).toBe(screen.getAllByRole('option').length);
     expect(renderedCount()).toBe(2);
+  });
+
+  it('throttles the screen-reader live region behind a 300ms pause', async () => {
+    const user = userEvent.setup();
+    render(<IndexSheet rows={INDEX_ROWS} mode="full" provenance={INDEX_PROVENANCE} />);
+
+    const live = () => screen.getByTestId('index-live');
+    expect(live()).toHaveAttribute('aria-live', 'polite');
+    // Initial live text matches the full count
+    expect(live().textContent).toMatch(/^3 of 3 rows/);
+
+    await user.type(screen.getByRole('combobox'), 'oauth');
+    // Visual count updates immediately…
+    expect(screen.getByTestId('index-count').textContent).toMatch(/^2 of 3 rows/);
+    // …but the live region still holds the stale value until the debounce fires
+    expect(live().textContent).toMatch(/^3 of 3 rows/);
+  });
+
+  it('clears the query on Escape and blurs on second Escape', async () => {
+    const user = userEvent.setup();
+    render(<IndexSheet rows={INDEX_ROWS} mode="full" provenance={INDEX_PROVENANCE} />);
+    const field = screen.getByRole('combobox');
+
+    await user.type(field, 'oauth');
+    expect(field).toHaveValue('oauth');
+
+    await user.keyboard('{Escape}');
+    expect(field).toHaveValue('');
+    expect(field).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(field).not.toHaveFocus();
+  });
+
+  it('focuses the filter from outside via the global / shortcut', async () => {
+    const user = userEvent.setup();
+    render(<IndexSheet rows={INDEX_ROWS} mode="full" provenance={INDEX_PROVENANCE} />);
+    const field = screen.getByRole('combobox');
+    expect(field).not.toHaveFocus();
+
+    await user.keyboard('/');
+    expect(field).toHaveFocus();
   });
 
   it('shows the empty state when no line contains the query', async () => {

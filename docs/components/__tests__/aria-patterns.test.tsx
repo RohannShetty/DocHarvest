@@ -2,97 +2,37 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { FaqSheet } from '../FaqSheet';
+import { Connectivity } from '../Connectivity';
 import { IndexSheet } from '../IndexSheet';
 import { InstallModal } from '../InstallModal';
-import { ManifestTree } from '../ManifestTree';
-import { FAQ_ITEMS } from '../../data/showcaseData';
-import { INDEX_PROVENANCE, INDEX_ROWS, MANIFEST_FIXTURE } from './sheetFixtures';
+import { CONNECT_PATHS, FAQ_ITEMS } from '../../data/showcaseData';
+import { Faq } from '../Faq';
+import { INDEX_PROVENANCE, INDEX_ROWS } from './sheetFixtures';
 
 afterEach(cleanup);
 
-// ─── FaqSheet: accordion with aria-expanded + aria-controls ───────────────────
+// ─── Connectivity: tablist over three integration routes ────────────────────
 
-describe('FaqSheet ARIA patterns', () => {
-  it('renders one accordion button per FAQ item', () => {
-    render(<FaqSheet />);
-    expect(screen.getAllByRole('button')).toHaveLength(FAQ_ITEMS.length);
-  });
-
-  it('reflects open/closed state in aria-expanded', () => {
-    render(<FaqSheet />);
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0]).toHaveAttribute('aria-expanded', 'true');
-    expect(buttons[1]).toHaveAttribute('aria-expanded', 'false');
-    expect(buttons[2]).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('gives every button an aria-controls pointing at an existing panel when open', () => {
-    render(<FaqSheet />);
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach((button) => {
-      const targetId = button.getAttribute('aria-controls');
-      expect(targetId).toBeTruthy();
-      expect(targetId!.length).toBeGreaterThan(0);
-    });
-    expect(document.getElementById(buttons[0].getAttribute('aria-controls')!)).toBeInTheDocument();
-  });
-
-  it('opens a closed panel and closes it again', async () => {
-    const user = userEvent.setup();
-    render(<FaqSheet />);
-    const buttons = screen.getAllByRole('button');
-
-    await user.click(buttons[1]);
-    expect(buttons[1]).toHaveAttribute('aria-expanded', 'true');
-    expect(buttons[0]).toHaveAttribute('aria-expanded', 'false');
-    expect(document.getElementById(buttons[1].getAttribute('aria-controls')!)).toBeInTheDocument();
-
-    await user.click(buttons[1]);
-    expect(buttons[1]).toHaveAttribute('aria-expanded', 'false');
-  });
-  it('gives open FAQ panel role="region" and aria-labelledby pointing to button', () => {
-    render(<FaqSheet />);
-    const button = screen.getAllByRole('button')[0];
-    const panel = screen.getByRole('region');
-    expect(panel).toHaveAttribute('aria-labelledby', button.id);
-  });
-});
-
-// ─── ManifestTree: four plates as a tab set ──────────────────────────────────
-
-describe('ManifestTree ARIA patterns', () => {
-  it('renders four plates with the first selected', () => {
-    render(<ManifestTree manifest={MANIFEST_FIXTURE} />);
+describe('Connectivity ARIA patterns', () => {
+  it('renders one tab per route with the first selected', () => {
+    render(<Connectivity />);
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(CONNECT_PATHS.length);
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
-    expect(tabs[2]).toHaveAttribute('aria-selected', 'false');
-    expect(tabs[3]).toHaveAttribute('aria-selected', 'false');
   });
 
-  it('pairs the visible panel with the selected plate', () => {
-    render(<ManifestTree manifest={MANIFEST_FIXTURE} />);
+  it('pairs the visible panel with the selected tab', () => {
+    render(<Connectivity />);
+    const tab = screen.getAllByRole('tab')[0];
     const panel = screen.getByRole('tabpanel');
-    expect(panel).toHaveAttribute('aria-labelledby', screen.getAllByRole('tab')[0].id);
+    expect(panel).toHaveAttribute('aria-labelledby', tab.id);
+    expect(tab).toHaveAttribute('aria-controls', panel.id);
   });
 
-  it('moving to another plate selects it and swaps the panel', async () => {
+  it('moves through the tabs with the arrow, Home, and End keys', async () => {
     const user = userEvent.setup();
-    render(<ManifestTree manifest={MANIFEST_FIXTURE} />);
-    const tabs = screen.getAllByRole('tab');
-
-    await user.click(tabs[1]);
-    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
-    expect(tabs[0]).toHaveAttribute('aria-selected', 'false');
-    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', tabs[1].id);
-    expect(screen.getByText(/Markdown capture of/)).toBeInTheDocument();
-  });
-
-  it('navigates tabs with keyboard arrow keys', async () => {
-    const user = userEvent.setup();
-    render(<ManifestTree manifest={MANIFEST_FIXTURE} />);
+    render(<Connectivity />);
     const tabs = screen.getAllByRole('tab');
 
     await user.click(tabs[0]);
@@ -103,17 +43,39 @@ describe('ManifestTree ARIA patterns', () => {
     await user.keyboard('{ArrowLeft}');
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     expect(tabs[0]).toHaveFocus();
+
+    await user.keyboard('{End}');
+    expect(tabs[tabs.length - 1]).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('{Home}');
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('states the absence when the capture has no RAG export', async () => {
-    const user = userEvent.setup();
-    render(<ManifestTree manifest={MANIFEST_FIXTURE} />);
-    await user.click(screen.getAllByRole('tab')[3]);
-    expect(screen.getByText(/No RAG export in this capture — run capture with --rag/)).toBeInTheDocument();
+  it('keeps only the selected tab in the tab order', () => {
+    render(<Connectivity />);
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs[0]).toHaveAttribute('tabindex', '0');
+    expect(tabs[1]).toHaveAttribute('tabindex', '-1');
   });
 });
 
-// ─── IndexSheet: combobox over the row listbox ────────────────────────────────
+// ─── Faq: native disclosure with an accessible name ─────────────────────────
+
+describe('Faq ARIA patterns', () => {
+  it('renders one disclosure per question', () => {
+    render(<Faq />);
+    expect(screen.getAllByText(/./, { selector: 'summary span:first-child' })).toHaveLength(FAQ_ITEMS.length);
+  });
+
+  it('keeps the answer inside the same disclosure', () => {
+    render(<Faq />);
+    const details = document.querySelectorAll('details');
+    expect(details).toHaveLength(FAQ_ITEMS.length);
+    expect(details[0].textContent).toContain(FAQ_ITEMS[0].answer);
+  });
+});
+
+// ─── IndexSheet: combobox over the row listbox ──────────────────────────────
 
 describe('IndexSheet ARIA patterns', () => {
   it('wires the filter field to the row listbox', () => {
@@ -158,7 +120,7 @@ describe('IndexSheet ARIA patterns', () => {
   });
 });
 
-// ─── InstallModal: tablist and tabpanel ───────────────────────────────────────
+// ─── InstallModal: tablist and tabpanel ─────────────────────────────────────
 
 describe('InstallModal ARIA patterns', () => {
   it('pairs the visible tabpanel with the selected tab', () => {

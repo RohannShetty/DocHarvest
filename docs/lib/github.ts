@@ -170,7 +170,7 @@ function getFallbackRelease(): ReleaseInfo {
 
 - Native FastMCP v2 server: 12 MCP tools plus resources and prompts over stdio, with ready-made configs for 14 AI clients (Cursor, Claude Code/Desktop, Windsurf, VS Code & more).
 - Four-Part Output Contract: every capture yields a modular pages/ tree with SHA-256 YAML frontmatter, a consolidated book.md with TOC, a standardized llms.txt manifest, and search index records.
-- Eight documentation platforms with dedicated parsers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs — measured at ~83% token reduction vs raw pages.
+- Eight documentation platforms with dedicated readers: GitBook, Mintlify, Docusaurus, Nextra, VitePress, MkDocs, ReadMe.io & ReadTheDocs, plus a generic crawler fallback.
 - Export Studio & local search: RAG JSONL for vector databases, pure-Python PDF handbooks (fpdf2, zero C-dependencies), and AST markdown chunks indexed into embedded SQLite FTS5 BM25 search.
 
 ### What's New in v11.2.0

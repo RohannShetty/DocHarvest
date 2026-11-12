@@ -13,13 +13,13 @@ const OUTPUTS = [
 
 export function Outputs() {
   return (
-    <section id="outputs" className="border-b border-rule-strong bg-bond px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-      <div className="mx-auto max-w-7xl">
+    <section id="outputs" className="border-b border-rule bg-bond-2">
+      <div className="mx-auto w-full max-w-[1200px] px-5 py-16 sm:px-8 sm:py-24">
         <div className="grid gap-8 lg:grid-cols-[0.65fr_1.35fr] lg:gap-16">
           <div>
-            <p className="sheet-label text-match">Outputs</p>
-            <h2 className="sheet-head mt-4 max-w-[11ch] text-ink">A capture is a folder, not a black box.</h2>
-            <p className="sheet-body mt-5 max-w-[38ch] text-ink-2">Every artifact has a filename, a consumer, and enough provenance to inspect what happened.</p>
+            <p className="sheet-label text-match">04 — What lands on disk</p>
+            <h2 className="sheet-head mt-4 max-w-[14ch] text-ink">A capture is a folder, not a black box.</h2>
+            <p className="sheet-body mt-5 max-w-[40ch]">Every artifact has a filename, a consumer, and enough provenance to check what happened. This is the list you get on disk.</p>
           </div>
 
           <div className="overflow-x-auto border-y border-rule-strong">

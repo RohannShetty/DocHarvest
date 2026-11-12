@@ -84,21 +84,21 @@ const jsonLd = {
     },
     {
       "@type": "TechArticle",
-      headline: "How AI Coding Agents Ingest Web Documentation with FastMCP v2 and DocHarvest",
+      headline: "How DocHarvest turns a documentation site into a local corpus for coding agents",
       author: {
         "@type": "Person",
         name: "Rohan Shetty",
       },
       description:
-        "Technical specification and benchmarks on eliminating 83% HTML noise from web docs to optimize LLM context economy and prevent hallucinations.",
-      url: `${SITE_ORIGIN}#agents`,
+        "How a capture writes a page tree, a combined book, an llms.txt manifest, and a search index, and how an MCP client reads that corpus over stdio.",
+      url: `${SITE_ORIGIN}#how-it-works`,
     },
     {
       "@type": "FAQPage",
       mainEntity: FAQ_ITEMS.map((f) => ({
         "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
       })),
     },
   ],

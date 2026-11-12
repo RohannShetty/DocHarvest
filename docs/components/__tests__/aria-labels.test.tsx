@@ -2,12 +2,11 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 
 import { Header } from '@/components/Header';
+import { Hero } from '@/components/Hero';
 import { IndexSheet } from '@/components/IndexSheet';
 import { InstallModal } from '@/components/InstallModal';
-import { Masthead } from '@/components/Masthead';
-import { Releases } from '@/components/Releases';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { GITHUB_FIXTURE, INDEX_PROVENANCE, INDEX_ROWS } from './sheetFixtures';
+import { INDEX_PROVENANCE, INDEX_ROWS } from './sheetFixtures';
 
 afterEach(cleanup);
 
@@ -18,7 +17,7 @@ describe('Header aria-labels', () => {
   it('names the theme toggle for the theme it switches to', () => {
     render(
       <ThemeProvider>
-        <Header stars={128} onOpenInstallModal={noop} />
+        <Header onOpenInstallModal={noop} />
       </ThemeProvider>,
     );
     const themeButton = screen.getByTitle('Switch to Light Mode');
@@ -28,22 +27,31 @@ describe('Header aria-labels', () => {
   it('gives the section nav an accessible name', () => {
     render(
       <ThemeProvider>
-        <Header stars={128} onOpenInstallModal={noop} />
+        <Header onOpenInstallModal={noop} />
       </ThemeProvider>,
     );
     expect(screen.getByRole('navigation', { name: 'Sections' })).toBeInTheDocument();
   });
+
+  it('names the install action', () => {
+    render(
+      <ThemeProvider>
+        <Header onOpenInstallModal={noop} />
+      </ThemeProvider>,
+    );
+    expect(screen.getByRole('button', { name: 'Install' })).toBeInTheDocument();
+  });
 });
 
-describe('Masthead aria-labels', () => {
+describe('Hero aria-labels', () => {
   it('labels the copy action for the capture command', () => {
-    render(<Masthead onOpenInstallModal={noop} indexData={indexData} />);
+    render(<Hero onOpenInstallModal={noop} indexData={indexData} />);
     expect(screen.getByLabelText('Copy capture command')).toBeInTheDocument();
   });
 
   it('names the primary action', () => {
-    render(<Masthead onOpenInstallModal={noop} indexData={indexData} />);
-    expect(screen.getByRole('button', { name: 'Install in 30 seconds' })).toBeInTheDocument();
+    render(<Hero onOpenInstallModal={noop} indexData={indexData} />);
+    expect(screen.getByRole('button', { name: 'Install DocHarvest' })).toBeInTheDocument();
   });
 });
 
@@ -75,18 +83,5 @@ describe('InstallModal aria-labels', () => {
   it('names the dialog', () => {
     render(<InstallModal isOpen={true} onClose={noop} />);
     expect(screen.getByRole('dialog', { name: /Install DocHarvest/ })).toBeInTheDocument();
-  });
-});
-
-describe('Releases aria-labels', () => {
-  it('labels the verification command copy', () => {
-    render(<Releases data={GITHUB_FIXTURE} />);
-    expect(screen.getByLabelText('Copy verification command')).toBeInTheDocument();
-  });
-
-  it('labels every commit hash copy', () => {
-    render(<Releases data={GITHUB_FIXTURE} />);
-    const shaButtons = screen.getAllByLabelText('Copy commit hash');
-    expect(shaButtons.length).toBeGreaterThan(0);
   });
 });
