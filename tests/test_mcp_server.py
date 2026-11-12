@@ -812,3 +812,29 @@ def test_extract_topic_bounded_keeps_whole_word_heading_first():
     out = server._extract_topic_bounded(content, "OAuth", max_tokens=4000)
 
     assert out.index("the actual auth section") < out.index("long heading body")
+
+import asyncio
+
+
+def test_read_doc_traversal_does_not_leak_secret(tmp_path, monkeypatch):
+    from docharvest.storage import StorageManager
+    from docharvest.mcp import server
+
+    domain = "docs.traversal.test"
+    storage = StorageManager(base_dir=tmp_path)
+    monkeypatch.setattr(server, "_storage", storage)
+    monkeypatch.setattr(server, "_versioning", None)
+    monkeypatch.setattr(server, "_search", None)
+
+    pages_dir = storage._domain_dir(domain) / "pages"
+    pages_dir.mkdir(parents=True, exist_ok=True)
+    (pages_dir / "index.md").write_text("# Index\nhello", encoding="utf-8")
+    secret_path = storage._domain_dir(domain).parent / "secret.md"
+    secret_path.write_text("TOPSECRET_VALUE_123", encoding="utf-8")
+
+    res = asyncio.run(server.read_doc(domain=domain, path="../../secret.md"))
+    # Should not contain the secret bytes.
+    dumped = str(res)
+    assert "TOPSECRET_VALUE_123" not in dumped
+    # Either not found or no content.
+    assert res.get("found") is not True or "TOPSECRET_VALUE_123" not in (res.get("content") or "")
