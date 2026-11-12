@@ -125,3 +125,43 @@ def test_gui_web_assets_are_complete():
     assets = PACKAGE_DIR / "gui" / "web" / "assets"
     assert assets.is_dir(), "gui/web/assets directory is missing"
     assert list(assets.glob("*.js")), "no compiled JavaScript in gui/web/assets"
+
+
+def _dep_names(requirement: str) -> str:
+    # Strip environment markers and extras, then the version specifier.
+    return (
+        requirement.split(";")[0]
+        .split("[")[0]
+        .split(">=")[0]
+        .split("==")[0]
+        .split("~=")[0]
+        .split(">")[0]
+        .split("<")[0]
+        .strip()
+        .lower()
+    )
+
+
+def test_requirements_mirror_matches_pyproject():
+    """requirements.txt must list exactly the runtime dependencies pyproject declares."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # pragma: no cover - Python 3.10 only
+        pytest.skip("tomllib is required for this guard")
+
+    pp = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+    expected = {_dep_names(d) for d in pp["project"]["dependencies"]}
+
+    text = (REPO_ROOT / "requirements.txt").read_text(encoding="utf-8")
+    actual = {
+        _dep_names(line)
+        for line in text.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
+    missing = expected - actual
+    extra = actual - expected
+    assert not missing and not extra, (
+        "requirements.txt has drifted from pyproject.toml [project.dependencies]: "
+        f"missing={sorted(missing)} extra={sorted(extra)}"
+    )
