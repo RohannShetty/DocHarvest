@@ -280,8 +280,9 @@ class DomainLock:
                     # Process died without releasing lock -> reclaim immediately
                     return True
         except Exception:
-            if age > 5.0:
-                return True
+            # An unreadable lock is not proof of death: fall back to the mtime
+            # staleness window rather than stealing a possibly-live lock.
+            return age > self.stale_seconds
 
         return False
 
