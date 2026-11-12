@@ -450,6 +450,9 @@ class TestSearchIndexInsertErrorLogging:
                     raise sqlite3.OperationalError("forced insert failure")
                 return self._real.execute(sql, *args, **kwargs)
 
+            def executemany(self, sql, seq):
+                return self._real.executemany(sql, seq)
+
             def commit(self):
                 return self._real.commit()
 
@@ -683,3 +686,49 @@ class TestPageTreeIndexing:
 
             assert hits
             assert hits[0]["url"] == "https://legacy.example.com#intro"
+
+# ── Scoped FTS5 maintenance (plan 007) ────────────────────────────────
+
+
+def test_index_domain_does_not_rebuild_globally(tmp_path, monkeypatch):
+    from docharvest.search import index as index_mod
+
+    statements: list[str] = []
+    real = index_mod._get_connection
+
+    def traced(base_dir=None):
+        conn = real(base_dir)
+        conn.set_trace_callback(statements.append)
+        return conn
+
+    monkeypatch.setattr(index_mod, "_get_connection", traced)
+    si = SearchIndex(base_dir=tmp_path)
+    si.index_domain("a.com", "# A\n\nsome body")
+
+    assert statements, "expected the indexing pass to execute SQL"
+    assert not any("rebuild" in s.lower() for s in statements), (
+        "a global FTS5 rebuild re-tokenizes the whole library"
+    )
+
+
+def test_reindex_preserves_other_domains(tmp_path):
+    si = SearchIndex(base_dir=tmp_path)
+    si.index_domain("a.com", "# Alpha\n\nzebracrossingalpha")
+    si.index_domain("b.com", "# Beta\n\nquokkasightingbeta")
+
+    si.index_domain("a.com", "# Alpha\n\nnewalphtext")
+
+    assert si.search("quokkasightingbeta"), "domain B must survive re-indexing A"
+    assert si.search("newalphtext"), "domain A must reflect its new content"
+    assert not si.search("zebracrossingalpha"), "domain A's old content must be gone"
+
+
+def test_remove_domain_scoped(tmp_path):
+    si = SearchIndex(base_dir=tmp_path)
+    si.index_domain("a.com", "# A\n\nwombatparadealpha")
+    si.index_domain("b.com", "# B\n\nnarwhalspottedbeta")
+
+    si.remove_domain("a.com")
+
+    assert si.search("narwhalspottedbeta"), "domain B must survive removing A"
+    assert not si.search("wombatparadealpha"), "domain A must be gone"

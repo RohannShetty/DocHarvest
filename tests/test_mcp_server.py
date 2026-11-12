@@ -761,21 +761,21 @@ async def test_download_docs_does_not_block_other_requests(monkeypatch, no_searc
 
 
 @pytest.mark.asyncio
-async def test_download_docs_reports_search_index_failure_in_warnings(monkeypatch):
-    """A silent re-index failure leaves search serving stale hits, so the
-    reason must travel back with the capture result."""
+async def test_download_docs_does_not_reindex_and_passes_facade_warnings(monkeypatch):
+    """The facade owns indexing (and surfaces failures in its warnings); the
+    MCP path must not duplicate the work."""
 
-    class FailingSearch:
+    class ExplodingSearch:
         def index_domain_from_storage(self, *a, **k):
-            raise RuntimeError("database is locked")
+            raise AssertionError("MCP must not re-index; the facade already did")
 
     monkeypatch.setattr(server, "_run_capture", FakeCapture())
-    monkeypatch.setattr(server, "_search", FailingSearch())
+    monkeypatch.setattr(server, "_search", ExplodingSearch())
 
     out = await server.download_docs("https://docs.example.com")
 
     assert "error" not in out
-    assert any("database is locked" in w for w in out["warnings"])
+    assert out["warnings"] == []
 
 
 # ── read_doc topic ranking: a named section beats a body mention ─────

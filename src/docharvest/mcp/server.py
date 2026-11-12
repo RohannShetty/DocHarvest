@@ -311,16 +311,8 @@ async def download_docs(
 
         domain = _domain_from_url(url)
         capture_warnings = list(result.warnings)
-
-        # Best-effort re-index from storage for full-text search. A silent
-        # failure here leaves search returning stale hits, so the reason is
-        # surfaced alongside the capture warnings.
-        if _search is not None:
-            try:
-                _search.index_domain_from_storage(domain, _storage, domain_url=url)
-            except Exception as exc:
-                logger.warning("Search indexing failed for %s: %s", domain, exc)
-                capture_warnings.append(f"Search indexing failed: {exc}")
+        # The facade already indexed this capture (and reports failures via
+        # `result.warnings`); a second re-index here duplicated the work.
 
         return {
             "url": result.source_url,
