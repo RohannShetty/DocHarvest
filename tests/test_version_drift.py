@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_VERSION = "11.3.2"
+CANONICAL_VERSION = "11.4.0"
 
 
 # Files where the value MUST literally equal CANONICAL_VERSION (not just

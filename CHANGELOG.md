@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.4.0] - 2026-11-12
+
+Security hardening, a single-owner persistence model, scoped search indexing, and a
+first-class batch-capture surface. No breaking CLI or capture-facade changes
+(`CaptureOptions`/`CaptureResult` are unchanged; `capture_many` is additive).
+
+### Security
+
+- **GUI bridge confined to the library.** `read_file`, `open_file`, and `open_folder` now resolve through a shared containment check rooted at the library base. Absolute paths outside it are rejected, relative paths are limited to known domain names, and the Windows Explorer call no longer interpolates a path into a shell string.
+- **`StorageManager.load_page` cannot escape `pages/`.** Paths are resolved and checked against the pages root, closing the MCP `read_doc` prompt-injection traversal primitive.
+- **Mermaid runs in strict mode and is loaded lazily.** Diagram HTML/click handlers are no longer emitted unsanitized; the ~1.6 MB library loads only when a diagram is present. DOMPurify and KaTeX advisories are cleared via overrides.
+- **Showcase Next.js bumped to 16.4.6**, clearing the critical Next 16 RCE advisories.
+
+### Fixed — Concurrency and Liveness
+
+- The GUI cancel path clears only its own or stale locks (`force=False`); it can no longer delete a live lock owned by another window, TUI, or CLI capture.
+- Windows `OpenProcess` access-denied is treated as "alive", and probe errors as "unknown" (also alive), so a live lock cannot be stolen. Lock release retries a Windows `PermissionError` briefly instead of silently leaking the lock under thread contention.
+- `www.` stripping is prefix-only (`strip_www_prefix`), so `a.www.example.com` no longer collides with `a.example.com`.
+
+### Changed — Persistence and Search
+
+- **The facade owns persistence.** `engine.stream_download` no longer constructs its own `StorageManager`, writes `docs.md`, or indexes FTS; the engine returns structured `{pages, provider, discovered, failed}` data and the facade publishes/searches once.
+- FTS5 maintenance is scoped to the captured domain (rows are deleted from the external-content index explicitly) instead of rebuilding and re-tokenizing the whole library; the duplicate MCP re-index after a capture is gone.
+- `publish()` builds the book and full manifest once per capture instead of once per output root.
+- Render mode reuses one Playwright browser for the whole capture and renders sequentially (the sync API is thread-bound); non-render captures stay parallel.
+- GUI domain payload carries the book once and reads only 512 bytes per page for titles.
+
+### Added
+
+- **`capture_many(urls, options)`** facade plus `docharvest capture <url...>` and `capture --file urls.txt`. Batches run sequentially, record per-item failures, stop cleanly on cancel, and exit non-zero if any item failed.
+- Coverage measurement in CI (`--cov=src/docharvest`, `fail_under = 70`, measured 71% baseline), Python 3.13 in the test matrix and classifiers, a showcase typecheck/lint CI job, pip caching, `npm ci` everywhere, and a `requirements.txt` ↔ `pyproject.toml` drift test.
+
+### Tests
+
+- Added `cancel_check` coverage (pre-crawl, plumbed to the engine, engine error propagation), `DomainLock` thread-contention tests, storage `load_page` traversal tests, MCP `read_doc` traversal and event-loop non-blocking tests, publish byte-equality, and search scoping regressions.
+
 ## [11.3.2] - 2026-10-27
 
 Reliable capture queues, safer local browser access, GUI preferences, and documentation updates. No breaking CLI or capture-facade changes.
