@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: docs
-        run: npm install
+        run: npm ci
 
       # The published test count is a claim, so it is generated from a real run
       # rather than typed in. A red suite still deploys — the site then says how

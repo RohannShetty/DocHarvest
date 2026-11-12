@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet :: WWW/HTTP",
     "Topic :: Software Development :: Documentation",
     "Topic :: Text Processing :: Markup",
@@ -47,10 +48,13 @@ dependencies = [
 mcp = ["mcp>=1.2.0"]
 render = ["playwright>=1.40.0"]
 js = ["playwright>=1.40.0"]
+# The pytest packages below are pinned identically to [dependency-groups].dev;
+# only PyInstaller differs (build tool, uv-group and release workflow only).
+# tests/test_packaging.py::test_dev_pins_match enforces the shared pins.
 dev = [
-    "pytest>=8.0",
-    "pytest-timeout>=2.3",
-    "pytest-asyncio>=0.23",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-timeout>=2.4.0",
     "pytest-cov>=4.0",
 ]
 
@@ -92,6 +96,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "pytest-timeout>=2.4.0",
+    "pytest-cov>=4.0",
 ]
 
 [tool.pytest.ini_options]
@@ -99,5 +104,20 @@ tmp_path_retention_policy = "none"
 tmp_path_retention_count = 0
 markers = [
     "real_min_content_config: opt out of the autouse min_content_chars stub so the real config-reading path is exercised",
+]
+
+[tool.coverage.run]
+source = ["src/docharvest"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# Baseline ratchet (measured 71% at 2026-11-12); raise deliberately, never lower.
+fail_under = 70
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
 ]
 

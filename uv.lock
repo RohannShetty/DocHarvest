@@ -633,6 +633,7 @@ dev = [
     { name = "pyinstaller-hooks-contrib" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
     { name = "pytest-timeout" },
 ]
 
@@ -647,10 +648,10 @@ requires-dist = [
     { name = "playwright", marker = "extra == 'js'", specifier = ">=1.40.0" },
     { name = "playwright", marker = "extra == 'render'", specifier = ">=1.40.0" },
     { name = "pyperclip", specifier = ">=1.8.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.1.1" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.4.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
+    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.4.0" },
     { name = "pywebview", specifier = ">=6.2.1" },
     { name = "requests", specifier = ">=2.28.0" },
     { name = "textual", specifier = ">=0.60" },
@@ -663,6 +664,7 @@ dev = [
     { name = "pyinstaller-hooks-contrib", specifier = ">=2026.6" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },
+    { name = "pytest-cov", specifier = ">=4.0" },
     { name = "pytest-timeout", specifier = ">=2.4.0" },
 ]
 

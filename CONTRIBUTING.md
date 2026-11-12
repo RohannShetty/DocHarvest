@@ -13,7 +13,7 @@ optional.
 git clone https://github.com/RohannShetty/DocHarvest.git
 cd DocHarvest
 
-uv sync --extra dev --extra mcp
+uv sync  # installs the dev group (pytest + coverage + PyInstaller)
 # or, without uv:
 pip install -e ".[dev,mcp]"
 ```
