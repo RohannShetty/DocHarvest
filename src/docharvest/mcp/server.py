@@ -377,8 +377,14 @@ async def search_docs(
                 )
             }
         ]
+    return await asyncio.to_thread(_search_docs_blocking, query, domain, limit, max_tokens)
+
+
+def _search_docs_blocking(
+    query: str, domain: Optional[str], limit: int, max_tokens: int
+) -> list[dict]:
     try:
-        results = _search.search(query, domain=domain, limit=min(limit, 50))
+        results = _search.search(query, domain=domain, limit=min(limit, 50))  # type: ignore[union-attr]
         return _bound_search_results(results, max_tokens)
     except Exception as exc:
         return [{"error": str(exc)}]
@@ -395,6 +401,10 @@ async def list_domains() -> list[dict]:
     moved or partially deleted while the search index kept their rows) are
     omitted so agents never surface phantom docsets.
     """
+    return await asyncio.to_thread(_list_domains_blocking)
+
+
+def _list_domains_blocking() -> list[dict]:
     try:
         domains = _storage.list_domains()
         return [d for d in domains if _storage.domain_exists(d.get("domain", ""))]
@@ -416,6 +426,10 @@ async def find_docs(query: str, limit: int = 10) -> list[dict]:
     Returns:
         List of matching domain metadata dicts (domain, title, pages, last_crawled).
     """
+    return await asyncio.to_thread(_find_docs_blocking, query, limit)
+
+
+def _find_docs_blocking(query: str, limit: int) -> list[dict]:
     try:
         domains = _storage.list_domains()
         q = query.strip().lower()
@@ -453,6 +467,18 @@ async def read_doc(
     Returns:
         Dict with domain, path/topic, token_estimate, content, and found status.
     """
+    return await asyncio.to_thread(
+        _read_doc_blocking, domain, path, topic, max_tokens, version
+    )
+
+
+def _read_doc_blocking(
+    domain: str,
+    path: Optional[str],
+    topic: Optional[str],
+    max_tokens: int,
+    version: Optional[str],
+) -> dict:
     try:
         # 1. If path is provided, attempt to load that specific page
         if path:
@@ -517,6 +543,10 @@ async def get_doc(
     Returns:
         Dict with domain, version, content length, and a 2 000-char preview.
     """
+    return await asyncio.to_thread(_get_doc_blocking, domain, version)
+
+
+def _get_doc_blocking(domain: str, version: Optional[str]) -> dict:
     try:
         if version:
             content = _versioning.get_version_content(domain, version)
@@ -558,6 +588,10 @@ async def diff_versions(
     Returns:
         Dict with diff text, added lines count, and removed lines count.
     """
+    return await asyncio.to_thread(_diff_versions_blocking, domain, v1, v2)
+
+
+def _diff_versions_blocking(domain: str, v1: str, v2: str) -> dict:
     try:
         diff_text = _versioning.diff(domain, v1, v2)
         added = sum(
@@ -588,6 +622,10 @@ async def list_versions(domain: str) -> list[dict]:
     Returns:
         List of version dicts with version, timestamp, pages, size, and is_latest.
     """
+    return await asyncio.to_thread(_list_versions_blocking, domain)
+
+
+def _list_versions_blocking(domain: str) -> list[dict]:
     try:
         versions = _versioning.get_versions(domain)
         if not versions:
@@ -613,6 +651,10 @@ async def export_docs(
     Returns:
         Dict with export path (if applicable), format, and content preview.
     """
+    return await asyncio.to_thread(_export_docs_blocking, domain, format)
+
+
+def _export_docs_blocking(domain: str, format: str) -> dict:
     try:
         content = _storage.load_doc(domain)
         if content is None:
@@ -696,6 +738,10 @@ async def get_changelog(domain: str) -> dict:
         Dict with domain and a list of changelog entries, each containing
         version, timestamp, added_lines, removed_lines, and diff text.
     """
+    return await asyncio.to_thread(_get_changelog_blocking, domain)
+
+
+def _get_changelog_blocking(domain: str) -> dict:
     try:
         entries = _versioning.changelog(domain)
         return {
@@ -726,6 +772,10 @@ async def query_doc_graph(
     Returns:
         Dict with domain, matches count, and node results with 1-hop connected neighbors.
     """
+    return await asyncio.to_thread(_query_doc_graph_blocking, domain, query, limit)
+
+
+def _query_doc_graph_blocking(domain: str, query: str, limit: int) -> dict:
     try:
         from docharvest.search.graph import build_graph_from_pages
 
@@ -751,6 +801,10 @@ async def get_related_concepts(
     Returns:
         Dict with primary matches and related graph nodes.
     """
+    return await asyncio.to_thread(_get_related_concepts_blocking, domain, concept)
+
+
+def _get_related_concepts_blocking(domain: str, concept: str) -> dict:
     try:
         from docharvest.search.graph import build_graph_from_pages
 
@@ -768,21 +822,29 @@ if hasattr(mcp, "resource"):
     @mcp.resource("docs://{domain}/book")
     async def get_book_resource(domain: str) -> str:
         """Read the full unified markdown handbook for a documentation domain."""
-        content = _storage.load_doc(domain)
-        if content is None:
-            return f"No documentation found for domain: {domain}"
-        return content
+        return await asyncio.to_thread(_get_book_resource_blocking, domain)
 
     @mcp.resource("docs://{domain}/manifest")
     async def get_manifest_resource(domain: str) -> str:
         """Read the llms.txt discovery manifest for a documentation domain."""
-        manifest_path = _storage._domain_dir(domain) / "llms.txt"
-        if manifest_path.exists():
-            try:
-                return manifest_path.read_text(encoding="utf-8")
-            except Exception as exc:
-                return f"Error reading manifest: {exc}"
-        return f"No llms.txt manifest found for domain: {domain}"
+        return await asyncio.to_thread(_get_manifest_resource_blocking, domain)
+
+
+def _get_book_resource_blocking(domain: str) -> str:
+    content = _storage.load_doc(domain)
+    if content is None:
+        return f"No documentation found for domain: {domain}"
+    return content
+
+
+def _get_manifest_resource_blocking(domain: str) -> str:
+    manifest_path = _storage._domain_dir(domain) / "llms.txt"
+    if manifest_path.exists():
+        try:
+            return manifest_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            return f"Error reading manifest: {exc}"
+    return f"No llms.txt manifest found for domain: {domain}"
 
 
 # ── MCP v2 Prompts ───────────────────────────────────────────────────

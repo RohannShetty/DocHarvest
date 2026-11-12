@@ -761,6 +761,35 @@ async def test_download_docs_does_not_block_other_requests(monkeypatch, no_searc
 
 
 @pytest.mark.asyncio
+async def test_search_docs_does_not_block_other_requests(monkeypatch):
+    """SQLite FTS is blocking; a slow query must not stall the event loop."""
+    search_seconds = 0.6
+    search_finished: list[float] = []
+
+    class SlowSearch:
+        def search(self, query, domain=None, limit=10):
+            time.sleep(search_seconds)
+            search_finished.append(time.monotonic())
+            return []
+
+    monkeypatch.setattr(server, "_search", SlowSearch())
+
+    task = asyncio.create_task(server.search_docs("anything"))
+    await asyncio.sleep(0.05)  # let the search task enter the sync seam
+
+    await server.list_domains()
+    served_at = time.monotonic()
+
+    await task
+
+    assert search_finished, "the fake search must have run"
+    assert served_at < search_finished[0], (
+        "a concurrent request was served only after the search finished; the "
+        "blocking FTS query must run off the event loop"
+    )
+
+
+@pytest.mark.asyncio
 async def test_download_docs_reports_search_index_failure_in_warnings(monkeypatch):
     """A silent re-index failure leaves search serving stale hits, so the
     reason must travel back with the capture result."""
