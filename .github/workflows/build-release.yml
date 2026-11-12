@@ -114,7 +114,7 @@ jobs:
           elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
             TAG="${GITHUB_REF#refs/tags/}"
           else
-            TAG=$(python -c "import tomllib; open('pyproject.toml', 'rb') as f: print('v' + tomllib.load(f)['project']['version'])")
+            TAG=$(python -c "import tomllib; print('v' + tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Target Release Tag: $TAG"
