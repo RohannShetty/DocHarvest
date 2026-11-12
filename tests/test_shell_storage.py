@@ -411,3 +411,71 @@ class TestBaseDirEnvOverride:
         monkeypatch.delenv("DOCHARVEST_HOME", raising=False)
         manager = StorageManager()
         assert manager.base == Path.home() / ".docharvest"
+
+# ── Windows liveness tri-state (plan 017) ─────────────────────────────
+
+
+@pytest.mark.skipif(__import__("sys").platform != "win32", reason="Windows-only path")
+class TestWindowsProcessState:
+    def _patch_kernel32(self, monkeypatch, fake):
+        import ctypes
+
+        monkeypatch.setattr(ctypes, "windll", type("W", (), {"kernel32": fake})())
+
+    def test_access_denied_means_running(self, monkeypatch):
+        from docharvest.storage.manager import _process_state, is_process_running
+
+        self._patch_kernel32(
+            monkeypatch,
+            type(
+                "K",
+                (),
+                {"OpenProcess": staticmethod(lambda *a, **k: 0), "GetLastError": staticmethod(lambda: 5)},
+            )(),
+        )
+        assert _process_state(1234) == "running"
+        assert is_process_running(1234) is True
+
+    def test_invalid_parameter_means_not_running(self, monkeypatch):
+        from docharvest.storage.manager import _process_state, is_process_running
+
+        self._patch_kernel32(
+            monkeypatch,
+            type(
+                "K",
+                (),
+                {"OpenProcess": staticmethod(lambda *a, **k: 0), "GetLastError": staticmethod(lambda: 87)},
+            )(),
+        )
+        assert _process_state(1234) == "not_running"
+        assert is_process_running(1234) is False
+
+    def test_exit_code_query_failure_means_running(self, monkeypatch):
+        from docharvest.storage.manager import _process_state
+
+        self._patch_kernel32(
+            monkeypatch,
+            type(
+                "K",
+                (),
+                {
+                    "OpenProcess": staticmethod(lambda *a, **k: 1),
+                    "GetExitCodeProcess": staticmethod(lambda *a, **k: 0),
+                    "CloseHandle": staticmethod(lambda h: None),
+                },
+            )(),
+        )
+        assert _process_state(1234) == "running"
+
+    def test_probe_exception_means_unknown_and_alive(self, monkeypatch):
+        from docharvest.storage.manager import _process_state, is_process_running
+
+        def boom(*a, **k):
+            raise OSError("probe failed")
+
+        self._patch_kernel32(
+            monkeypatch,
+            type("K", (), {"OpenProcess": staticmethod(boom)})(),
+        )
+        assert _process_state(1234) == "unknown"
+        assert is_process_running(1234) is True
