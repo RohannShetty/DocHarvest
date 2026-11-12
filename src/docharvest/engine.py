@@ -20,6 +20,7 @@ from docharvest.providers.base import (
     looks_like_spa_shell,
     normalize_url,
     same_domain,
+    strip_www_prefix,
 )
 from docharvest.storage import StorageManager
 from docharvest.utils import create_session
@@ -300,7 +301,7 @@ def stream_download(
         session = create_session(timeout=timeout)
 
     parsed = urlparse(url)
-    domain = parsed.netloc.replace("www.", "")
+    domain = strip_www_prefix(parsed.netloc)
 
     scope_prefixes = _as_prefixes(path_scope)
     exclude_patterns = _as_prefixes(exclude_paths)

@@ -31,6 +31,11 @@ def normalize_url(url: str) -> str:
     return urlunparse((p.scheme, p.netloc, path, p.query, "", ""))
 
 
+def strip_www_prefix(host: str) -> str:
+    """Remove a single leading ``www.`` from *host* (idempotent, prefix-only)."""
+    return (host or "").removeprefix("www.")
+
+
 def content_probe_url(url: str) -> str:
     """Path-only form of *url* for ``<url>.md`` content probes.
 

@@ -93,6 +93,7 @@ mcp = FastMCP("docharvest", **_MCP_KWARGS)
 
 # ── Shared singletons ───────────────────────────────────────────────
 
+from docharvest.providers.base import strip_www_prefix  # noqa: E402
 from docharvest.storage import StorageManager, VersionManager, domain_to_path_name  # noqa: E402
 
 _storage = StorageManager()
@@ -105,7 +106,7 @@ _versioning = VersionManager(_storage)
 def _domain_from_url(url: str) -> str:
     """Extract the domain from *url*, stripping ``www.``."""
     parsed = urlparse(url)
-    return parsed.netloc.replace("www.", "")
+    return strip_www_prefix(parsed.netloc)
 
 
 def _run_capture(url: str, options_kwargs: dict) -> Any:
