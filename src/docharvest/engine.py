@@ -450,6 +450,19 @@ def stream_download(
     lock = threading.Lock()
     url_content: dict[str, str] = {}
 
+    # Playwright's sync API is thread-bound, so render mode uses one shared
+    # browser on the calling thread; the non-render path stays parallel.
+    renderer = None
+    if render:
+        from .utils.renderer import HeadlessRenderer, is_render_available
+
+        if not is_render_available():
+            raise RuntimeError(
+                "Headless rendering requires Playwright. Install with: "
+                "pip install \"docharvest[render]\" && playwright install chromium"
+            )
+        renderer = HeadlessRenderer()
+
     def download_one(url_to_fetch: str) -> tuple[Optional[str], str, Optional[str]]:
         """Download a single URL, return (content, url, error)."""
         nonlocal pages_downloaded, pages_errored, total_size_kb
@@ -459,13 +472,6 @@ def stream_download(
             content = ""
             if render:
                 try:
-                    from .utils.renderer import HeadlessRenderer, is_render_available
-                    if not is_render_available():
-                        raise RuntimeError(
-                            "Headless rendering requires Playwright. Install with: "
-                            "pip install \"docharvest[render]\" && playwright install chromium"
-                        )
-                    renderer = HeadlessRenderer()
                     html = renderer.render_url(url_to_fetch)
                     if hasattr(provider, "_extract_md_from_html"):
                         content = provider._extract_md_from_html(html)
@@ -530,15 +536,27 @@ def stream_download(
                 })
             return None, url_to_fetch, error_msg
 
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = {executor.submit(download_one, u): u for u in crawl_urls}
-        for future in as_completed(futures):
-            if cancel_check and cancel_check():
-                executor.shutdown(wait=False, cancel_futures=True)
-                raise RuntimeError("Capture aborted by user")
-            content, fetched_url, error = future.result()
-            if content:
-                url_content[fetched_url] = content
+    if render:
+        try:
+            for u in crawl_urls:
+                if cancel_check and cancel_check():
+                    raise RuntimeError("Capture aborted by user")
+                content, fetched_url, error = download_one(u)
+                if content:
+                    url_content[fetched_url] = content
+        finally:
+            if renderer is not None:
+                renderer.close()
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {executor.submit(download_one, u): u for u in crawl_urls}
+            for future in as_completed(futures):
+                if cancel_check and cancel_check():
+                    executor.shutdown(wait=False, cancel_futures=True)
+                    raise RuntimeError("Capture aborted by user")
+                content, fetched_url, error = future.result()
+                if content:
+                    url_content[fetched_url] = content
 
     # ── Assemble content ─────────────────────────────────────────
     # Deterministic order: follow crawl_urls order (discovery/BFS order),
