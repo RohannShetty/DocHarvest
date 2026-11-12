@@ -218,11 +218,12 @@ def cmd_capture(args) -> int:
         try:
             from urllib.parse import urlparse
 
+            from .providers.base import strip_www_prefix
             from .storage import domain_to_path_name
             from .utils.export import StoragePageSource, export_to_jsonl
 
             storage = _default_storage()
-            domain = urlparse(target).netloc.replace("www.", "")
+            domain = strip_www_prefix(urlparse(target).netloc)
             path_name = domain_to_path_name(domain)
             base_out = _export_root(result)
             exports_dir = base_out / "exports"
@@ -243,10 +244,11 @@ def cmd_capture(args) -> int:
         try:
             from urllib.parse import urlparse
 
+            from .providers.base import strip_www_prefix
             from .storage import domain_to_path_name
             from .utils.export import export_to_pdf
 
-            domain = urlparse(target).netloc.replace("www.", "")
+            domain = strip_www_prefix(urlparse(target).netloc)
             path_name = domain_to_path_name(domain)
             base_out = _export_root(result)
             exports_dir = base_out / "exports"

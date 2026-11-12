@@ -43,3 +43,11 @@ def test_content_probe_strips_query():
 
 def test_probe_helpers_exported_from_discovery():
     assert discovery.content_probe_url is provider_base.content_probe_url
+
+
+def test_strip_www_prefix_removes_leading_only():
+    s = provider_base.strip_www_prefix
+    assert s("www.example.com") == "example.com"
+    assert s("a.www.example.com") == "a.www.example.com"
+    assert s("www.www.example.com") == "www.example.com"
+    assert s("example.com") == "example.com"
