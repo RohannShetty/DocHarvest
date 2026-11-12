@@ -97,4 +97,7 @@ dev = [
 [tool.pytest.ini_options]
 tmp_path_retention_policy = "none"
 tmp_path_retention_count = 0
+markers = [
+    "real_min_content_config: opt out of the autouse min_content_chars stub so the real config-reading path is exercised",
+]
 

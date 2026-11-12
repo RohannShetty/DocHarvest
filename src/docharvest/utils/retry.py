@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_CONNECT_TIMEOUT = 5.0
 # Default timeout (seconds) applied to every request when not overridden.
 DEFAULT_TIMEOUT = 20
+DEFAULT_RETRIES = 3
 
 
 class TimeoutHTTPAdapter(HTTPAdapter):
@@ -40,7 +41,7 @@ class TimeoutHTTPAdapter(HTTPAdapter):
 
 def create_session(
     timeout: int | float | tuple[float, float] = DEFAULT_TIMEOUT,
-    retries: int = 3,
+    retries: int | None = None,
     backoff_factor: float = 0.5,
     user_agent: str = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -60,6 +61,17 @@ def create_session(
     """
     session = requests.Session()
     session.headers.update({"User-Agent": user_agent})
+
+    if retries is None:
+        try:
+            from .config import load_full_config
+
+            retries = int(load_full_config().values.get("retry_attempts", DEFAULT_RETRIES))
+            if retries < 0:
+                raise ValueError("retry_attempts cannot be negative")
+        except (TypeError, ValueError):
+            logger.warning("Invalid retry_attempts config; using %d", DEFAULT_RETRIES)
+            retries = DEFAULT_RETRIES
 
     retry_strategy = Retry(
         total=retries,

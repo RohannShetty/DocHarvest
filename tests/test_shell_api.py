@@ -94,18 +94,21 @@ def events():
     return collected
 
 
-def run_capture(tmp_path, options=None, engine=None, events=None):
+def run_capture(tmp_path, options=None, engine=None, events=None, min_content_chars=0):
     """Wire a fake engine (or default) and run capture()."""
     engine = engine or FakeEngine()
     monkey_target = engine
     original_loader = api._load_stream_download
+    original_min_content = api._configured_min_content_chars
     api._load_stream_download = lambda: monkey_target
+    api._configured_min_content_chars = lambda: min_content_chars
     try:
         opts = options or CaptureOptions(local_dir=tmp_path / "out")
         return capture("https://docs.example.com/", opts,
                        progress=(events.append if events is not None else None))
     finally:
         api._load_stream_download = original_loader
+        api._configured_min_content_chars = original_min_content
 
 
 # ── Validation ──────────────────────────────────────────────────────────
@@ -144,6 +147,18 @@ class TestCaptureValidation:
 
 
 class TestEnginePlumbing:
+    @pytest.mark.real_min_content_config
+    def test_min_content_preference_reads_config(self, monkeypatch):
+        from docharvest.utils import config
+
+        monkeypatch.setattr(
+            config,
+            "load_full_config",
+            lambda: config.AppConfig(values={"min_content_chars": 42}),
+        )
+
+        assert api._configured_min_content_chars() == 42
+
     def test_engine_receives_v7_signature(self, tmp_path, library):
         engine = FakeEngine()
         options = CaptureOptions(
@@ -176,6 +191,13 @@ class TestEnginePlumbing:
         assert result.book_file is not None and result.book_file.exists()
         assert result.manifest_file is not None
         assert result.manifest_file.name == "llms.txt"
+
+    def test_min_content_preference_filters_short_pages(self, tmp_path, library):
+        result = run_capture(tmp_path, min_content_chars=20)
+
+        assert result.pages_captured == 1
+        assert result.skipped == 2
+        assert any("minimum content" in warning.lower() for warning in result.warnings)
 
     def test_progress_events_emitted(self, tmp_path, library, events):
         run_capture(tmp_path, engine=FakeEngine(failed=1), events=events)

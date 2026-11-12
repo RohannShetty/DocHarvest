@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "typescript-language-server": {
+      "rootMarkers": ["frontend", "docs"],
+      "initOptions": {
+        "tsserver": {
+          "path": "D:\\gd-new\\frontend\\node_modules\\typescript\\lib\\tsserver.js"
+        }
+      }
+    }
+  }
+}

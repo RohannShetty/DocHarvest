@@ -121,6 +121,22 @@ def _default_storage() -> StorageManager:
     return StorageManager()
 
 
+def _configured_min_content_chars() -> int:
+    """Return the configured minimum Markdown length, or the built-in default."""
+    from .utils.config import DEFAULTS, load_full_config
+
+    raw = load_full_config().values.get("min_content_chars", DEFAULTS["min_content_chars"])
+    try:
+        if isinstance(raw, bool):
+            raise ValueError("boolean is not a character count")
+        value = int(raw)
+        if value < 0:
+            raise ValueError("character count cannot be negative")
+        return value
+    except (TypeError, ValueError):
+        return int(DEFAULTS["min_content_chars"])
+
+
 # ── Validation ──────────────────────────────────────────────────────────
 
 
@@ -470,6 +486,19 @@ def capture(
 
         pages, provider_name, discovered_hint, failed_hint = \
             normalize_engine_result(raw, url)
+        normalized_page_count = len(pages)
+
+        min_content_chars = _configured_min_content_chars()
+        short_pages = [
+            page for page in pages
+            if min_content_chars and len(page.content.strip()) < min_content_chars
+        ]
+        if short_pages:
+            pages = [page for page in pages if page not in short_pages]
+            warnings.append(
+                f"Skipped {len(short_pages)} page(s) below the configured minimum "
+                f"content length of {min_content_chars} characters."
+            )
 
         if not provider_name:
             try:
@@ -485,43 +514,50 @@ def capture(
         site_versions_found = detect_site_versions([p.url for p in pages])
         before_filter = len(pages)
         pages = _apply_site_version_filter(pages, options.site_versions, warnings)
-        skipped = max(0, before_filter - len(pages))
+        skipped = len(short_pages) + max(0, before_filter - len(pages))
 
         if not pages:
-            # Detect reason for 0 pages
-            is_spa = False
-            is_blocked = False
-            try:
-                import requests
-                from .providers.base import decode_response, looks_like_challenge_or_blocked, looks_like_spa_shell
-                probe_sess = requests.Session()
-                probe_resp = probe_sess.get(url, timeout=10)
-                probe_html = decode_response(probe_resp)
-                if looks_like_challenge_or_blocked(probe_html, probe_resp.status_code):
-                    is_blocked = True
-                elif looks_like_spa_shell(probe_html):
-                    is_spa = True
-            except Exception:
+            # The capture already has a definitive reason when all normalized
+            # pages fell below the configured threshold. Avoid a second network
+            # probe, which cannot change that outcome and can turn a local
+            # capture into an unnecessary timeout.
+            if short_pages:
                 pass
-
-            if is_blocked:
-                warnings.append(
-                    "Anti-bot or challenge interstitial detected (e.g. Cloudflare/DataDome). "
-                    "The target site blocked static HTTP requests."
-                )
-            elif is_spa:
-                if options.render:
-                    warnings.append(
-                        "No content was captured for this source despite headless rendering (--render) being enabled. "
-                        "The target page did not render content within the timeout, or Playwright/Chromium failed to launch."
-                    )
-                else:
-                    warnings.append(
-                        "No content was captured for this source. This documentation site appears to be "
-                        "client-rendered JavaScript (SPA) — try --render to execute JavaScript with a headless browser."
-                    )
             else:
-                warnings.append("No content was captured for this source.")
+                # Detect reason for 0 pages
+                is_spa = False
+                is_blocked = False
+                try:
+                    import requests
+                    from .providers.base import decode_response, looks_like_challenge_or_blocked, looks_like_spa_shell
+                    probe_sess = requests.Session()
+                    probe_resp = probe_sess.get(url, timeout=10)
+                    probe_html = decode_response(probe_resp)
+                    if looks_like_challenge_or_blocked(probe_html, probe_resp.status_code):
+                        is_blocked = True
+                    elif looks_like_spa_shell(probe_html):
+                        is_spa = True
+                except Exception:
+                    pass
+
+                if is_blocked:
+                    warnings.append(
+                        "Anti-bot or challenge interstitial detected (e.g. Cloudflare/DataDome). "
+                        "The target site blocked static HTTP requests."
+                    )
+                elif is_spa:
+                    if options.render:
+                        warnings.append(
+                            "No content was captured for this source despite headless rendering (--render) being enabled. "
+                            "The target page did not render content within the timeout, or Playwright/Chromium failed to launch."
+                        )
+                    else:
+                        warnings.append(
+                            "No content was captured for this source. This documentation site appears to be "
+                            "client-rendered JavaScript (SPA) — try --render to execute JavaScript with a headless browser."
+                        )
+                else:
+                    warnings.append("No content was captured for this source.")
 
             emit(ProgressEvent(kind="written", count=0,
                                message="nothing written"))
@@ -625,7 +661,7 @@ def capture(
         discovered = discovered_hint if discovered_hint is not None \
             else engine_counts["discovered"]
         if discovered is not None:
-            unaccounted = max(0, int(discovered) - len(pages)
+            unaccounted = max(0, int(discovered) - normalized_page_count
                               - (failed_hint or engine_counts["failed"]))
             skipped += unaccounted
 

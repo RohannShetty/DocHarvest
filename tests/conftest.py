@@ -121,3 +121,13 @@ def fixture_server():
     server = FixtureServer()
     yield server
     server.stop()
+
+
+@pytest.fixture(autouse=True)
+def disable_min_content_filter_for_unrelated_tests(request, monkeypatch):
+    """Keep synthetic short-page fixtures independent of user preferences."""
+    if request.node.get_closest_marker("real_min_content_config"):
+        return
+    from docharvest import api
+
+    monkeypatch.setattr(api, "_configured_min_content_chars", lambda: 0, raising=False)

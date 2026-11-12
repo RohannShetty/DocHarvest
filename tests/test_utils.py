@@ -83,6 +83,32 @@ class TestCreateSession:
         assert isinstance(http_adapter, TimeoutHTTPAdapter)
         assert isinstance(https_adapter, TimeoutHTTPAdapter)
 
+    def test_default_retries_come_from_saved_config(self, monkeypatch):
+        from docharvest import utils
+        from docharvest.utils.config import AppConfig
+
+        monkeypatch.setattr(
+            utils.config,
+            "load_full_config",
+            lambda: AppConfig(values={"retry_attempts": 7}),
+        )
+        session = create_session()
+
+        assert session.get_adapter("https://example.com").max_retries.total == 7
+
+    def test_explicit_retries_override_saved_config(self, monkeypatch):
+        from docharvest import utils
+        from docharvest.utils.config import AppConfig
+
+        monkeypatch.setattr(
+            utils.config,
+            "load_full_config",
+            lambda: AppConfig(values={"retry_attempts": 7}),
+        )
+        session = create_session(retries=2)
+
+        assert session.get_adapter("https://example.com").max_retries.total == 2
+
 
 class TestRetryGet:
     """Tests for retry_get helper."""
