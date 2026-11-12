@@ -165,3 +165,28 @@ def test_requirements_mirror_matches_pyproject():
         "requirements.txt has drifted from pyproject.toml [project.dependencies]: "
         f"missing={sorted(missing)} extra={sorted(extra)}"
     )
+
+
+def test_dev_pins_match():
+    """The pip extra and the uv dependency-group must pin pytest identically."""
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # pragma: no cover - Python 3.10 only
+        pytest.skip("tomllib is required for this guard")
+
+    pp = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+    extra = {
+        _dep_names(r): r
+        for r in pp["project"]["optional-dependencies"]["dev"]
+    }
+    group = {_dep_names(r): r for r in pp["dependency-groups"]["dev"]}
+
+    shared = {"pytest", "pytest-asyncio", "pytest-timeout", "pytest-cov"}
+    assert shared <= set(extra), f"extras dev misses {sorted(shared - set(extra))}"
+    assert shared <= set(group), f"group dev misses {sorted(shared - set(group))}"
+    for name in shared:
+        assert extra[name] == group[name], (
+            f"{name} pinned differently: extra={extra[name]!r} group={group[name]!r}"
+        )
+    assert "pyinstaller" not in extra, "PyInstaller belongs to the uv group only"
+    assert "pyinstaller" in group
