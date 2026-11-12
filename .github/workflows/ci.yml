@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
@@ -70,6 +70,32 @@ jobs:
     - name: Build the desktop GUI
       working-directory: frontend
       run: npm run build
+
+  # The public showcase is the project's front door; it had lint config and a
+  # build but no PR gate. Typecheck + lint run here (both were green at plan
+  # time; keep them green).
+  showcase:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+        cache: npm
+        cache-dependency-path: docs/package-lock.json
+
+    - name: Install showcase dependencies
+      working-directory: docs
+      run: npm ci
+
+    - name: Typecheck the showcase
+      working-directory: docs
+      run: npm run typecheck
+
+    - name: Lint the showcase
+      working-directory: docs
+      run: npm run lint
 
   # The brand is generated from brand/tokens.json into three stylesheet/module
   # surfaces and seven drawn assets; these fail the moment someone hand-edits
