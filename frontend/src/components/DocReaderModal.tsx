@@ -66,7 +66,7 @@ export const DocReaderModal: React.FC<DocReaderModalProps> = ({ domain, theme, o
   const handleSelectPage = async (pageTarget: any) => {
     if (pageTarget === "book.md" || (typeof pageTarget === "object" && pageTarget.relpath === "book.md")) {
       setSelectedFile("book.md")
-      setFileContent(docData?.content || docData?.book_content || "")
+      setFileContent(docData?.content || "")
       return
     }
 
