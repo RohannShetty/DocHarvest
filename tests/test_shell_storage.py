@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
 from pathlib import Path
 
@@ -261,6 +262,76 @@ class TestDomainLock:
         with sm.domain_lock("test.com") as lock:
             payload = lock.path.read_text(encoding="utf-8")
             assert f"pid={os.getpid()}" in payload
+
+
+class TestDomainLockContention:
+    """O_EXCL is the arbiter: simultaneous acquires must yield one holder."""
+
+    def test_contending_acquires_one_wins(self, sm):
+        lock_a = sm.domain_lock("race.com")
+        lock_b = sm.domain_lock("race.com")
+        barrier = threading.Barrier(2)
+        results: list[tuple[str, DomainLock]] = []
+
+        def worker(lock: DomainLock) -> None:
+            barrier.wait()
+            try:
+                lock.acquire()
+                results.append(("ok", lock))
+            except LockHeldError:
+                results.append(("held", lock))
+
+        t1 = threading.Thread(target=worker, args=(lock_a,))
+        t2 = threading.Thread(target=worker, args=(lock_b,))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+
+        winners = [r for r in results if r[0] == "ok"]
+        held = [r for r in results if r[0] == "held"]
+        assert len(winners) == 1 and len(held) == 1
+
+        winners[0][1].release()
+        # After the winner releases, the loser must be able to acquire.
+        held[0][1].acquire()
+        held[0][1].release()
+
+    def test_lock_storm_serializes(self, sm):
+        n_threads = 8
+        attempts = 25
+        barrier = threading.Barrier(n_threads)
+        counter = threading.Lock()
+        acquires = 0
+        held = 0
+        errors: list[Exception] = []
+
+        def worker() -> None:
+            nonlocal acquires, held
+            barrier.wait()
+            for _ in range(attempts):
+                try:
+                    lock = sm.domain_lock("storm.com")
+                    lock.acquire()
+                    with counter:
+                        acquires += 1
+                    lock.release()
+                except LockHeldError:
+                    with counter:
+                        held += 1
+                except Exception as exc:  # noqa: BLE001 - surface unexpected failures
+                    errors.append(exc)
+
+        threads = [threading.Thread(target=worker) for _ in range(n_threads)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert not errors, f"unexpected exceptions during lock storm: {errors}"
+        assert acquires + held == n_threads * attempts, (acquires, held)
+        # Every attempt either acquired or was correctly refused; the lock is clean.
+        assert not sm.domain_lock("storm.com").path.exists()
 
 
 # ── Rollback without version inflation ──────────────────────────────────

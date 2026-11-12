@@ -281,10 +281,19 @@ class DomainLock:
     def release(self) -> None:
         if not self._acquired:
             return
-        try:
-            self.path.unlink()
-        except OSError:
-            pass
+        # Windows briefly refuses to delete a file another thread is reading
+        # (the staleness probe in `_is_stale`). Retry for a bounded window so
+        # a contended release cannot leak the lock and wedge the domain.
+        for attempt in range(50):
+            try:
+                self.path.unlink()
+                break
+            except FileNotFoundError:
+                break
+            except OSError:
+                if attempt == 49:
+                    break
+                time.sleep(0.02)
         self._acquired = False
 
     def __enter__(self) -> "DomainLock":
