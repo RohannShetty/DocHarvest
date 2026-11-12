@@ -147,3 +147,79 @@ def test_bridge_handles_none_options(monkeypatch):
     assert captured_options.get("max_pages") is None
     assert captured_options.get("output_mode") == "library"
 
+
+from docharvest.storage import StorageManager
+
+
+def _bridge_with_tmp_library(tmp_path):
+    storage = StorageManager(base_dir=tmp_path)
+    return storage, ApiBridge(storage_manager=storage)
+
+
+def test_read_file_outside_library_rejected(tmp_path):
+    bridge = _bridge_with_tmp_library(tmp_path)[1]
+    res = bridge.read_file(str(tmp_path.parent / "secret.txt"))
+    assert res.get("success") is False
+    assert "content" not in res
+
+
+def test_read_file_inside_library_allowed(tmp_path):
+    storage, bridge = _bridge_with_tmp_library(tmp_path)
+    page = tmp_path / "docs" / "example.com" / "pages" / "index.md"
+    page.parent.mkdir(parents=True, exist_ok=True)
+    page.write_text("# hello", encoding="utf-8")
+    res = bridge.read_file(str(page))
+    assert res.get("success") is True
+    assert res.get("content") == "# hello"
+
+
+def test_open_folder_outside_library_rejected(tmp_path):
+    bridge = _bridge_with_tmp_library(tmp_path)[1]
+    res = bridge.open_folder(str(tmp_path.parent))
+    assert res.get("success") is False
+
+
+def test_open_file_outside_library_rejected(tmp_path):
+    bridge = _bridge_with_tmp_library(tmp_path)[1]
+    res = bridge.open_file(str(tmp_path.parent / "x.txt"))
+    assert res.get("success") is False
+
+
+def test_open_folder_domain_name_opens_confined_path(tmp_path, monkeypatch):
+    storage, bridge = _bridge_with_tmp_library(tmp_path)
+    # create a domain dir
+    ddir = storage._domain_dir("example.com") if hasattr(storage, "_domain_dir") else None
+    if ddir is None:
+        pytest.skip("no _domain_dir")
+    ddir.mkdir(parents=True, exist_ok=True)
+    storage._domains = getattr(storage, "_domains", {})
+    try:
+        storage._domains["example.com"] = ddir
+    except Exception:
+        pass
+
+    import subprocess as _sp
+    import os as _os
+
+    calls = {"popen": [], "startfile": []}
+
+    def fake_popen(args, *a, **k):
+        calls["popen"].append(args)
+        return MagicMock()
+
+    def fake_startfile(p):
+        calls["startfile"].append(p)
+
+    monkeypatch.setattr("docharvest.gui.bridge.subprocess.Popen", fake_popen)
+    monkeypatch.setattr("docharvest.gui.bridge.os.startfile", fake_startfile, raising=False)
+
+    # Ensure domain_exists returns True
+    monkeypatch.setattr(storage, "domain_exists", lambda d: d == "example.com")
+    monkeypatch.setattr(storage, "_domain_dir", lambda d: ddir)
+
+    res = bridge.open_folder("example.com")
+    assert res.get("success") is True
+    assert any(str(ddir) in str(x) for x in calls["startfile"]) or any(
+        any(str(ddir) in str(a) for a in args) for args in calls["popen"]
+    )
+

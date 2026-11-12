@@ -445,8 +445,9 @@ class ApiBridge:
                     rel = md_file.relative_to(pages_dir).as_posix()
                     title = md_file.stem
                     try:
-                        first_lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()[:5]
-                        for l in first_lines:
+                        with open(md_file, "rb") as fh:
+                            head = fh.read(512).decode("utf-8", errors="replace")
+                        for l in head.splitlines()[:10]:
                             if l.startswith("# "):
                                 title = l[2:].strip()
                                 break
@@ -474,7 +475,6 @@ class ApiBridge:
                 "domain": domain,
                 "title": domain,
                 "content": book_content,
-                "book_content": book_content,
                 "folder": str(doc_dir),
                 "path": str(doc_dir),
                 "pages": pages_list,
@@ -482,10 +482,36 @@ class ApiBridge:
         except Exception as exc:
             return {"success": False, "error": str(exc)}
 
+    def _allowed_roots(self) -> list[Path]:
+        """Roots that API-reachable file access is confined to."""
+        return [Path(self._storage.base)]
+
+    def _resolve_under(self, path_like: str, roots: list[Path] | None = None) -> Path | None:
+        """Resolve *path_like* and return it only if it lands under one of *roots*.
+
+        Returns None for anything else. Used to confine API-reachable file access
+        to the docharvest library (or other caller-approved roots).
+        """
+        try:
+            p = Path(path_like).expanduser().resolve()
+        except (OSError, ValueError):
+            return None
+        if roots is None:
+            roots = self._allowed_roots()
+        for root in roots:
+            try:
+                p.relative_to(Path(root).resolve())
+                return p
+            except ValueError:
+                continue
+        return None
+
     def read_file(self, file_path: str) -> dict[str, Any]:
         """Read a single markdown page."""
         try:
-            p = Path(file_path)
+            p = self._resolve_under(file_path)
+            if p is None:
+                return {"success": False, "error": "Path is outside the docharvest library"}
             if not p.exists() or not p.is_file():
                 return {"success": False, "error": "File not found"}
             content = p.read_text(encoding="utf-8", errors="replace")
@@ -530,22 +556,30 @@ class ApiBridge:
     def open_folder(self, target: str) -> dict[str, Any]:
         """Open a directory or highlight a file in Windows Explorer / Finder."""
         try:
-            p = Path(target)
-            if not p.is_absolute():
+            target = (target or "").strip()
+            if not target:
+                return {"success": False, "error": "Target is required"}
+
+            if not Path(target).is_absolute():
+                # Only a bare domain name is allowed as a relative input.
                 if self._storage.domain_exists(target):
                     p = self._storage._domain_dir(target)
                 else:
-                    p = Path.cwd() / target
+                    return {"success": False, "error": "Path is outside the docharvest library"}
+            else:
+                p = self._resolve_under(target)
+                if p is None:
+                    return {"success": False, "error": "Path is outside the docharvest library"}
 
             if not p.exists():
                 if p.parent.exists():
                     p = p.parent
                 else:
-                    p = self._storage.root_dir
+                    p = Path(self._storage.base)
 
             if sys.platform == "win32":
                 if p.is_file():
-                    subprocess.Popen(f'explorer.exe /select,"{p}"', shell=True)
+                    subprocess.Popen(["explorer.exe", f"/select,{p}"])
                 else:
                     os.startfile(str(p))
             elif sys.platform == "darwin":
@@ -565,10 +599,14 @@ class ApiBridge:
     def open_file(self, target: str) -> dict[str, Any]:
         """Open a document / export file directly with the operating system's default application."""
         try:
-            p = Path(target)
-            if not p.is_absolute():
-                p = Path.cwd() / target
-
+            target = (target or "").strip()
+            if not target:
+                return {"success": False, "error": "Target is required"}
+            if not Path(target).is_absolute():
+                return {"success": False, "error": "Path is outside the docharvest library"}
+            p = self._resolve_under(target)
+            if p is None:
+                return {"success": False, "error": "Path is outside the docharvest library"}
             if not p.exists():
                 return {"success": False, "error": f"File not found: {p}"}
 
