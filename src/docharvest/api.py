@@ -43,9 +43,12 @@ __all__ = [
     "CaptureError",
     "CaptureOptions",
     "CaptureResult",
+    "BatchItemResult",
+    "CaptureBatchResult",
     "ProgressEvent",
     "LATEST_ONLY",
     "capture",
+    "capture_many",
 ]
 
 
@@ -104,6 +107,26 @@ class CaptureResult:
     book_file: Path | None
     manifest_file: Path | None     # llms.txt
     version_id: str | None         # snapshot id created, if snapshotting
+
+
+@dataclass(frozen=True)
+class BatchItemResult:
+    """Outcome of one URL inside :func:`capture_many`."""
+
+    url: str
+    ok: bool
+    result: CaptureResult | None = None   # None when ok=False
+    error: str | None = None              # populated when ok=False
+
+
+@dataclass(frozen=True)
+class CaptureBatchResult:
+    """Aggregate outcome of a sequential multi-URL capture."""
+
+    items: tuple[BatchItemResult, ...]
+    succeeded: int
+    failed: int
+    cancelled: bool
 
 
 # ── Seams (monkeypatch targets for tests) ───────────────────────────────
@@ -683,3 +706,45 @@ def capture(
         )
     finally:
         lock.release()
+
+
+def capture_many(
+    urls,
+    options: CaptureOptions,
+    *,
+    progress=None,
+) -> CaptureBatchResult:
+    """Capture *urls* sequentially with the same options.
+
+    Sequential by design: two crawls must never run against the library at
+    once (the per-domain lock would refuse the second anyway). A failure on
+    one URL is recorded and the batch continues; a cancellation stops the
+    batch and marks it as cancelled.
+    """
+    items: list[BatchItemResult] = []
+    cancelled = False
+
+    for url in urls:
+        if options.cancel_check and options.cancel_check():
+            cancelled = True
+            break
+        try:
+            result = capture(url, options, progress=progress)
+        except CaptureError as exc:
+            if "aborted by user" in str(exc) or (
+                options.cancel_check and options.cancel_check()
+            ):
+                cancelled = True
+                break
+            items.append(BatchItemResult(url=url, ok=False, error=str(exc)))
+            continue
+        items.append(BatchItemResult(url=url, ok=True, result=result))
+
+    succeeded = sum(1 for item in items if item.ok)
+    failed = sum(1 for item in items if not item.ok)
+    return CaptureBatchResult(
+        items=tuple(items),
+        succeeded=succeeded,
+        failed=failed,
+        cancelled=cancelled,
+    )
