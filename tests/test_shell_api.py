@@ -268,6 +268,16 @@ class TestOutputRouting:
         assert result.local_path.exists()
         assert not library.domain_exists("docs.example.com")
 
+    def test_local_mode_does_not_write_library(self, tmp_path, library):
+        """`local` must leave no domain artifacts in the library (engine writes
+        used to leak here because the engine constructed its own storage)."""
+        options = CaptureOptions(output_mode="local",
+                                 local_dir=tmp_path / "out")
+        run_capture(tmp_path, options=options)
+        docs = tmp_path / "library" / "docs"
+        leftovers = list(docs.glob("*")) if docs.exists() else []
+        assert leftovers == [], f"local mode wrote library artifacts: {leftovers}"
+
 
 # ── Site versions ───────────────────────────────────────────────────────
 

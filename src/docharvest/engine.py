@@ -21,10 +21,8 @@ from docharvest.providers.base import (
     normalize_url,
     same_domain,
 )
-from docharvest.storage import StorageManager
 from docharvest.utils import create_session
 from docharvest.utils.discovery import discover_from_llms_txt, discover_from_sitemap
-from docharvest.search import SearchIndex
 
 logger = logging.getLogger(__name__)
 
@@ -586,36 +584,9 @@ def stream_download(
         logger.warning("Download produced 0 pages for %s: %s", url, err_msg)
         return ""
 
-    # ── Save to storage ──────────────────────────────────────────
-    # Snapshotting is owned solely by api.capture(), which records the
-    # pre-capture state exactly once before the crawl starts. The engine used
-    # to snapshot here as well, which wrote metadata.json twice per capture
-    # and raced the facade's version id.
-    storage = StorageManager()
-
-    storage.save_doc(
-        domain=domain,
-        content=combined,
-        url=url,
-        title=entry_title or provider.extract_title(combined, url),
-        pages=pages_downloaded,
-        provider=provider.name,
-        new_pages=pages_downloaded,
-        size_kb=round(total_size_kb, 1),
-    )
-
-    # ── Index for search ─────────────────────────────────────────
-    try:
-        search = SearchIndex()
-        # Index the granular page tree when it exists so hit URLs point at the
-        # page that holds the text instead of a domain-root anchor.
-        try:
-            pages_dir = storage.pages_dir(domain)
-        except Exception:  # noqa: BLE001 — a storage without a page tree is fine
-            pages_dir = None
-        search.index_domain(domain, combined, domain_url=url, pages_dir=pages_dir)
-    except Exception as e:
-        logger.warning("Search indexing failed: %s", e)
+    # Persistence is owned solely by api.capture(): the facade snapshots
+    # before the crawl and publishes the page tree/book/index afterwards.
+    # The engine must not write the library or the search index itself.
 
     if progress_callback:
         progress_callback({

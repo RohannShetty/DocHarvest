@@ -21,7 +21,14 @@ from docharvest.utils import create_session
 
 
 @pytest.fixture()
-def fake_storage(monkeypatch):
+def fake_storage():
+    """Compatibility fixture: the engine no longer writes storage itself.
+
+    Kept so existing test signatures keep working while pinning the boundary:
+    if the engine ever regains hidden persistence, tests that assert on the
+    facade's storage will catch it.
+    """
+
     class FakeStorage:
         def __init__(self):
             self.saved = []
@@ -32,17 +39,7 @@ def fake_storage(monkeypatch):
         def save_doc(self, **kw):
             self.saved.append(kw)
 
-    class FakeSearch:
-        def __init__(self):
-            pass
-
-        def index_domain(self, *a, **k):
-            pass
-
-    store = FakeStorage()
-    monkeypatch.setattr(engine, "StorageManager", lambda: store)
-    monkeypatch.setattr(engine, "SearchIndex", FakeSearch)
-    return store
+    return FakeStorage()
 
 
 @pytest.fixture()
@@ -161,9 +158,10 @@ class TestDeterministicOrder:
         assert "/docs/guide" in first_source_line, (
             f"first crawled page must come first regardless of completion order; got {first_source_line}"
         )
-        # Stored title comes from the entry page, not whichever page finished first.
-        assert fake_storage.saved, "save_doc must be called"
-        assert fake_storage.saved[0]["title"] == "Guide"
+        # The engine no longer writes storage; persistence is the facade's job.
+        assert fake_storage.saved == [], (
+            "the engine must not persist; api.capture owns storage writes"
+        )
 
 
 # ── Fix #9: link rewriting ───────────────────────────────────────
@@ -323,13 +321,11 @@ class TestEngineDoesNotSnapshot:
     live ``docs.md``."""
 
     def test_stream_download_creates_no_version_file(
-        self, fixture_server, session, tmp_path, monkeypatch
+        self, fixture_server, session, tmp_path
     ):
         from urllib.parse import urlparse
 
         store = StorageManager(base_dir=tmp_path)
-        monkeypatch.setattr(engine, "StorageManager", lambda: store)
-        monkeypatch.setattr(engine, "SearchIndex", _NullSearch)
 
         start_url = fixture_server.url("/")
         domain = urlparse(start_url).netloc
