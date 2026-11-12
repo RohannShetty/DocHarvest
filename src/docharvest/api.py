@@ -489,16 +489,19 @@ def capture(
         normalized_page_count = len(pages)
 
         min_content_chars = _configured_min_content_chars()
-        short_pages = [
-            page for page in pages
-            if min_content_chars and len(page.content.strip()) < min_content_chars
-        ]
-        if short_pages:
-            pages = [page for page in pages if page not in short_pages]
-            warnings.append(
-                f"Skipped {len(short_pages)} page(s) below the configured minimum "
-                f"content length of {min_content_chars} characters."
+        short_count = 0
+        if min_content_chars:
+            short_count = sum(
+                1 for p in pages if len(p.content.strip()) < min_content_chars
             )
+            if short_count:
+                pages = [
+                    p for p in pages if len(p.content.strip()) >= min_content_chars
+                ]
+                warnings.append(
+                    f"Skipped {short_count} page(s) below the configured minimum "
+                    f"content length of {min_content_chars} characters."
+                )
 
         if not provider_name:
             try:
@@ -514,14 +517,14 @@ def capture(
         site_versions_found = detect_site_versions([p.url for p in pages])
         before_filter = len(pages)
         pages = _apply_site_version_filter(pages, options.site_versions, warnings)
-        skipped = len(short_pages) + max(0, before_filter - len(pages))
+        skipped = short_count + max(0, before_filter - len(pages))
 
         if not pages:
             # The capture already has a definitive reason when all normalized
             # pages fell below the configured threshold. Avoid a second network
             # probe, which cannot change that outcome and can turn a local
             # capture into an unnecessary timeout.
-            if short_pages:
+            if short_count:
                 pass
             else:
                 # Detect reason for 0 pages
