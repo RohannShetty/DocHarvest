@@ -272,7 +272,7 @@ def stream_download(
     timeout: float = 20.0,
     cancel_check: Optional[callable] = None,
     render: bool = False,
-) -> str:
+) -> dict:
     """Download an entire documentation site.
 
     Auto-detects the documentation platform, discovers all pages,
@@ -549,17 +549,18 @@ def stream_download(
         if content:
             ordered_pages.append((u, content))
 
-    entry_title = ""
-    combined_parts: list[str] = []
-    for i, (u, raw_content) in enumerate(ordered_pages):
-        if i == 0:
-            entry_title = provider.extract_title(raw_content, u)
+    page_dicts: list[dict] = []
+    for u, raw_content in ordered_pages:
         rewritten = rewrite_markdown_links(raw_content, u)
-        combined_parts.append(f"Source: {u}\n\n{rewritten}")
+        page_dicts.append(
+            {
+                "url": u,
+                "title": provider.extract_title(raw_content, u),
+                "content": rewritten,
+            }
+        )
 
-    combined = "\n\n---\n\n".join(combined_parts)
-
-    if not combined.strip():
+    if not page_dicts or not any(p["content"].strip() for p in page_dicts):
         # Diagnostic detection for empty crawl
         err_msg = "No content downloaded"
         try:
@@ -582,7 +583,7 @@ def stream_download(
                 "error": err_msg,
             })
         logger.warning("Download produced 0 pages for %s: %s", url, err_msg)
-        return ""
+        return {"pages": [], "provider": provider.name}
 
     # Persistence is owned solely by api.capture(): the facade snapshots
     # before the crawl and publishes the page tree/book/index afterwards.
@@ -597,7 +598,12 @@ def stream_download(
             "provider": provider.name,
         })
 
-    return combined
+    return {
+        "pages": page_dicts,
+        "provider": provider.name,
+        "discovered": len(crawl_urls),
+        "failed": pages_errored,
+    }
 
 
 def download_urls(
