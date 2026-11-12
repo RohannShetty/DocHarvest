@@ -35,24 +35,31 @@ def split_markdown(input_path, output_dir=None, max_mb=1.0, progress_callback=No
     # Split on markdown headers — this is the key: we split at `\n#`
     # so each chunk starts at a header boundary
     sections = content.split("\n#")
-    chunks = []
-    current = ""
+    chunks: list[str] = []
+    parts: list[str] = []
+    current_bytes = 0
 
     for i, section in enumerate(sections):
         if i > 0:
             section = "#" + section  # Restore the header marker
+        section_bytes = len(section.encode("utf-8"))
 
         # If adding this section would exceed the limit AND we already have content,
         # finish the current chunk and start a new one
-        if len((current + section).encode("utf-8")) > max_bytes and current.strip():
-            chunks.append(current)
-            current = section
+        if current_bytes + section_bytes > max_bytes and parts:
+            chunk = "".join(parts)
+            if chunk.strip():
+                chunks.append(chunk)
+            parts = [section]
+            current_bytes = section_bytes
         else:
-            current += section
+            parts.append(section)
+            current_bytes += section_bytes
 
     # Don't forget the last chunk
-    if current.strip():
-        chunks.append(current)
+    chunk = "".join(parts)
+    if chunk.strip():
+        chunks.append(chunk)
 
     # Write chunks to disk
     results = []
