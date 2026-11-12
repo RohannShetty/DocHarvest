@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import mermaid from "mermaid"
 
 interface MarkdownViewerProps {
   content: string
@@ -42,10 +41,23 @@ interface TocItem {
 // carrying their own hard-coded cyan/blue/indigo palette that matched nothing.
 let activeMermaidTheme: "dark" | "light" | null = null
 
+type MermaidAPI = typeof import("mermaid")["default"]
+
+let mermaidApi: MermaidAPI | null = null
+
+/** Load Mermaid on demand so the ~1.6 MB library is not parsed at launch. */
+export async function loadMermaid(): Promise<MermaidAPI> {
+  if (!mermaidApi) {
+    const mod = await import("mermaid")
+    mermaidApi = mod.default
+  }
+  return mermaidApi
+}
+
 export function initMermaid(theme: "dark" | "light"): void {
-  if (activeMermaidTheme === theme) return
+  if (activeMermaidTheme === theme || mermaidApi === null) return
   const t = brandTokens()
-  mermaid.initialize({
+  mermaidApi.initialize({
     startOnLoad: false,
     theme: theme === "dark" ? "dark" : "default",
     themeVariables: {
@@ -60,13 +72,10 @@ export function initMermaid(theme: "dark" | "light"): void {
       textColor: t.ink2,
       edgeLabelBackground: t.bond
     },
-    securityLevel: "loose"
+    securityLevel: "strict"
   })
   activeMermaidTheme = theme
 }
-
-// Initial configuration (the app boots in dark mode; see index.html).
-initMermaid("dark")
 
 export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   content,
@@ -121,31 +130,35 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
   useEffect(() => {
     if (!contentRef.current) return
 
-    initMermaid(resolvedTheme)
-
     const mermaidBlocks = contentRef.current.querySelectorAll("pre.mermaid-block")
     mermaidBlocks.forEach((el) => {
       const code = el.getAttribute("data-code") || ""
       el.classList.remove("mermaid-rendered")
       if (code) el.textContent = code
     })
+    if (mermaidBlocks.length === 0) return
 
     let cancelled = false
-    mermaidBlocks.forEach((el, index) => {
-      const code = el.getAttribute("data-code") || el.textContent || ""
-      if (!code) return
-      void (async () => {
-        try {
-          const id = `mermaid-svg-${Date.now()}-${index}`
-          const { svg } = await mermaid.render(id, code)
-          if (cancelled) return
-          el.innerHTML = svg
-          el.classList.add("mermaid-rendered")
-        } catch (err) {
-          console.warn("Mermaid rendering error:", err)
-        }
-      })()
-    })
+    void (async () => {
+      const mermaid = await loadMermaid()
+      if (cancelled) return
+      initMermaid(resolvedTheme)
+      mermaidBlocks.forEach((el, index) => {
+        const code = el.getAttribute("data-code") || el.textContent || ""
+        if (!code) return
+        void (async () => {
+          try {
+            const id = `mermaid-svg-${Date.now()}-${index}`
+            const { svg } = await mermaid.render(id, code)
+            if (cancelled) return
+            el.innerHTML = svg
+            el.classList.add("mermaid-rendered")
+          } catch (err) {
+            console.warn("Mermaid rendering error:", err)
+          }
+        })()
+      })
+    })()
 
     return () => {
       cancelled = true

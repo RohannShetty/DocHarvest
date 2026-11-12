@@ -23,7 +23,6 @@ export default defineConfig({
   build: {
     outDir: '../src/docharvest/gui/web',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
         manualChunks(id) {

@@ -31,7 +31,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
     "lucide-react": "^0.475.0",
-    "mermaid": "^11.17.2",
+    "mermaid": "^12.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sonner": "^2.0.1",
@@ -53,5 +53,9 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.70.1",
     "vite": "^6.1.0"
+  },
+  "overrides": {
+    "dompurify": ">=3.4.17",
+    "katex": ">=0.19.1"
   }
 }
