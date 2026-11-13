@@ -6,6 +6,7 @@ inside fixture files are substituted with the server's own base URL so
 absolute links in sitemaps/llms.txt always point back at the live server.
 """
 
+import hashlib
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -49,6 +50,10 @@ ROUTES = {
     "/spa/page.md": ("spa_page.md", "text/plain"),
     # Charset trap: UTF-8 bytes declared as iso-8859-1.
     "/charset": ("charset_page.html", "text/html; charset=iso-8859-1"),
+    # Incremental-refresh corpus (spike 026): one index + two children.
+    "/reval/": ("reval_index.html", "text/html"),
+    "/reval/a.html": ("reval_a.html", "text/html"),
+    "/reval/b.html": ("reval_b.html", "text/html"),
 }
 
 # Paths whose responses carry deliberately wrong metadata.
@@ -61,10 +66,24 @@ class FixtureServer:
     """Tiny routing HTTP server over tests/fixtures/."""
 
     def __init__(self):
+        # Incremental-refresh harness: per-path request counts, 304 accounting,
+        # and mutable bodies (``set_body``) for the changed-page test.
+        self.counts: dict[str, int] = {}
+        self.not_modified = 0
+        self.overrides: dict[str, bytes] = {}
+        self._lock = threading.Lock()
         self._server = ThreadingHTTPServer(("127.0.0.1", 0), self._make_handler())
         self._server.daemon_threads = True
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
         self._thread.start()
+
+    def set_body(self, path: str, text: str) -> None:
+        """Replace the served body for *path* (invalidates its ETag)."""
+        with self._lock:
+            self.overrides[path] = text.encode("utf-8")
+
+    def request_count(self, path: str) -> int:
+        return self.counts.get(path, 0)
 
     @property
     def base_url(self) -> str:
@@ -83,25 +102,42 @@ class FixtureServer:
                 route = ROUTES.get(path.rstrip("/") or "/")
             return route
 
+        server = self
+
         class Handler(BaseHTTPRequestHandler):
             def log_message(self, *args):  # silence test noise
                 pass
 
             def _serve(self):
                 path = self.path.split("?", 1)[0]
+                with server._lock:
+                    server.counts[path] = server.counts.get(path, 0) + 1
                 route = resolve(path)
                 if route is None:
                     self.send_response(404)
                     self.end_headers()
                     return
                 filename, content_type = route
-                raw = (FIXTURES_DIR / filename).read_bytes()
-                base = f"http://{self.headers.get('Host', '127.0.0.1')}"
-                text = raw.decode("utf-8").replace("{{BASE}}", base)
-                body = text.encode("utf-8")
+                override = server.overrides.get(path)
+                if override is not None:
+                    body = override
+                else:
+                    raw = (FIXTURES_DIR / filename).read_bytes()
+                    base = f"http://{self.headers.get('Host', '127.0.0.1')}"
+                    text = raw.decode("utf-8").replace("{{BASE}}", base)
+                    body = text.encode("utf-8")
+                etag = '"' + hashlib.sha1(body).hexdigest() + '"'
+                if self.headers.get("If-None-Match") == etag:
+                    with server._lock:
+                        server.not_modified += 1
+                    self.send_response(304)
+                    self.send_header("ETag", etag)
+                    self.end_headers()
+                    return
                 self.send_response(200)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Content-Length", str(len(body)))
+                self.send_header("ETag", etag)
                 self.end_headers()
                 self.wfile.write(body)
 
