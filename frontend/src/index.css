@@ -75,19 +75,52 @@
   transform: scale(0.98);
 }
 
-/* Custom Scrollbars - sharp, like every other corner in the product. */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ---------------------------------------------------------------------------
+   Scrollbars.
+
+   The standard properties come first: `scrollbar-width` and `scrollbar-color`
+   are the cross-engine route and the only one that follows the OS accessibility
+   settings for scrollbar size. The ::-webkit-* pseudo-elements are kept strictly
+   as a fallback for engines without support, wrapped so the two routes can never
+   compete — where `scrollbar-color` parses, the legacy block is skipped whole.
+
+   The thumb is --muted-foreground at 0.7 over the sheet, which measures 4.2:1 in
+   the dark theme and 3.6:1 in the light one against --background. The previous
+   0.25 sat at 1.5:1, i.e. effectively invisible on a dim screen.
+--------------------------------------------------------------------------- */
+:root {
+  --scrollbar-thumb: hsl(var(--muted-foreground) / 0.7);
+  --scrollbar-thumb-hover: hsl(var(--muted-foreground) / 0.85);
+  --scrollbar-track: transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+/* Native UI — form controls, scrollbars, carets, autofill — follows the same
+   theme as the page. Declared in CSS as well as in <meta name="color-scheme">
+   because a :root declaration is the one the browser honours once stylesheets
+   are live; the meta only covers the paint before they are. */
+:root {
+  color-scheme: dark;
 }
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.25);
-  border-radius: 0;
-  transition: background-color 0.2s ease;
+:root.light {
+  color-scheme: light;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.45);
+
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 0;
+    transition: background-color 0.2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
 }

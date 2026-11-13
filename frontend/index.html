@@ -4,13 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DocHarvest v11.5.0</title>
+    <meta name="color-scheme" content="dark" />
     <script>
       // Apply the persisted theme before first paint (avoids a dark flash for
       // users who saved the light theme). Falls back to the "dark" default.
+      // The meta is pinned at the same moment: it is what the browser uses to
+      // paint native UI (form controls, scrollbars) before any stylesheet runs,
+      // and it must not disagree with the class the CSS reads.
       try {
         if (localStorage.getItem("docharvest_theme") === "light") {
           document.documentElement.classList.remove("dark")
           document.documentElement.classList.add("light")
+          document.querySelector('meta[name="color-scheme"]').setAttribute("content", "light")
         }
       } catch (e) { /* storage unavailable: keep dark default */ }
     </script>

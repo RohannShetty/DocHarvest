@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, } from "@/components/ui/card"
 import { pyApi } from "@/lib/bridge"
+import { onEnterSubmit } from "@/lib/keyboard"
 import { toast } from "sonner"
 
 interface SearchViewProps {
@@ -95,7 +96,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                 placeholder="Query keyword, function name, API endpoint, or topic..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                onKeyDown={(e) => onEnterSubmit(e, handleSearch)}
                 className="pl-10 pr-9 h-11 text-sm bg-background/80 font-mono focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
               />
               {query && (

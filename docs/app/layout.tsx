@@ -113,7 +113,10 @@ const jsonLd = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  colorScheme: "dark light",
+  // The site is dark by default (see ThemeProvider), so the base matches that;
+  // the pre-paint script and ThemeProvider narrow it to "light" when the
+  // visitor stored the light theme.
+  colorScheme: "dark",
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#09090B" },
     { media: "(prefers-color-scheme: light)", color: "#FBFBFA" },
@@ -239,11 +242,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `
               try {
                 var saved = localStorage.getItem('theme');
-                if (saved === 'light') {
-                  document.documentElement.classList.add('light');
-                } else {
-                  document.documentElement.classList.remove('light');
-                }
+                var light = saved === 'light';
+                document.documentElement.classList.toggle('light', light);
+                // Pin color-scheme to the stored theme so native UI (form
+                // controls, scrollbars) matches the sheet from the first frame.
+                // Server-rendered base is "dark"; this only ever narrows it.
+                var meta = document.querySelector('meta[name="color-scheme"]');
+                if (meta) meta.setAttribute('content', light ? 'light' : 'dark');
               } catch (e) {}
             `,
           }}

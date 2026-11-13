@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, } from "@/components/ui/card"
 import { formatBytes } from "@/lib/utils"
 import { computeSelectAll } from "@/lib/flow"
 import { pyApi } from "@/lib/bridge"
+import { onEnterSubmit } from "@/lib/keyboard"
 import { toast } from "sonner"
 
 interface LibraryViewProps {
@@ -206,8 +207,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   value={renameInput}
                   onChange={(e) => setRenameInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSaveRename()
-                    if (e.key === "Escape") setRenamingDomain(null)
+                    if (e.key === "Escape") {
+                      setRenamingDomain(null)
+                      return
+                    }
+                    onEnterSubmit(e, handleSaveRename)
                   }}
                   autoFocus
                   placeholder="e.g. docs.myproject.com or my-framework-docs"

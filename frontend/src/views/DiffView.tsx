@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, } from "@/components/ui/tabs"
 import { pyApi } from "@/lib/bridge"
+import { onEnterSubmit } from "@/lib/keyboard"
 import { toast } from "sonner"
 import { initMermaid, loadMermaid } from "@/components/MarkdownViewer"
 
@@ -282,7 +283,7 @@ export const DiffView: React.FC<DiffViewProps> = ({ library, onOpenDocReader }) 
                 placeholder="Search concepts, endpoints (GET/POST), symbols, or headings..."
                 value={graphQuery}
                 onChange={(e) => setGraphQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && loadDocGraph(selectedDomain, graphQuery)}
+                onKeyDown={(e) => onEnterSubmit(e, () => loadDocGraph(selectedDomain, graphQuery))}
                 className="pl-9 h-9 text-xs bg-background/80 font-mono focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
               />
             </div>

@@ -93,7 +93,25 @@ export function App() {
     const root = document.documentElement
     root.classList.toggle("dark", theme === "dark")
     root.classList.toggle("light", theme === "light")
+    // Keep <meta name="color-scheme"> pinned to the same theme. It is what the
+    // browser paints native UI (form controls, scrollbars) with, and it is
+    // independent of the CSS cascade.
+    document
+      .querySelector('meta[name="color-scheme"]')
+      ?.setAttribute("content", theme)
   }, [theme])
+
+  // Follow a theme change made in another window. `storage` only fires in the
+  // windows that did not perform the write, so this never fights the local
+  // toggle; the effect above re-applies the class and <meta> from state.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== THEME_STORAGE_KEY) return
+      setTheme(event.newValue === "light" ? "light" : "dark")
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
 
   // Theme switcher
   const handleToggleTheme = () => {

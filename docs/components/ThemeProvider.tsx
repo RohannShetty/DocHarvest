@@ -52,6 +52,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('light', theme === 'light');
+    // color-scheme must follow the stored choice, not the OS preference: the
+    // site defaults to dark, so a light-OS visitor would otherwise get a dark
+    // page with light native controls.
+    document
+      .querySelector('meta[name="color-scheme"]')
+      ?.setAttribute('content', theme);
   }, [theme]);
 
   const toggleTheme = () => {

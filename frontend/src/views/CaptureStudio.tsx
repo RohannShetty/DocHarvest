@@ -37,6 +37,7 @@ import { Tabs, TabsList, TabsTrigger, } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Progress } from "@/components/ui/progress"
 import { pyApi, CaptureProgressPayload, CaptureDonePayload } from "@/lib/bridge"
+import { onEnterSubmit } from "@/lib/keyboard"
 import { toast } from "sonner"
 import { toggleVersionSelection } from "@/lib/flow"
 import { BatchController } from "@/lib/batch"
@@ -638,7 +639,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                   placeholder="https://pi.dev/docs/latest or https://docs.openalgo.in/ or https://mintlify.com/docs"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !isCapturing && handleStartCapture()}
+                  onKeyDown={(e) => onEnterSubmit(e, () => { if (!isCapturing) handleStartCapture() })}
                   disabled={isCapturing}
                   className="pl-10 pr-24 h-12 bg-background/80 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg font-mono placeholder:font-sans"
                 />
@@ -866,7 +867,7 @@ export const CaptureStudio: React.FC<CaptureStudioProps> = ({
                 placeholder="https://docs.site2.com/"
                 value={newBatchUrl}
                 onChange={(e) => setNewBatchUrl(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddBatch()}
+                onKeyDown={(e) => onEnterSubmit(e, handleAddBatch)}
                 className="h-9 text-xs bg-background font-mono"
               />
               <Button size="sm" onClick={handleAddBatch} className="h-9 px-4 interactive-scale">
