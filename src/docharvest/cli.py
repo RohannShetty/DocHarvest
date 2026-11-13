@@ -588,6 +588,46 @@ def cmd_init(args) -> int:
         return 1
 
 
+def cmd_agent_init(args) -> int:
+    """MCP install for the JSON client family (``docharvest setup``).
+
+    Dry-run by default; ``--apply`` writes. ``docharvest init`` already exists
+    with write-by-default semantics, so this spike does not reuse that name.
+    """
+    from .mcpinstall import InstallError, apply, detect, plan
+
+    if args.client == "auto":
+        for client, path in detect().items():
+            print(f"{client}: {path or 'not found'}")
+        print("Detection is report-only; pass --client <name> to install.")
+        return 0
+
+    if getattr(args, "apply", False) and getattr(args, "dry_run", False):
+        print("Error: --apply and --dry-run are mutually exclusive.", file=sys.stderr)
+        return 2
+
+    try:
+        prepared = plan(args.client, path=args.path, force=args.force)
+    except InstallError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"Would write: {prepared.path}")
+    if not getattr(args, "apply", False):
+        print(prepared.rendered, end="")
+        print("\nDry run: nothing written. Re-run with --apply to write.")
+        return 0
+
+    try:
+        apply(prepared)
+    except (InstallError, OSError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    print(f"Installed DocHarvest MCP config for {prepared.client}: {prepared.path}")
+    print("Server command: docharvest mcp")
+    return 0
+
+
 def cmd_skill(args) -> int:
     """Bundled agent skills: list | install.
 
@@ -755,6 +795,29 @@ def build_parser() -> argparse.ArgumentParser:
     cap.add_argument("--pdf", action="store_true", default=False,
                      help="Export styled PDF handbook after capture")
     cap.set_defaults(func=cmd_capture)
+
+    # setup: one-command MCP install (JSON family; dry-run by default).
+    # NOTE: `init` already exists above with write-by-default semantics; this
+    # spike deliberately uses a new name instead of changing that contract.
+    initp = sub.add_parser(
+        "setup",
+        help="Install the DocHarvest MCP server into a client (dry-run by default)",
+    )
+    initp.add_argument(
+        "--client",
+        required=True,
+        help="Client id: claude-code, claude-desktop, cursor, vscode, windsurf, or auto",
+    )
+    initp.add_argument("--apply", action="store_true",
+                       help="Write the configuration (default is a dry run)")
+    initp.add_argument("--dry-run", action="store_true",
+                       help="Print the JSON that would be written (the default)")
+    initp.add_argument("--force", action="store_true",
+                       help="Replace an existing docharvest entry")
+    initp.add_argument("--path", default=None, metavar="PATH",
+                       help="Override the configuration path (advanced/testing)")
+    initp.set_defaults(func=cmd_agent_init)
+
     # search
     srch = sub.add_parser("search", help="Search captured documentation")
     srch.add_argument("query", help="Search query (FTS5 syntax)")
