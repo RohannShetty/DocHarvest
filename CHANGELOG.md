@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [11.5.0] - 2026-11-13
+
+The three direction spikes are now part of the product: flag-first ingest
+screening (on by default), opt-in incremental refresh, and a dry-run-first MCP
+installer. No breaking CLI or capture-facade changes.
+
+### Added — Ingest screening (flag-first)
+
+- Captured content is screened at the normalize boundary for prompt-injection
+  shapes (instruction overrides, fake role markers, hidden characters,
+  exfiltration directives) and credential-shaped strings. Findings surface as
+  `CaptureResult.warnings`, a `## Security findings` section in `llms.txt`, and
+  an additive `security_flags` key on MCP `read_doc`.
+- **Content is never rewritten by default.** `DOCHARVEST_SCREEN=off` disables
+  the pass; `DOCHARVEST_SCREEN_REDACT=1` opts into masking credentials only.
+  The scanner is heuristic — flags are a warning, not a verdict.
+
+### Added — Incremental refresh (opt-in)
+
+- `DOCHARVEST_CHANGED_ONLY=1` sends `If-None-Match` / `If-Modified-Since` for
+  pages fetched in a previous capture and reuses cached bytes on `304`, so an
+  unchanged site transfers no page bodies. The cache lives under
+  `<library>/cache/<domain>/` and never inside the capture artifacts. Off by
+  default; render mode bypasses it.
+
+### Added — One-command MCP installer
+
+- `docharvest setup --client <claude-code|claude-desktop|cursor|vscode|windsurf|auto>`
+  writes the JSON `mcpServers.docharvest` entry (VS Code uses `servers` +
+  `stdio`). Dry-run is the default; `--apply` writes, `--force` replaces an
+  existing entry. Writes are atomic, parse-back verified, and byte-identical
+  rollback on any failure. `--client auto` reports only. No network access.
+- `docharvest init` is unchanged for compatibility; the new safe surface is
+  `setup` (see `MCP_INSTALLER_SPIKE.md`).
+
+### Changed
+
+- MCP responses may carry `security_flags`; consumers that ignore unknown keys
+  are unaffected.
+- The fixture HTTP server now emits ETags and counts requests/304s for the
+  incremental-refresh tests.
+
+### Notes
+
+- The screening scanner and the incremental cache are prototypes promoted with
+  tests; see `SECURITY_SCREENING_SPIKE.md` and `INCREMENTAL_REFRESH_SPIKE.md`
+  for threat model, known limits, and the follow-up build plans (family B/C
+  installers, cache dedupe, `init`/`setup` unification).
+
 ## [11.4.0] - 2026-11-12
 
 Security hardening, a single-owner persistence model, scoped search indexing, and a

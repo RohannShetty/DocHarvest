@@ -182,8 +182,8 @@ export const pyApi = {
     if (window.pywebview?.api?.get_system_info) return await window.pywebview.api.get_system_info()
     return {
       name: 'DocHarvest',
-      version: '11.4.0',
-      engine: 'DocHarvest Engine v11.4.0 (AST + FastMCP v2 + fpdf2)',
+      version: '11.5.0',
+      engine: 'DocHarvest Engine v11.5.0 (AST + FastMCP v2 + fpdf2)',
       platform: 'win32',
       library_dir: '~/.docharvest/docs'
     }
