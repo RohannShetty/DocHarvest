@@ -277,8 +277,13 @@ def build_manifest(
     provider: str,
     crawl_date: str,
     book_name: str = "book.md",
+    security_findings: list[dict] | None = None,
 ) -> str:
-    """Build the ``llms.txt`` manifest listing what was captured and where."""
+    """Build the ``llms.txt`` manifest listing what was captured and where.
+
+    ``security_findings`` is optional and additive: when supplied, a
+    ``## Security findings`` section is appended. Default output is unchanged.
+    """
     ordered = sort_pages(dedupe_pages(pages))
     lines = [
         f"# {site_title}",
@@ -298,6 +303,20 @@ def build_manifest(
     for page in ordered:
         title = (page.title or page.url).replace("\n", " ").strip()
         lines.append(f"- [{title}](pages/{page_relpath(page.url)}): {page.url}")
+
+    if security_findings:
+        lines.extend(["", "## Security findings", ""])
+        for item in security_findings:
+            lines.append(
+                f"- {item.get('class')}/{item.get('kind')} "
+                f"({item.get('confidence')}) — {item.get('url')}: "
+                f"line {item.get('line')} — `{item.get('snippet')}`"
+            )
+        lines.append("")
+        lines.append(
+            "> These are heuristic flags, not a verdict. Review before feeding "
+            "the content to an agent."
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -349,6 +368,7 @@ def publish(
     local_dir: Path | None = None,
     library_dir: Path | None = None,
     crawl_date: str | None = None,
+    security_findings: list[dict] | None = None,
 ) -> PublishOutcome:
     """Write the full output contract to the configured destinations.
 
@@ -403,6 +423,7 @@ def publish(
             provider=provider,
             crawl_date=crawl_date,
             book_name=book_name,
+            security_findings=security_findings,
         )
         book_file = atomic_write_text(root / book_name, book_text)
         manifest_file = atomic_write_text(root / "llms.txt", manifest_text)

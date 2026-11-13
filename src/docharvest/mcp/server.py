@@ -465,6 +465,24 @@ async def read_doc(
     )
 
 
+def _security_flags(url: str, content: str) -> list[dict]:
+    """Additive screening summary for a returned document body."""
+    try:
+        from docharvest.security import scan_text
+
+        return [
+            {
+                "class": finding.cls,
+                "kind": finding.kind,
+                "confidence": finding.confidence,
+                "line": finding.line,
+            }
+            for finding in scan_text(url, content)
+        ]
+    except Exception:
+        return []
+
+
 def _read_doc_blocking(
     domain: str,
     path: Optional[str],
@@ -481,7 +499,7 @@ def _read_doc_blocking(
                 page_content = _storage.load_page(domain, f"{clean_p}.md")
             if page_content is not None:
                 bounded = _extract_topic_bounded(page_content, topic, max_tokens)
-                return {
+                payload = {
                     "domain": domain,
                     "path": path,
                     "topic": topic,
@@ -489,6 +507,10 @@ def _read_doc_blocking(
                     "token_estimate": len(bounded) // 4,
                     "content": bounded,
                 }
+                flags = _security_flags(f"https://{domain}/{clean_p}", bounded)
+                if flags:
+                    payload["security_flags"] = flags
+                return payload
 
         # 2. Load the combined book or versioned content
         if version:
@@ -504,7 +526,7 @@ def _read_doc_blocking(
             }
 
         bounded = _extract_topic_bounded(raw_content, topic, max_tokens)
-        return {
+        payload = {
             "domain": domain,
             "path": path,
             "topic": topic,
@@ -512,6 +534,10 @@ def _read_doc_blocking(
             "token_estimate": len(bounded) // 4,
             "content": bounded,
         }
+        flags = _security_flags(domain, bounded)
+        if flags:
+            payload["security_flags"] = flags
+        return payload
     except Exception as exc:
         return {
             "domain": domain,
