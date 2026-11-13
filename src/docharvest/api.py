@@ -36,6 +36,7 @@ from typing import Callable, Literal
 from urllib.parse import urlparse
 
 from .output_contract import CapturedPage, PublishOutcome, utc_now_iso, publish
+from .security import screen_pages
 from .storage.manager import LockHeldError, StorageManager, domain_to_path_name, parse_semver
 from .storage.versioning import VersionManager
 
@@ -609,6 +610,13 @@ def capture(
                 "If this documentation site is client-rendered, try --render to execute JavaScript."
             )
 
+        # ── Untrusted-content screening ─────────────────────────────
+        # Flag-first: findings surface as warnings and in the manifest; the
+        # content is only rewritten when credential redaction is opted in.
+        screening = screen_pages(pages)
+        pages = screening.pages
+        warnings.extend(screening.warnings)
+
         # ── Output routing ──────────────────────────────────────────
         effective_output_mode = options.output_mode
         local_dir = options.local_dir
@@ -645,6 +653,7 @@ def capture(
             output_mode=effective_output_mode,
             local_dir=local_dir,
             library_dir=library_dir,
+            security_findings=screening.manifest_findings() or None,
         )
 
         # ── Library metadata + search index (library mode only) ────
