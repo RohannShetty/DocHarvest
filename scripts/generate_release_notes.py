@@ -115,6 +115,13 @@ def parse_and_categorize_changelog(raw_section: str) -> Dict[str, List[str]]:
     lines = raw_section.splitlines()
     current_cat: Optional[str] = None
     current_bullet_lines: List[str] = []
+    summary_lines: List[str] = []
+
+    def flush_summary() -> None:
+        """Join wrapped prose lines into one paragraph (blank line ends it)."""
+        if summary_lines:
+            categories["summary"].append(" ".join(summary_lines).strip())
+            summary_lines.clear()
 
     def classify_by_keywords(text: str) -> Optional[str]:
         # Check first line (title/header line of bullet) first
@@ -159,10 +166,12 @@ def parse_and_categorize_changelog(raw_section: str) -> Dict[str, List[str]]:
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("---") or stripped.startswith("***"):
+            flush_summary()
             continue
 
         # Subheading match: ### Added, ### Fixed, ### Changed, etc.
         if stripped.startswith("###"):
+            flush_summary()
             flush_bullet(current_cat, current_bullet_lines)
             current_bullet_lines = []
             header_lower = stripped.lower()
@@ -175,6 +184,7 @@ def parse_and_categorize_changelog(raw_section: str) -> Dict[str, List[str]]:
                 current_cat = "features"
             else:
                 clean_header = stripped.lstrip("#").strip()
+                flush_summary()
                 categories["summary"].append(f"**{clean_header}**")
                 current_cat = None
             continue
@@ -186,13 +196,15 @@ def parse_and_categorize_changelog(raw_section: str) -> Dict[str, List[str]]:
         )
 
         if is_top_level_bullet:
+            flush_summary()
             flush_bullet(current_cat, current_bullet_lines)
             current_bullet_lines = [stripped]
         elif current_bullet_lines:
             current_bullet_lines.append(line)
         else:
-            categories["summary"].append(stripped)
+            summary_lines.append(stripped)
 
+    flush_summary()
     flush_bullet(current_cat, current_bullet_lines)
     return categories
 
