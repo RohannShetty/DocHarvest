@@ -451,6 +451,18 @@ def stream_download(
     lock = threading.Lock()
     url_content: dict[str, str] = {}
 
+    # SPIKE 026: opt-in conditional revalidation. Off by default; when on,
+    # page GETs carry validators and a 304 reuses the cached HTML body.
+    changed_only = False
+    try:
+        from .revalidate import ConditionalSession, changed_only_enabled, load_cache, save_cache
+
+        changed_only = changed_only_enabled()
+        if changed_only:
+            session = ConditionalSession(session, load_cache(domain), crawl_urls)
+    except Exception:  # noqa: BLE001 - the prototype must never break a capture
+        changed_only = False
+
     # Playwright's sync API is thread-bound, so render mode uses one shared
     # browser on the calling thread; the non-render path stays parallel.
     renderer = None
@@ -559,6 +571,17 @@ def stream_download(
                 if content:
                     url_content[fetched_url] = content
 
+    if changed_only and isinstance(session, ConditionalSession):
+        try:
+            save_cache(domain, session.cache)
+        except Exception:  # noqa: BLE001 - cache persistence is best-effort
+            pass
+        logger.info(
+            "Changed-only refresh: %d page(s) revalidated, %d fetched",
+            session.revalidated,
+            session.fetched,
+        )
+
     # ── Assemble content ─────────────────────────────────────────
     # Deterministic order: follow crawl_urls order (discovery/BFS order),
     # never thread-completion order, so snapshot diffs stay stable.
@@ -615,6 +638,7 @@ def stream_download(
             "errors": pages_errored,
             "total_size_kb": round(total_size_kb, 1),
             "provider": provider.name,
+            "revalidated": session.revalidated if changed_only else 0,
         })
 
     return {
