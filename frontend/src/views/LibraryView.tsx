@@ -9,22 +9,20 @@ import {
   Layers, 
   Calendar, 
   HardDrive, 
-  Sparkles, 
-
   RefreshCw, 
   ArrowUpDown, 
-
   Check,
   Pencil,
   Edit3,
   X,
   CheckSquare,
   Square,
-  } from "lucide-react"
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { formatBytes } from "@/lib/utils"
 import { computeSelectAll } from "@/lib/flow"
 import { pyApi } from "@/lib/bridge"
@@ -179,18 +177,18 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       {/* Rename Dialog Modal */}
       {renamingDomain && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl animate-in zoom-in-95 duration-150">
+          <div className="relative w-full max-w-md border border-border bg-card p-6 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Edit3 className="h-5 w-5 text-primary" />
+                <Edit3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 <h3 className="text-base font-semibold text-foreground">Rename Documentation Project</h3>
               </div>
               <button
                 onClick={() => setRenamingDomain(null)}
                 aria-label="Close rename dialog"
-                className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" strokeWidth={1.5} />
               </button>
             </div>
 
@@ -248,10 +246,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Library className="h-6 w-6 text-primary" />
+              <Library className="h-6 w-6 text-primary" strokeWidth={1.5} />
               <span>Document Library</span>
             </h1>
-            <Badge variant="secondary" className="font-mono text-xs border border-border bg-muted/60">
+            <Badge variant="secondary" className="font-mono tabular-nums text-xs border border-border bg-muted/60">
               {library.length} doc sets
             </Badge>
           </div>
@@ -262,7 +260,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
         <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
           <div className="relative w-full sm:w-60">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
             <Input
               placeholder="Filter library..."
               value={filter}
@@ -274,13 +272,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 onClick={() => setFilter("")}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" strokeWidth={1.5} />
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 bg-background/80 border border-border p-1 rounded-lg">
-            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
+          <div className="flex items-center gap-1.5 bg-background/80 border border-border p-1">
+            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground ml-1" strokeWidth={1.5} />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortField)}
@@ -302,7 +300,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             }}
             className="h-9 px-3 text-xs border-border interactive-scale"
           >
-            {isBatchMode ? <CheckSquare className="h-3.5 w-3.5 mr-1 text-primary" /> : <Square className="h-3.5 w-3.5 mr-1" />}
+            {isBatchMode ? <CheckSquare className="h-3.5 w-3.5 mr-1 text-primary" strokeWidth={1.5} /> : <Square className="h-3.5 w-3.5 mr-1" strokeWidth={1.5} />}
             Batch
           </Button>
 
@@ -312,7 +310,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             onClick={onRefresh} 
             className="h-9 px-3 text-xs border-border interactive-scale"
           >
-            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} strokeWidth={1.5} />
             Refresh
           </Button>
         </div>
@@ -320,7 +318,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
       {/* Batch Action Bar */}
       {isBatchMode && (
-        <Card className="border-primary/40 bg-primary/10 shadow-sm p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-2">
+        <Card className="border-primary/40 bg-primary/10 p-3.5 flex items-center justify-between gap-3 animate-in slide-in-from-top-2">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
@@ -330,7 +328,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             >
               {selectedDomains.length === filteredAndSorted.length ? "Deselect All" : `Select All (${filteredAndSorted.length})`}
             </Button>
-            <span className="text-xs font-mono text-foreground font-semibold">
+            <span className="text-xs font-mono tabular-nums text-foreground font-semibold">
               {selectedDomains.length} item{selectedDomains.length === 1 ? "" : "s"} selected
             </span>
           </div>
@@ -343,7 +341,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               disabled={selectedDomains.length === 0}
               className="h-8 text-xs"
             >
-              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              <Trash2 className="h-3.5 w-3.5 mr-1" strokeWidth={1.5} />
               Delete Selected
             </Button>
           </div>
@@ -356,15 +354,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           Loading library entries...
         </div>
       ) : filteredAndSorted.length === 0 ? (
-        <Card className="sheet-card p-12 text-center border-dashed border-border/80">
-          <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 border border-primary/20">
-            <Library className="h-7 w-7" />
-          </div>
-          <h3 className="text-base font-semibold text-foreground">No documentation sources found</h3>
-          <p className="text-xs text-muted-foreground max-w-md mx-auto mt-1.5 leading-relaxed">
-            {filter ? `No library items match "${filter}". Clear your search query to see all sets.` : "Capture documentation from the Capture Studio to build your offline library."}
-          </p>
-        </Card>
+        <EmptyState
+          icon={Library}
+          title="No documentation sources found"
+          description={filter ? `No library items match "${filter}". Clear your search query to see all sets.` : "Capture documentation from the Capture Studio to build your offline library."}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAndSorted.map((item) => {
@@ -374,8 +368,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             return (
               <Card
                 key={item.domain}
-                className={`sheet-card flex flex-col justify-between group shadow-sm transition-all ${
-                  isSelected ? "border-primary bg-primary/10 shadow-md shadow-primary/15" : "hover:border-primary/50"
+                className={`sheet-card flex flex-col justify-between group transition-colors ${
+                  isSelected ? "border-primary bg-primary/10" : "hover:border-primary/50"
                 }`}
               >
                 <CardHeader className="p-5 pb-3">
@@ -384,13 +378,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       {isBatchMode ? (
                         <button
                           onClick={() => toggleSelectDomain(item.domain)}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center border border-border bg-background"
                         >
-                          {isSelected ? <Check className="h-4 w-4 text-primary" /> : null}
+                          {isSelected ? <Check className="h-4 w-4 text-primary" strokeWidth={1.5} /> : null}
                         </button>
                       ) : (
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-105 transition-transform">
-                          <BookOpen className="h-4 w-4" />
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-primary/10 text-primary border border-primary/20">
+                          <BookOpen className="h-4 w-4" strokeWidth={1.5} />
                         </div>
                       )}
                       <div className="overflow-hidden">
@@ -406,7 +400,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       </div>
                     </div>
 
-                    <Badge variant="secondary" className="text-xs font-mono shrink-0 bg-muted/60">
+                    <Badge variant="secondary" className="text-xs font-mono tabular-nums shrink-0 bg-muted/60">
                       {pageCount} pages
                     </Badge>
                   </div>
@@ -416,16 +410,16 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   {/* Meta details */}
                   <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground pt-3 border-t border-border/40">
                     <div className="flex items-center gap-1.5 truncate">
-                      <HardDrive className="h-3.5 w-3.5 text-muted-foreground/70" />
-                      <span className="font-mono">{formatBytes(item.size_bytes || 0)}</span>
+                      <HardDrive className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.5} />
+                      <span className="font-mono tabular-nums">{formatBytes(item.size_bytes || 0)}</span>
                     </div>
                     <div className="flex items-center gap-1.5 truncate">
-                      <Layers className="h-3.5 w-3.5 text-muted-foreground/70" />
-                      <span>{item.snapshot_count || item.snapshots?.length || 1} Snapshots</span>
+                      <Layers className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.5} />
+                      <span className="font-mono tabular-nums">{item.snapshot_count || item.snapshots?.length || 1} Snapshots</span>
                     </div>
                     <div className="col-span-2 flex items-center gap-1.5 truncate text-xs text-muted-foreground/80">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
-                      <span>{item.last_crawled || "Recently captured"}</span>
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" strokeWidth={1.5} />
+                      <span className="font-mono tabular-nums">{item.last_crawled || "Recently captured"}</span>
                     </div>
                   </div>
 
@@ -435,9 +429,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       variant="default"
                       size="sm"
                       onClick={() => onOpenDocReader(item.domain)}
-                      className="flex-1 h-8 text-xs font-medium gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs interactive-scale"
+                      className="flex-1 h-8 text-xs font-medium gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 interactive-scale"
                     >
-                      <Sparkles className="h-3.5 w-3.5" />
+                      <BookOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
                       <span>Read in Studio</span>
                     </Button>
 
@@ -448,7 +442,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       className="h-8 w-8 text-muted-foreground hover:text-foreground border-border interactive-scale"
                       title="Rename project"
                     >
-                      <Pencil className="h-3.5 w-3.5" />
+                      <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
                     </Button>
 
                     <Button
@@ -458,7 +452,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       className="h-8 w-8 text-muted-foreground hover:text-foreground border-border interactive-scale"
                       title="Export to RAG / PDF / JSONL"
                     >
-                      <FileUp className="h-3.5 w-3.5" />
+                      <FileUp className="h-3.5 w-3.5" strokeWidth={1.5} />
                     </Button>
 
                     {folderPath && (
@@ -469,7 +463,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                         className="h-8 w-8 text-muted-foreground hover:text-foreground border-border interactive-scale"
                         title="Open in Windows Explorer"
                       >
-                        <FolderOpen className="h-3.5 w-3.5" />
+                        <FolderOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
                       </Button>
                     )}
 
@@ -480,7 +474,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 interactive-scale"
                       title="Delete domain"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                     </Button>
                   </div>
                 </CardContent>

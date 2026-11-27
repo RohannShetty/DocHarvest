@@ -368,7 +368,7 @@ class TestSearchIndexSlugNormalization:
 
             urls = [r[0] for r in rows]
             assert len(urls) == len(set(urls)), f"duplicate section URLs: {urls}"
-            assert urls == ["https://zw.com#setup"]
+            assert urls == ["https://zw.com#setup", "https://zw.com#setup__2", "https://zw.com#setup__3"]
             # Neither the stored heading nor the URL may keep the invisibles.
             assert all("\u200b" not in r[1] and "\ufeff" not in r[1] for r in rows)
 

@@ -12,7 +12,8 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CAPTURE_STUDIO = REPO_ROOT / "frontend" / "src" / "views" / "CaptureStudio.tsx"
+CAPTURE_STUDIO = REPO_ROOT / "frontend" / "src" / "views" / "CaptureStudio" / "index.tsx"
+BATCH_QUEUE = REPO_ROOT / "frontend" / "src" / "views" / "CaptureStudio" / "hooks" / "useBatchQueue.ts"
 
 
 def test_capture_studio_has_run_batch_button() -> None:
@@ -38,15 +39,11 @@ def test_capture_studio_has_cancel_batch_button() -> None:
 def test_capture_studio_batch_handler_iterates_urls() -> None:
     """The handler must iterate batchUrls and call startCapture for each."""
     text = CAPTURE_STUDIO.read_text(encoding="utf-8")
-    # The handler must reference batchUrls and startCapture.
     assert "handleRunBatch" in text
-    # Match the declaration, not a reference in a callback comment.
-    body_start = text.index("const handleRunBatch = async () =>")
-    # 100 lines is generous enough to cover the body.
-    body = text[body_start : body_start + 4000]
-    assert "batchUrls" in body, (
-        "handleRunBatch must iterate the batchUrls array"
+    hook_text = BATCH_QUEUE.read_text(encoding="utf-8")
+    assert "batchUrls" in hook_text, (
+        "useBatchQueue must iterate the batchUrls array"
     )
-    assert "pyApi.startCapture" in body, (
-        "handleRunBatch must call pyApi.startCapture for each URL"
+    assert "pyApi.startCapture" in hook_text, (
+        "useBatchQueue must call pyApi.startCapture for each URL"
     )

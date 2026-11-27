@@ -83,8 +83,9 @@ class TestPageRelpath:
     def test_html_extension_stripped(self):
         assert page_relpath("https://x.com/guide.html") == "guide.md"
 
-    def test_query_and_fragment_ignored(self):
-        assert page_relpath("https://x.com/p?x=1#frag") == "p.md"
+    def test_query_encoded_and_fragment_ignored(self):
+        assert page_relpath("https://x.com/p?x=1#frag") == "p__q_x_1.md"
+        assert page_relpath("https://x.com/p#frag") == "p.md"
 
     def test_unsafe_characters_sanitised(self):
         rel = page_relpath("https://x.com/héllo wörld/page name")
@@ -127,9 +128,9 @@ class TestWritePageTree:
 
     def test_collision_gets_numeric_suffix(self, tmp_path):
         pages = [
-            CapturedPage(url="https://x.com/a?one=1", title="A1",
+            CapturedPage(url="https://x.com/a.html", title="A1",
                          content="first"),
-            CapturedPage(url="https://x.com/a?two=2", title="A2",
+            CapturedPage(url="https://x.com/a.md", title="A2",
                          content="second"),
         ]
         written, _ = write_page_tree(tmp_path, pages, crawl_date="D")

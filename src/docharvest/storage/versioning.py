@@ -26,6 +26,7 @@ from .manager import (
     format_semver,
     parse_semver,
 )
+from docharvest.providers.base import canonical_domain
 
 logger = logging.getLogger(__name__)
 
@@ -202,6 +203,7 @@ class VersionManager:
         # entries so the next-version computation sees reality.
         self.storage.reconcile_versions(domain)
 
+        domain = canonical_domain(domain)
         meta = self._ensure_meta(domain)
         candidates = [
             meta.get("latest_version", "1.0.0"),
@@ -268,6 +270,7 @@ class VersionManager:
 
     def get_versions(self, domain: str) -> list:
         """List all available versions for a domain (chronological order)."""
+        domain = canonical_domain(domain)
         meta = self.storage.get_metadata(domain)
         if not meta:
             return []
@@ -275,6 +278,7 @@ class VersionManager:
 
     def get_version_content(self, domain: str, version: str):
         """Read a specific version's content, or ``None`` if it doesn't exist."""
+        domain = canonical_domain(domain)
         return self.storage.load_doc_version(domain, version)
 
     # ------------------------------------------------------------------
@@ -289,6 +293,7 @@ class VersionManager:
         Raises:
             VersioningError: If either version is not found.
         """
+        domain = canonical_domain(domain)
         c1 = self.get_version_content(domain, v1)
         c2 = self.get_version_content(domain, v2)
 
@@ -330,6 +335,7 @@ class VersionManager:
         Raises:
             VersioningError: If the requested version does not exist.
         """
+        domain = canonical_domain(domain)
         content = self.get_version_content(domain, version)
         if content is None:
             raise VersioningError(f"Version {version} not found for {domain}")

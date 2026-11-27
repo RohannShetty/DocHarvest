@@ -8,16 +8,16 @@
 
 **CLI + Universal Skill first.** MCP is optional when you need a live tool surface.
 
-| `673 pages` | `18.2 s` | `~83% less boilerplate` |
+| `470 pages` | `76.4 s` | `5 files per capture` |
 |---:|---:|---:|
-| reference capture | reference capture | reference measurement |
+| full OpenAlgo capture, 2026-11-13 | local output | pages/, book.md, llms.txt, llms-full.txt, PDF |
 
-[![Version: 11.5.1](https://img.shields.io/badge/version-11.5.1-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
+[![Version: 11.6.0](https://img.shields.io/badge/version-11.6.0-3f3f46?style=flat-square&labelColor=18181b)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-71717a?style=flat-square&labelColor=18181b)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-a1a1aa?style=flat-square&labelColor=18181b)](pyproject.toml)
 [![Tests: 1001 passing](https://img.shields.io/badge/tests-1001%20passing%20(2026--11--13)-f59e0b?style=flat-square&labelColor=18181b)](docs/lib/stats.ts)
 
-> Reference measurement, not a guarantee: 673 pages captured in 18.2 seconds with approximately 83% boilerplate-token reduction. Reproduce the local retrieval benchmark with `python benchmarks/run.py`; replace this capture reference only with a fresh end-to-end measurement.
+> Reference measurement, not a guarantee: 470 pages captured from https://docs.openalgo.in in 76.4 seconds on 2026-11-13 (local output). No token-reduction multiple is claimed: a measured comparison found no reduction against the page's visible text. Reproduce the retrieval fixture with `python benchmarks/run.py`; the full method is in `docs/CLAIMS.md`.
 ```bash
 pip install docharvest && docharvest capture https://docs.example.com/
 ```
@@ -31,15 +31,15 @@ pip install docharvest && docharvest capture https://docs.example.com/
 
 ## ⚡ Overview
 
-**Your coding agent doesn't read documentation — it reads web pages.** Navbars, cookie banners, search modals, and footer scripts make up **80–85% of a raw page's bytes** before a single API fact arrives. Chunks captured without source URLs make hallucinations unfalsifiable, and per-page cloud scraping API bills spike the moment you index a real documentation portal.
+**Your coding agent doesn't read documentation — it reads web pages.** Navbars, cookie banners, search modals, and footer scripts make up **most of a raw page's bytes** before a single API fact arrives. Chunks captured without source URLs make hallucinations unfalsifiable, and per-page cloud scraping API bills spike the moment you index a real documentation portal.
 
 **DocHarvest** (package: `docharvest`) compiles any technical documentation site into a pristine, structured local knowledge base with verifiable SHA-256 provenance:
 
-- ⚡ **Ultra-Fast Throughput**: Reference capture of **673 pages in 18.2 seconds** (~37 pages/sec) directly into SQLite FTS5 BM25 search and semantic graphs.
-- 🎯 **~83% Token Reduction**: Eliminates boilerplate DOM trees, sidebars, anchor spam, and tracking wrappers, delivering high-density context directly to your LLMs.
-- 📐 **OpenSpec SDD Native**: Integrated spec-driven development harnesses and prompt commands (`opsx-*`) across 14+ agent environments.
+- ⚡ **One-Pass Capture**: 470 pages from a live portal in 76.4 seconds (2026-11-13), written straight into SQLite FTS5 BM25 search and the concept graph.
+- 🎯 **Noise Stripped, Provenance Kept**: Removes boilerplate DOM trees, sidebars, anchor spam and tracking wrappers, and keeps each page's source URL and SHA-256 content hash so a citation can be checked later (`docs/CLAIMS.md`).
+- 📐 **OpenSpec SDD Native**: Integrated spec-driven development harnesses and prompt commands (`opsx-*`) across 17 documented agent harness directories.
 - 🖥️ **Universal Desktop & Browser GUI**: Seamless native window with zero-dependency standalone HTTP/SSE browser fallback across any default system browser.
-- 🧠 **Universal Agent Skill (`SKILL.md`)**: Bundled, harness-neutral intelligence that equips 14+ coding agents (Cursor, Claude Code, Windsurf, Gemini CLI, Oh My Pi, Codex) with self-orchestrated harvesting and retrieval workflows via a single install command (`docharvest skill install docharvest -o <dir>`).
+- 🧠 **Universal Agent Skill (`SKILL.md`)**: Bundled, harness-neutral intelligence that equips 17 documented harness directories (Cursor, Claude Code, Windsurf, Gemini CLI, Oh My Pi, Codex and more) with self-orchestrated harvesting and retrieval workflows via a single install command (`docharvest skill install docharvest -o <dir>`).
 - 🔌 **Native FastMCP v2 Server**: 12 zero-friction tools in an opt-in full profile, with a smaller default profile for lower schema cost; MCP Resources (`docs://{domain}/book`), and MCP Prompts over stdio.
 - 🔒 **Deterministic SHA-256 Provenance**: Every page is stored with an exact SHA-256 content hash in YAML frontmatter for caching, version diffing, and citation verification.
 
@@ -87,10 +87,10 @@ DocHarvest features dedicated, priority-ordered parsers that extract clean artic
 
 ## 🌟 Key Capabilities
 
-- 🤖 **Zero-Noise LLM Context**: Auto-detects 8 documentation frameworks, probes native `.md` endpoints, and cleans DOM trees — measured at ~83% token reduction vs raw pages.
+- 🤖 **Zero-Noise LLM Context**: Auto-detects 8 documentation frameworks, probes native `.md` endpoints, and cleans DOM trees (method and measurements in `docs/CLAIMS.md`).
 - 📦 **Five-Part Output Contract**: Every capture yields a modular `pages/` tree with SHA-256 YAML frontmatter, a consolidated `book.md` with TOC, `llms.txt`, a full-content `llms-full.txt`, and search index records.
 - 🚀 **Export Studio & Local Search**: RAG JSONL for vector databases, pure-Python PDF handbooks (`fpdf2`, zero C-dependencies), and AST markdown chunks — all indexed into embedded SQLite FTS5 BM25 search.
-- 🔌 **Native FastMCP v2 Server**: A minimal schema is the default; `docharvest mcp --profile full` exposes all 12 tools plus resources and prompts over stdio. Crash-safe atomic storage and semver snapshot diffing included.
+- 🔌 **Native FastMCP v2 Server**: A minimal schema is the default; `docharvest mcp --profile full` exposes all 12 tools plus 2 resource templates and 2 prompts over stdio. Crash-safe atomic storage and semver snapshot diffing included.
 
 ### What DocHarvest Is *Not* For
 
@@ -369,7 +369,7 @@ Tool profiles are documented in [`docs/TOOL_PROFILES.md`](docs/TOOL_PROFILES.md)
 
 ---
 
-### Zero-Setup MCP Configuration Snippets (14 Clients)
+### Zero-Setup MCP Configuration Snippets (29 Clients)
 
 #### 1. Claude Code
 ```bash

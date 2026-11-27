@@ -1,17 +1,17 @@
 """DocHarvest — Desktop GUI and CLI surface.
 
-    gitbook-dl                        → Desktop GUI (or TUI fallback)
-    gitbook-dl gui                    → Desktop GUI
-    gitbook-dl capture <url> [--scope P]... [--exclude P]... [--max-pages N]
+    docharvest                        → Desktop GUI (or TUI fallback)
+    docharvest gui                    → Desktop GUI
+    docharvest capture <url> [--scope P]... [--exclude P]... [--max-pages N]
                   [--workers N] [--latest-only] [--versions v1,v2]
                   [--output both|library|local] [-o DIR] [--no-snapshot]
                   [--preset NAME]                                     (alias: dl)
-    gitbook-dl <url>                  → sugar for capture
-    gitbook-dl search QUERY [-d DOMAIN] [-l N]
-    gitbook-dl ls                     → library domains (alias: list)
-    gitbook-dl history DOMAIN · diff DOMAIN V1 V2
-    gitbook-dl split FILE --max-mb X [-o DIR] [-q]
-    gitbook-dl config [init|show|path] · mcp · tui
+    docharvest <url>                  → sugar for capture
+    docharvest search QUERY [-d DOMAIN] [-l N]
+    docharvest ls                     → library domains (alias: list)
+    docharvest history DOMAIN · diff DOMAIN V1 V2
+    docharvest split FILE --max-mb X [-o DIR] [-q]
+    docharvest config [init|show|path] · mcp · tui
 
 All captures go through the facade (:func:`docharvest.api.capture`)
 — this module owns no download logic.
@@ -26,7 +26,7 @@ from pathlib import Path
 try:
     from . import __version__
 except ImportError:  # pragma: no cover - direct-script fallback
-    __version__ = "11.5.1"
+    __version__ = "11.6.0"
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ def _launch_tui() -> int:
               file=sys.stderr)
         print("It needs the 'textual' package "
               "(pip install \"docharvest[tui]\").", file=sys.stderr)
-        print("You can still use the CLI:  gitbook-dl capture <url>",
+        print("You can still use the CLI:  docharvest capture <url>",
               file=sys.stderr)
         return 1
     tui_run()
@@ -329,10 +329,12 @@ def _export_root(result) -> Path:
 
 def cmd_search(args) -> int:
     """Search downloaded documentation."""
+    from .providers.base import canonical_domain
     from .search import SearchIndex
 
     search = SearchIndex()
-    results = search.search(args.query, domain=args.domain, limit=args.limit)
+    domain = canonical_domain(args.domain) if args.domain else None
+    results = search.search(args.query, domain=domain, limit=args.limit)
 
     if not results:
         print(f"No results found for '{args.query}'.")
@@ -365,7 +367,7 @@ def cmd_list(args) -> int:
     domains = storage.list_domains()
 
     if not domains:
-        print("No domains captured yet. Try: gitbook-dl capture <url>")
+        print("No domains captured yet. Try: docharvest capture <url>")
         return 0
 
     _top, _title, _bottom = _banner(f"Library Domains ({len(domains)} total)")
@@ -384,19 +386,21 @@ def cmd_list(args) -> int:
 
 def cmd_history(args) -> int:
     """Show snapshot history for one domain."""
+    from .providers.base import canonical_domain
     from .storage import StorageManager, VersionManager
 
     storage = StorageManager()
     versioning = VersionManager(storage)
+    domain = canonical_domain(args.domain)
 
-    if not storage.domain_exists(args.domain):
-        print(f"Domain '{args.domain}' not found in the library.", file=sys.stderr)
+    if not storage.domain_exists(domain):
+        print(f"Domain '{domain}' not found in the library.", file=sys.stderr)
         return 1
 
-    meta = storage.get_metadata(args.domain) or {}
-    versions = versioning.get_versions(args.domain)
+    meta = storage.get_metadata(domain) or {}
+    versions = versioning.get_versions(domain)
 
-    _top, _title, _bottom = _banner(f"History: {args.domain}")
+    _top, _title, _bottom = _banner(f"History: {domain}")
     print(f"\n{_top}")
     print(_title)
     print(f"{_bottom}\n")
@@ -417,17 +421,19 @@ def cmd_history(args) -> int:
 
 def cmd_diff(args) -> int:
     """Diff two snapshots of a domain."""
+    from .providers.base import canonical_domain
     from .storage import StorageManager, VersionManager, VersioningError
 
     storage = StorageManager()
     versioning = VersionManager(storage)
+    domain = canonical_domain(args.domain)
 
-    if not storage.domain_exists(args.domain):
-        print(f"Domain '{args.domain}' not found in storage.", file=sys.stderr)
+    if not storage.domain_exists(domain):
+        print(f"Domain '{domain}' not found in storage.", file=sys.stderr)
         return 1
 
     try:
-        diff_text = versioning.diff(args.domain, args.v1, args.v2)
+        diff_text = versioning.diff(domain, args.v1, args.v2)
     except VersioningError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
@@ -499,7 +505,7 @@ def cmd_config(args) -> int:
         written = init_default_config(dest)
         print(f"Config ready: {written}")
         if not args.project:
-            print("(Project-level file: gitbook-dl config init --project)")
+            print("(Project-level file: docharvest config init --project)")
         return 0
 
     if action == "path":
@@ -648,7 +654,7 @@ def cmd_skill(args) -> int:
         if name is None:
             print(
                 f"Multiple skills bundled ({', '.join(names)}); name one: "
-                f"gitbook-dl skill install <name>",
+                f"docharvest skill install <name>",
                 file=sys.stderr,
             )
             return 1
@@ -677,7 +683,7 @@ def cmd_skill(args) -> int:
     for skill_name in names:
         print(f"  • {skill_name}  →  {skill_file(skill_name)}")
     print("\nInstall into a harness directory:")
-    print("  gitbook-dl skill install docharvest -o .claude/skills")
+    print("  docharvest skill install docharvest -o .claude/skills")
     return 0
 
 
@@ -946,7 +952,7 @@ def main(argv: list[str] | None = None) -> int:
     elif first in ("--tui", "-tui"):
         return _launch_tui()
 
-    # Bare-URL sugar: `gitbook-dl https://…` == `gitbook-dl capture https://…`
+    # Bare-URL sugar: `docharvest https://…` == `docharvest capture https://…`
     if _looks_like_url(argv[0]):
         argv.insert(0, "capture")
 

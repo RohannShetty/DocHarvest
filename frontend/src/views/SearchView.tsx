@@ -1,9 +1,10 @@
 import React, { useState } from "react"
-import { Search, BookOpen, Hash, Copy, Check, X, } from "lucide-react"
+import { Search, BookOpen, Hash, Copy, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { pyApi } from "@/lib/bridge"
 import { onEnterSubmit } from "@/lib/keyboard"
 import { toast } from "sonner"
@@ -61,7 +62,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
     const parts = text.split(new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'))
     return parts.map((part, i) => 
       part.toLowerCase() === highlight.toLowerCase() ? (
-        <mark key={i} className="bg-primary/30 text-foreground font-semibold px-0.5 rounded">
+        <mark key={i} className="bg-primary/30 text-foreground font-semibold px-0.5 rounded-none">
           {part}
         </mark>
       ) : part
@@ -74,7 +75,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
       <div>
         <div className="flex items-center gap-2.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Search className="h-6 w-6 text-primary" />
+            <Search className="h-6 w-6 text-primary" strokeWidth={1.5} />
             <span>Search Studio</span>
           </h1>
           <Badge variant="secondary" className="font-mono text-xs border border-border bg-muted/60">
@@ -87,17 +88,17 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
       </div>
 
       {/* Search Input Bar */}
-      <Card className="sheet-card shadow-sm border-border/70">
+      <Card className="sheet-card border-border/70">
         <CardContent className="p-5 space-y-3.5">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
               <Input
                 placeholder="Query keyword, function name, API endpoint, or topic..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => onEnterSubmit(e, handleSearch)}
-                className="pl-10 pr-9 h-11 text-sm bg-background/80 font-mono focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+                className="pl-10 pr-9 h-11 text-sm bg-background/80 font-mono focus-visible:ring-2 focus-visible:ring-primary/40"
               />
               {query && (
                 <button
@@ -109,7 +110,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                   aria-label="Clear search query"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4" strokeWidth={1.5} />
                 </button>
               )}
             </div>
@@ -117,7 +118,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
             <select
               value={selectedDomain}
               onChange={(e) => setSelectedDomain(e.target.value)}
-              className="h-11 rounded-lg border border-border bg-background/80 px-3 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary/40 font-mono"
+              className="h-11 border border-border bg-background/80 px-3 text-xs text-foreground outline-none focus:ring-2 focus:ring-primary/40 font-mono"
             >
               <option value="all">All Documentation Domains ({library.length})</option>
               {library.map((item) => (
@@ -130,7 +131,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
             <Button
               onClick={() => handleSearch()}
               disabled={searching || !query.trim()}
-              className="h-11 px-7 font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 interactive-scale"
+              className="h-11 px-7 font-semibold bg-primary text-primary-foreground hover:bg-primary/90 interactive-scale"
             >
               {searching ? "Searching..." : "Search"}
             </Button>
@@ -146,7 +147,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                   setQuery(sq)
                   handleSearch(sq)
                 }}
-                className="text-xs px-2.5 py-0.5 rounded-full border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors font-mono"
+                className="text-xs px-2.5 py-0.5 border border-border/60 bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors font-mono"
               >
                 {sq}
               </button>
@@ -161,26 +162,27 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
           Querying full-text search index...
         </div>
       ) : hasSearched && results.length === 0 ? (
-        <Card className="sheet-card p-10 text-center border-dashed border-border/80">
-          <p className="text-sm text-muted-foreground">No matches found for &quot;{query}&quot;. Try a different keyword or search across all domains.</p>
-        </Card>
+        <EmptyState
+          title="No matches found"
+          description={`No matches found for "${query}". Try a different keyword or search across all domains.`}
+        />
       ) : results.length > 0 ? (
         <div className="space-y-3.5 animate-in fade-in-50 duration-300">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-mono px-1">
-            <span>Found {results.length} matching section{results.length === 1 ? "" : "s"}</span>
+            <span className="tabular-nums">Found {results.length} matching section{results.length === 1 ? "" : "s"}</span>
             <span>Ranked by BM25 relevance</span>
           </div>
 
           <div className="flex flex-col gap-3">
             {results.map((r, idx) => (
-              <Card key={idx} className="sheet-card p-4.5 hover:border-primary/50 transition-all shadow-sm">
+              <Card key={idx} className="sheet-card p-4.5 hover:border-primary/50 transition-colors">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2 overflow-hidden flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-foreground truncate font-mono">{r.title || r.domain}</span>
                       {r.section_heading && (
                         <Badge variant="outline" className="text-xs font-mono py-0 h-4 border-primary/30 text-primary bg-primary/5">
-                          <Hash className="h-3 w-3 mr-0.5" />
+                          <Hash className="h-3 w-3 mr-0.5" strokeWidth={1.5} />
                           {r.section_heading}
                         </Badge>
                       )}
@@ -188,14 +190,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                         {r.domain}
                       </Badge>
                       {r.rank !== undefined && (
-                        <Badge variant="secondary" className="text-xs font-mono py-0 h-4 bg-muted/60 text-muted-foreground">
+                        <Badge variant="secondary" className="text-xs font-mono tabular-nums py-0 h-4 bg-muted/60 text-muted-foreground">
                           score: {r.rank}
                         </Badge>
                       )}
                     </div>
 
                     {r.snippet && (
-                      <p className="text-xs text-muted-foreground font-mono leading-relaxed line-clamp-3 bg-muted/30 p-2.5 rounded-lg border border-border/40 select-text">
+                      <p className="text-xs text-muted-foreground font-mono leading-relaxed line-clamp-3 bg-muted/30 p-2.5 border border-border/40 select-text">
                         {highlightSnippet(r.snippet, query)}
                       </p>
                     )}
@@ -208,7 +210,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                       onClick={() => onOpenDocReader(r.domain)}
                       className="h-8 text-xs text-primary border-primary/30 hover:bg-primary/10 interactive-scale"
                     >
-                      <BookOpen className="h-3.5 w-3.5 mr-1.5" />
+                      <BookOpen className="h-3.5 w-3.5 mr-1.5" strokeWidth={1.5} />
                       Read
                     </Button>
 
@@ -221,9 +223,9 @@ export const SearchView: React.FC<SearchViewProps> = ({ library, onOpenDocReader
                         title="Copy text snippet"
                       >
                         {copiedIndex === idx ? (
-                          <Check className="h-3 w-3 text-success mr-1" />
+                          <Check className="h-3 w-3 text-success mr-1" strokeWidth={1.5} />
                         ) : (
-                          <Copy className="h-3 w-3 mr-1" />
+                          <Copy className="h-3 w-3 mr-1" strokeWidth={1.5} />
                         )}
                         <span>{copiedIndex === idx ? "Copied" : "Copy"}</span>
                       </Button>

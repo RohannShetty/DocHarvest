@@ -36,6 +36,30 @@ def strip_www_prefix(host: str) -> str:
     return (host or "").removeprefix("www.")
 
 
+def canonical_domain(raw: str) -> str:
+    """Normalize any domain input or URL into a canonical domain string.
+
+    Strips scheme, path, query, www prefix, trailing slashes, converts to lowercase,
+    normalizes default ports (:80, :443), while preserving custom ports.
+    """
+    text = str(raw or "").strip()
+    if not text:
+        return ""
+    if "://" in text:
+        p = urlparse(text)
+        netloc = p.netloc or p.path.split("/")[0]
+    else:
+        netloc = text.split("/")[0]
+    # Strip www. prefix, lowercase hostname, preserve custom port
+    netloc = strip_www_prefix(netloc.lower())
+    # Normalize standard ports
+    if netloc.endswith(":80"):
+        netloc = netloc[:-3]
+    elif netloc.endswith(":443"):
+        netloc = netloc[:-4]
+    return netloc
+
+
 def content_probe_url(url: str) -> str:
     """Path-only form of *url* for ``<url>.md`` content probes.
 

@@ -33,6 +33,7 @@ from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
 from docharvest import __version__
+from docharvest.providers.base import canonical_domain
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -179,21 +180,15 @@ def _extract_topic_bounded(content: str, topic: Optional[str], max_tokens: int =
     Returns:
         Bounded, clean markdown string.
     """
-    from docharvest.splitter import extract_topic_context
+    from docharvest.splitter import _split_markdown_sections, extract_topic_context
 
     if not content:
         return ""
     if not topic or not topic.strip():
         return extract_topic_context(content, topic=None, max_tokens=max_tokens)
 
-    # Split into sections exactly like splitter.extract_topic_context does,
-    # so the ranking here lines up with its downstream budget assembly.
-    raw_sections = content.split("\n#")
-    sections: list[str] = []
-    for i, sec in enumerate(raw_sections):
-        if i > 0:
-            sec = "#" + sec
-        sections.append(sec)
+    # Split into sections respecting code fences
+    sections = _split_markdown_sections(content)
 
     topic_norm = _normalize_topic_text(topic)
     # Containment keeps the splitter's raw-substring semantics; only the
@@ -490,6 +485,7 @@ def _read_doc_blocking(
     max_tokens: int,
     version: Optional[str],
 ) -> dict:
+    domain = canonical_domain(domain)
     try:
         # 1. If path is provided, attempt to load that specific page
         if path:
@@ -566,6 +562,7 @@ async def get_doc(
 
 
 def _get_doc_blocking(domain: str, version: Optional[str]) -> dict:
+    domain = canonical_domain(domain)
     try:
         if version:
             content = _versioning.get_version_content(domain, version)
@@ -611,6 +608,7 @@ async def diff_versions(
 
 
 def _diff_versions_blocking(domain: str, v1: str, v2: str) -> dict:
+    domain = canonical_domain(domain)
     try:
         diff_text = _versioning.diff(domain, v1, v2)
         added = sum(
@@ -645,6 +643,7 @@ async def list_versions(domain: str) -> list[dict]:
 
 
 def _list_versions_blocking(domain: str) -> list[dict]:
+    domain = canonical_domain(domain)
     try:
         versions = _versioning.get_versions(domain)
         if not versions:
@@ -674,6 +673,7 @@ async def export_docs(
 
 
 def _export_docs_blocking(domain: str, format: str) -> dict:
+    domain = canonical_domain(domain)
     try:
         content = _storage.load_doc(domain)
         if content is None:
@@ -761,6 +761,7 @@ async def get_changelog(domain: str) -> dict:
 
 
 def _get_changelog_blocking(domain: str) -> dict:
+    domain = canonical_domain(domain)
     try:
         entries = _versioning.changelog(domain)
         return {
@@ -798,6 +799,7 @@ def _query_doc_graph_blocking(domain: str, query: str, limit: int) -> dict:
     try:
         from docharvest.search.graph import build_graph_from_pages
 
+        domain = canonical_domain(domain)
         domain_dir = _storage._domain_dir(domain)
         pages_dir = domain_dir / "pages"
         graph = build_graph_from_pages(domain, pages_dir)
@@ -827,6 +829,7 @@ def _get_related_concepts_blocking(domain: str, concept: str) -> dict:
     try:
         from docharvest.search.graph import build_graph_from_pages
 
+        domain = canonical_domain(domain)
         domain_dir = _storage._domain_dir(domain)
         pages_dir = domain_dir / "pages"
         graph = build_graph_from_pages(domain, pages_dir)
@@ -850,6 +853,7 @@ if hasattr(mcp, "resource"):
 
 
 def _get_book_resource_blocking(domain: str) -> str:
+    domain = canonical_domain(domain)
     content = _storage.load_doc(domain)
     if content is None:
         return f"No documentation found for domain: {domain}"
@@ -857,6 +861,7 @@ def _get_book_resource_blocking(domain: str) -> str:
 
 
 def _get_manifest_resource_blocking(domain: str) -> str:
+    domain = canonical_domain(domain)
     manifest_path = _storage._domain_dir(domain) / "llms.txt"
     if manifest_path.exists():
         try:

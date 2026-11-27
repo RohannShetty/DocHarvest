@@ -140,7 +140,6 @@ export const SettingsView: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
     pyApi
       .getConfig()
       .then((res) => {
@@ -220,8 +219,8 @@ export const SettingsView: React.FC = () => {
   if (!form) {
     return (
       <div className="flex-1 p-8">
-        <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
-          <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+        <div className="flex items-start gap-2 border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
+          <AlertCircle className="h-4 w-4 shrink-0 text-destructive" strokeWidth={1.5} />
           <span>{error || "Configuration unavailable."}</span>
         </div>
       </div>
@@ -234,7 +233,7 @@ export const SettingsView: React.FC = () => {
       <div>
         <div className="flex items-center gap-2.5">
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Settings className="h-6 w-6 text-primary" />
+            <Settings className="h-6 w-6 text-primary" strokeWidth={1.5} />
             <span>Preferences</span>
           </h1>
           <Badge variant="secondary" className="font-mono text-xs border border-border bg-muted/60">
@@ -247,17 +246,17 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+        <div className="flex items-start gap-2 border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
+          <AlertCircle className="h-4 w-4 shrink-0 text-destructive" strokeWidth={1.5} />
           <span>{error}</span>
         </div>
       )}
 
       {/* Capture defaults */}
-      <Card className="sheet-card shadow-sm border-border/70">
+      <Card className="sheet-card border-border/70">
         <CardHeader className="p-5 pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Layers className="h-4 w-4 text-primary" />
+            <Layers className="h-4 w-4 text-primary" strokeWidth={1.5} />
             <span>Capture Defaults</span>
           </CardTitle>
           <CardDescription className="text-xs">
@@ -378,7 +377,7 @@ export const SettingsView: React.FC = () => {
       </Card>
 
       {/* Scope */}
-      <Card className="sheet-card shadow-sm border-border/70">
+      <Card className="sheet-card border-border/70">
         <CardHeader className="p-5 pb-3">
           <CardTitle className="text-sm font-semibold">Crawl Scope</CardTitle>
           <CardDescription className="text-xs">
@@ -406,10 +405,10 @@ export const SettingsView: React.FC = () => {
       </Card>
 
       {/* Files */}
-      <Card className="sheet-card shadow-sm border-border/70">
+      <Card className="sheet-card border-border/70">
         <CardHeader className="p-5 pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <FileCode2 className="h-4 w-4 text-primary" />
+            <FileCode2 className="h-4 w-4 text-primary" strokeWidth={1.5} />
             <span>Config Files</span>
           </CardTitle>
           <CardDescription className="text-xs">
@@ -423,7 +422,7 @@ export const SettingsView: React.FC = () => {
           {paths.map((entry) => (
             <div
               key={entry.label}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/50 px-3 py-2"
+              className="flex items-center justify-between gap-3 border border-border/60 bg-background/50 px-3 py-2"
             >
               <div className="flex flex-col overflow-hidden">
                 <div className="flex items-center gap-2">
@@ -432,7 +431,7 @@ export const SettingsView: React.FC = () => {
                   </span>
                   {entry.exists ? (
                     <Badge variant="outline" className="gap-1 text-xs border-success/40 text-success">
-                      <CheckCircle2 className="h-3 w-3" />
+                      <CheckCircle2 className="h-3 w-3" strokeWidth={1.5} />
                       present
                     </Badge>
                   ) : (
@@ -452,7 +451,7 @@ export const SettingsView: React.FC = () => {
                   handleOpenFolder(entry.path.replace(/[\\/][^\\/]+$/, ""))
                 }
               >
-                <FolderOpen className="h-4 w-4 mr-1.5" />
+                <FolderOpen className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
                 Open
               </Button>
             </div>
@@ -462,7 +461,7 @@ export const SettingsView: React.FC = () => {
 
       {/* Presets */}
       {presetNames.length > 0 && (
-        <Card className="sheet-card shadow-sm border-border/70">
+        <Card className="sheet-card border-border/70">
           <CardHeader className="p-5 pb-3">
             <CardTitle className="text-sm font-semibold">Presets</CardTitle>
             <CardDescription className="text-xs">
@@ -473,7 +472,7 @@ export const SettingsView: React.FC = () => {
             {presetNames.map((name) => {
               const url = presets[name]?.url
               return (
-                <div key={name} className="rounded-lg border border-border/60 bg-background/50 px-3 py-2">
+                <div key={name} className="border border-border/60 bg-background/50 px-3 py-2">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="font-mono text-xs">
                       {name}
@@ -492,10 +491,10 @@ export const SettingsView: React.FC = () => {
       )}
 
       {/* Save bar */}
-      <div className="sticky bottom-0 flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-card/95 px-4 py-3 shadow-sm backdrop-blur">
+      <div className="sticky bottom-0 flex items-center justify-between gap-4 border border-border/70 bg-card/95 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleResetToDefaults}>
-            <RotateCcw className="h-4 w-4 mr-1.5" />
+            <RotateCcw className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
             Reset to defaults
           </Button>
           <Select value={scope} onValueChange={(value) => setScope(value as Scope)}>
@@ -509,7 +508,7 @@ export const SettingsView: React.FC = () => {
           </Select>
         </div>
         <Button onClick={handleSave} disabled={saving}>
-          <Save className="h-4 w-4 mr-1.5" />
+          <Save className="h-4 w-4 mr-1.5" strokeWidth={1.5} />
           {saving ? "Saving…" : "Save preferences"}
         </Button>
       </div>

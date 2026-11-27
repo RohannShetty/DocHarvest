@@ -48,15 +48,15 @@ Goals, in priority order: (1) more qualified traffic from high-intent documentat
 
 | Metric | Canonical value | Source of truth |
 |---|---|---|
-| Reference capture | **673 pages in 18.2s** (full OpenAlgo suite) | User-confirmed 2026-09-04 |
-| Token reduction | **~83%** (82.8% measured) | HN benchmark |
-| Throughput | **~37 pages/sec** (673 / 18.2) | Derived |
-| Raw-page noise share | **80–85% of raw page bytes** | HN bottleneck analysis |
+| Reference capture | **470 pages in 76.4s** (full OpenAlgo capture) | Measured 2026-11-13, `docs/CLAIMS.md` |
+| Token reduction | **not claimed** — no reduction vs visible text; 99.6% fewer bytes vs raw HTML markup | Measured 2026-11-13, `docs/CLAIMS.md` |
+| Throughput | **~6.2 pages/sec** (470 / 76.4) | Derived from the measured capture |
+| Raw-page noise share | **most of a raw page's bytes** (no single number claimed) | Unverified |
 | MCP tools | **12** (+2 resources, 2 prompts) | `mcp/server.py` |
 | Documented AI clients | **14** | README config matrix |
 | Doc platforms | **8 dedicated + generic** | `providers/` |
 | Test suite | **generated** — `testsPassing` / `testsCollected` in `docs/lib/stats.ts` | `node docs/scripts/sync-stats.mjs --run` (do not hand-edit) |
-| Version | **v11.5.1** | `pyproject.toml` |
+| Version | **v11.6.0** | `pyproject.toml` |
 | License / price | **MIT / $0** | LICENSE |
 
 ---

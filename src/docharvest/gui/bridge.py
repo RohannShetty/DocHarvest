@@ -732,8 +732,12 @@ class ApiBridge:
     ) -> dict[str, Any]:
         """Compute diff between two snapshots."""
         try:
-            old_text = self._storage.load_doc_version(domain, old_version) or ""
-            new_text = self._storage.load_doc_version(domain, new_version) or ""
+            old_text = self._storage.load_doc_version(domain, old_version)
+            if old_text is None:
+                old_text = self._storage.load_doc(domain) or ""
+            new_text = self._storage.load_doc_version(domain, new_version)
+            if new_text is None:
+                new_text = self._storage.load_doc(domain) or ""
 
             diff_lines = list(
                 difflib.unified_diff(

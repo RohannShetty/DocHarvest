@@ -8,6 +8,44 @@ This is the exact logic that produced the 37 clean chunks from the 39 MB downloa
 import os
 
 
+def _split_markdown_sections(content: str) -> list[str]:
+    """Split markdown into sections on header boundaries (`#`),
+    ignoring `#` characters inside fenced code blocks (``` or ~~~).
+    """
+    if not content:
+        return []
+
+    lines = content.splitlines(keepends=True)
+    sections: list[str] = []
+    current_section: list[str] = []
+    in_code_block = False
+    fence_char = ""
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            fence = stripped[:3]
+            if not in_code_block:
+                in_code_block = True
+                fence_char = fence[0]
+            elif fence[0] == fence_char:
+                in_code_block = False
+                fence_char = ""
+
+        # A markdown heading starts with '#' when not inside a code block
+        if not in_code_block and line.startswith("#"):
+            if current_section:
+                sections.append("".join(current_section))
+                current_section = []
+
+        current_section.append(line)
+
+    if current_section:
+        sections.append("".join(current_section))
+
+    return sections
+
+
 def split_markdown(input_path, output_dir=None, max_mb=1.0, progress_callback=None):
     """
     Split a markdown file into chunks on header boundaries.
@@ -32,16 +70,13 @@ def split_markdown(input_path, output_dir=None, max_mb=1.0, progress_callback=No
 
     max_bytes = int(max_mb * 1024 * 1024)
 
-    # Split on markdown headers — this is the key: we split at `\n#`
-    # so each chunk starts at a header boundary
-    sections = content.split("\n#")
+    # Split on markdown headers respecting code fences
+    sections = _split_markdown_sections(content)
     chunks: list[str] = []
     parts: list[str] = []
     current_bytes = 0
 
-    for i, section in enumerate(sections):
-        if i > 0:
-            section = "#" + section  # Restore the header marker
+    for section in sections:
         section_bytes = len(section.encode("utf-8"))
 
         # If adding this section would exceed the limit AND we already have content,
@@ -130,13 +165,12 @@ def extract_topic_context(content: str, topic: str | None = None, max_tokens: in
 
     max_chars = max(max_tokens * 4, 200)
 
-    # Split on header boundaries so each block starts with '#'
-    raw_sections = content.split("\n#")
-    sections: list[str] = []
-    for i, s in enumerate(raw_sections):
-        if i > 0:
-            s = "#" + s
-        sections.append(s)
+    if not topic or not topic.strip():
+        if len(content) <= max_chars:
+            return content.strip()
+
+    # Split on header boundaries respecting code fences
+    sections = _split_markdown_sections(content)
 
     selected_sections: list[str] = []
 

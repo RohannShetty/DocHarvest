@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { AppSidebar, TabId } from "@/components/AppSidebar"
 import { CommandMenu } from "@/components/CommandMenu"
 import { DocReaderModal } from "@/components/DocReaderModal"
@@ -14,6 +14,7 @@ import { SettingsView } from "@/views/SettingsView"
 import { OnboardingTour } from "@/components/OnboardingTour"
 import { Toaster } from "@/components/ui/sonner"
 import { pyApi } from "@/lib/bridge"
+import { useLibrary } from "@/hooks/useLibrary"
 
 const THEME_STORAGE_KEY = "docharvest_theme"
 
@@ -45,30 +46,16 @@ export function App() {
   const [tourOpen, setTourOpen] = useState<boolean>(false)
   const [systemInfo, setSystemInfo] = useState<any>(null)
   
-  // Library State
-  const [library, setLibrary] = useState<any[]>([])
-  const [loadingLibrary, setLoadingLibrary] = useState<boolean>(false)
+  // Global Cached Library State
+  const { library, loadingLibrary, refresh: refreshLibrary } = useLibrary()
   
   // Modal State
   const [readerDomain, setReaderDomain] = useState<string | null>(null)
   const [exportDomain, setExportDomain] = useState<string | undefined>(undefined)
 
-  const loadLibrary = async () => {
-    setLoadingLibrary(true)
-    try {
-      const items = await pyApi.listLibrary()
-      setLibrary(items || [])
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoadingLibrary(false)
-    }
-  }
-
-  // Fetch system info and library on mount
+  // Fetch system info and check tour on mount
   useEffect(() => {
     pyApi.getSystemInfo().then(setSystemInfo).catch(console.error)
-    loadLibrary()
     
     // Check if first-time user tour should be shown
     try {
@@ -80,11 +67,6 @@ export function App() {
       // Storage unavailable or restricted in webview
     }
   }, [])
-
-  // Reload library whenever the active tab changes to keep UI synchronized
-  useEffect(() => {
-    loadLibrary()
-  }, [activeTab])
 
   // Keep the documentElement class in sync with the theme state. This also
   // covers the initial mount, correcting index.html's "dark" default when a
@@ -139,14 +121,14 @@ export function App() {
         return
       }
 
-      // Refresh Library (Ctrl+R / Cmd+R when not prevented, or custom)
+      // Refresh Library (Shift+Ctrl+R / Shift+Cmd+R)
       if (e.key === "r" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
         e.preventDefault()
-        loadLibrary()
+        void refreshLibrary()
         return
       }
 
-      // Number-based tab switching (1-7 without Ctrl when not focused on input, or Ctrl+1..7 always)
+      // Number-based tab switching (1-8 without Ctrl when not focused on input, or Ctrl+1..8 always)
       if (!isInput && !e.altKey && !e.metaKey && !e.ctrlKey) {
         if (e.key === "1") { setActiveTab("capture"); return }
         if (e.key === "2") { setActiveTab("library"); return }
@@ -169,7 +151,7 @@ export function App() {
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [theme])
+  }, [theme, refreshLibrary])
 
   const handleSelectExport = (domain: string) => {
     setExportDomain(domain)
@@ -195,7 +177,7 @@ export function App() {
       <main className="flex-1 flex flex-col overflow-y-auto relative bg-background/50">
         {activeTab === "capture" && (
           <CaptureStudio
-            onCaptureCompleted={loadLibrary}
+            onCaptureCompleted={refreshLibrary}
             onOpenDocReader={setReaderDomain}
           />
         )}
@@ -203,7 +185,7 @@ export function App() {
           <LibraryView
             library={library}
             loading={loadingLibrary}
-            onRefresh={loadLibrary}
+            onRefresh={refreshLibrary}
             onOpenDocReader={setReaderDomain}
             onSelectExport={handleSelectExport}
           />

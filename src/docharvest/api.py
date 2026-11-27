@@ -318,10 +318,13 @@ def _parse_pages_from_text(text: str, fallback_url: str) -> list[dict]:
     if not text or not text.strip():
         return []
 
+    # Normalize line endings to LF
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+
     # Split by page delimiter with Source: header
-    parts = re.split(r"(?:^|\n\n)---\n\n(?=Source:\s*https?://)", text.strip())
+    parts = re.split(r"(?:^|\n\n)---\n\n(?=Source:\s*https?://)", normalized.strip())
     if not parts or (len(parts) == 1 and not parts[0].startswith("Source:")):
-        return [{"url": fallback_url, "title": "", "content": text}]
+        return [{"url": fallback_url, "title": "", "content": normalized}]
 
     parsed_items: list[dict] = []
     source_pattern = re.compile(r"^Source:\s*(https?://[^\s\n]+)\s*\n\n?", re.MULTILINE)
@@ -344,7 +347,7 @@ def _parse_pages_from_text(text: str, fallback_url: str) -> list[dict]:
 
         parsed_items.append({"url": page_url, "title": title, "content": content})
 
-    return parsed_items or [{"url": fallback_url, "title": "", "content": text}]
+    return parsed_items or [{"url": fallback_url, "title": "", "content": normalized}]
 
 
 def normalize_engine_result(raw, source_url: str):

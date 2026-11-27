@@ -1,6 +1,6 @@
-"""DocHarvest (docharvest) v11.5.1 — Modern shadcn/ui Desktop & CLI documentation harvesting platform."""
+"""DocHarvest (docharvest) v11.6.0 — Modern shadcn/ui Desktop & CLI documentation harvesting platform."""
 
-__version__ = "11.5.1"
+__version__ = "11.6.0"
 __author__ = "Rohan Shetty"
 
 from .utils import (

@@ -39,6 +39,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from docharvest.paths import LIBRARY_DIR_NAME, library_root
+from docharvest.providers.base import canonical_domain
 
 # Environment variable overriding the library base directory (used by tests
 # and sandboxed installs). Evaluated per-instance, not at import time.
@@ -370,7 +371,8 @@ class StorageManager:
         ``host:port`` domain (or any name Windows cannot store) still works;
         hostnames are unaffected.
         """
-        return self.base / "docs" / domain_to_path_name(domain)
+        canon = canonical_domain(domain)
+        return self.base / "docs" / domain_to_path_name(canon)
 
     def metadata_path(self, domain: str) -> Path:
         """Return ``~/.docharvest/docs/<domain>/metadata.json``."""
@@ -421,7 +423,7 @@ class StorageManager:
     def domain_lock(self, domain: str,
                     stale_seconds: float = LOCK_STALE_SECONDS) -> DomainLock:
         """Return an un-acquired :class:`DomainLock` for *domain*."""
-        return DomainLock(self.base, domain, stale_seconds=stale_seconds)
+        return DomainLock(self.base, canonical_domain(domain), stale_seconds=stale_seconds)
 
     def list_active_locks(self) -> list[dict]:
         """List metadata for all active / existing lock files."""
@@ -477,6 +479,7 @@ class StorageManager:
         ``latest_version`` / ``versions[]`` history is always preserved —
         snapshots are owned by :class:`~storage.versioning.VersionManager`.
         """
+        domain = canonical_domain(domain)
         self.ensure_domain_dir(domain)
 
         atomic_write_text(self.latest_path(domain), content)
@@ -547,23 +550,64 @@ class StorageManager:
         """Read a specific version's ``docs.md``.
 
         Accepts version strings with or without the ``v`` prefix.
+        Falls back to ``v1.0.1.md`` or ``docs.md`` if ``1.0.0`` / ``v1.0.0``
+        is requested and not directly stored as ``v1.0.0.md``.
         """
-        vpath = self.versions_dir(domain) / f"v{str(version).lstrip('v')}.md"
-        return vpath.read_text(encoding="utf-8") if vpath.exists() else None
+        raw_v = str(version).strip()
+        norm_v = f"v{raw_v.lstrip('v')}"
+        vdir = self.versions_dir(domain)
+        vpath = vdir / f"{norm_v}.md"
+        if vpath.exists():
+            return vpath.read_text(encoding="utf-8")
+
+        # Seed version fallback: version 1.0.0 / v1.0.0
+        if norm_v == "v1.0.0":
+            v101_path = vdir / "v1.0.1.md"
+            if v101_path.exists():
+                return v101_path.read_text(encoding="utf-8")
+            return self.load_doc(domain)
+
+        return None
 
     def load_page(self, domain: str, relpath: str) -> str | None:
         """Read an individual page from the domain's pages/ tree.
 
+        Supports relative paths (e.g. 'api/auth.md', 'pages/api/auth.md'),
+        full URLs (e.g. 'https://docs.example.com/api?page=2'), or paths
+        with query parameters.
+
         Returns None if the page file does not exist.
         """
-        clean_rel = str(relpath).lstrip("/\\")
-        pages_root = (self._domain_dir(domain) / "pages").resolve()
-        page_path = (pages_root / clean_rel).resolve()
-        try:
-            page_path.relative_to(pages_root)
-        except ValueError:
+        clean_rel = str(relpath or "").strip()
+        if not clean_rel:
             return None
-        return page_path.read_text(encoding="utf-8") if page_path.exists() and page_path.is_file() else None
+
+        from docharvest.output_contract import page_relpath
+
+        candidates: list[str] = []
+        if "://" in clean_rel:
+            candidates.append(page_relpath(clean_rel))
+        elif "?" in clean_rel:
+            candidates.append(page_relpath(f"https://{self._domain_dir(domain).name}/{clean_rel.lstrip('/')}"))
+
+        stripped = clean_rel.lstrip("/\\")
+        if stripped.startswith("pages/") or stripped.startswith("pages\\"):
+            stripped = stripped[6:].lstrip("/\\")
+        candidates.append(stripped)
+        if not stripped.endswith(".md"):
+            candidates.append(f"{stripped}.md")
+
+        pages_root = (self._domain_dir(domain) / "pages").resolve()
+        for cand in candidates:
+            cand_clean = cand.lstrip("/\\")
+            page_path = (pages_root / cand_clean).resolve()
+            try:
+                page_path.relative_to(pages_root)
+            except ValueError:
+                continue
+            if page_path.exists() and page_path.is_file():
+                return page_path.read_text(encoding="utf-8")
+        return None
 
     def list_pages(self, domain: str) -> list[str]:
         """Return a list of relative paths for all pages in the domain's pages/ tree."""
@@ -763,6 +807,7 @@ class StorageManager:
 
     def _write_metadata(self, domain: str, metadata: dict):
         """Atomically write ``metadata.json`` for a domain."""
+        domain = canonical_domain(domain)
         self.ensure_domain_dir(domain)
         atomic_write_text(
             self.metadata_path(domain), json.dumps(metadata, indent=2)
@@ -809,8 +854,8 @@ class StorageManager:
 
     def rename_domain(self, old_domain: str, new_domain: str) -> bool:
         """Rename a domain directory and update its metadata. Returns True on success."""
-        old_domain = old_domain.strip()
-        new_domain = new_domain.strip()
+        old_domain = canonical_domain(old_domain)
+        new_domain = canonical_domain(new_domain)
         if not old_domain or not new_domain:
             return False
         if old_domain == new_domain:
@@ -839,6 +884,7 @@ class StorageManager:
 
     def save_chunks(self, domain: str, chunks: list):
         """Record chunk metadata in the domain directory."""
+        domain = canonical_domain(domain)
         self.ensure_domain_dir(domain)
         self.chunks_dir(domain).mkdir(parents=True, exist_ok=True)
 

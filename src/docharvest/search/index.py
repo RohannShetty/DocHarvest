@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 from docharvest.paths import library_root
+from docharvest.providers.base import canonical_domain
 
 logger = logging.getLogger(__name__)
 
@@ -215,6 +216,7 @@ class SearchIndex:
                 When it contains at least one page file it is used instead of
                 *docs_content*.
         """
+        domain = canonical_domain(domain)
         rows = self._page_tree_rows(domain, pages_dir, domain_url) if pages_dir else []
         if not rows:
             rows = self._book_rows(domain, docs_content, domain_url)
@@ -295,6 +297,7 @@ class SearchIndex:
             storage_manager: A :class:`~docharvest.storage.StorageManager` instance.
             domain_url: Source URL for the domain.
         """
+        domain = canonical_domain(domain)
         docs_content = storage_manager.load_doc(domain)
         pages_dir = None
         try:
@@ -320,15 +323,20 @@ class SearchIndex:
         Sections are anchored to the domain root, which is the historical
         behaviour and the only option when no page tree exists.
         """
+        slug_counts: dict[str, int] = {}
         rows = []
         for heading, content in self._parse_sections(docs_content):
             # Normalize first so headings that differ only by invisible
             # characters collapse onto one URL / section_heading.
             heading = _strip_unprintable(heading)
+            base_slug = _section_slug(heading)
+            count = slug_counts.get(base_slug, 0) + 1
+            slug_counts[base_slug] = count
+            anchor_slug = base_slug if count == 1 else f"{base_slug}__{count}"
             if domain_url:
-                section_url = f"{domain_url}#{_section_slug(heading)}"
+                section_url = f"{domain_url}#{anchor_slug}"
             else:
-                section_url = f"{domain}/{heading or 'home'}"
+                section_url = f"{domain}/{anchor_slug or 'home'}"
             rows.append(
                 (
                     section_url,
@@ -375,11 +383,16 @@ class SearchIndex:
                     f"{domain_url.rstrip('/')}/{rel}" if domain_url else f"{domain}/{rel}"
                 )
 
+            slug_counts: dict[str, int] = {}
             for heading, content in self._parse_sections(body):
                 heading = _strip_unprintable(heading)
+                base_slug = _section_slug(heading)
+                count = slug_counts.get(base_slug, 0) + 1
+                slug_counts[base_slug] = count
+                anchor_slug = base_slug if count == 1 else f"{base_slug}__{count}"
                 rows.append(
                     (
-                        f"{page_url}#{_section_slug(heading)}",
+                        f"{page_url}#{anchor_slug}",
                         heading or page_title or page_url,
                         heading or "",
                         content[:100000],
@@ -450,6 +463,9 @@ class SearchIndex:
         """
         if not query or not query.strip():
             return []
+
+        if domain:
+            domain = canonical_domain(domain)
 
         match_expr = _fts_escape(query)
         if not match_expr.strip():
@@ -540,6 +556,7 @@ class SearchIndex:
         whole library). This is the supported way to purge stale or orphaned
         domains (domains whose ``docs/<domain>/`` directory no longer exists).
         """
+        domain = canonical_domain(domain)
         conn = _get_connection(self.base_dir)
         try:
             old = conn.execute(
@@ -565,6 +582,8 @@ class SearchIndex:
 
     def rename_domain(self, old_domain: str, new_domain: str):
         """Update domain name in the search index."""
+        old_domain = canonical_domain(old_domain)
+        new_domain = canonical_domain(new_domain)
         conn = _get_connection(self.base_dir)
         try:
             conn.execute("UPDATE pages_meta SET domain = ? WHERE domain = ?", (new_domain, old_domain))

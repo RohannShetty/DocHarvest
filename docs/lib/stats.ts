@@ -13,8 +13,10 @@
 // of them failing. `tests/test_stats_drift.py` guards the contract.
 //
 // The benchmark values (pagesCaptured / captureTimeSec / speedPagesPerSec /
-// reductionPct) describe one reference capture, documented in docs/SEO_GUIDE.md
-// §3. They are reference measurements, not guarantees.
+// reductionPct) describe one reference capture, documented in docs/CLAIMS.md
+// (2026-11-13). They are reference measurements, not guarantees. reductionPct
+// is 0 because no token reduction was measurable against the page's visible
+// text; the earlier 83% figure could not be reproduced.
 
 export const PRODUCT_FACTS = {
   name: 'DocHarvest',
@@ -35,14 +37,14 @@ export const STATS = {
   testsPassing: 1001,
   testsFailing: 0,
   testsSkipped: 0,
-  suiteSeconds: 157.41,
+  suiteSeconds: 175.22,
   statsUpdated: '2026-11-13',
 
   // ── Reference capture (docs/SEO_GUIDE.md §3) ─────────────────────────
-  pagesCaptured: 673,
-  reductionPct: 83,
-  speedPagesPerSec: 37.0,
-  captureTimeSec: 18.2,
+  pagesCaptured: 470,
+  reductionPct: 0,
+  speedPagesPerSec: 6.2,
+  captureTimeSec: 76.4,
 
   // ── Product surface ──────────────────────────────────────────────────
   agentsShipped: 17,

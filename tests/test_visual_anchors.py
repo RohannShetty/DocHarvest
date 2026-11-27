@@ -29,7 +29,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 HERO = REPO_ROOT / "docs" / "components" / "Hero.tsx"
 INSTALL_MODAL = REPO_ROOT / "docs" / "components" / "InstallModal.tsx"
-CAPTURE_STUDIO = REPO_ROOT / "frontend" / "src" / "views" / "CaptureStudio.tsx"
+CAPTURE_STUDIO = REPO_ROOT / "frontend" / "src" / "views" / "CaptureStudio" / "index.tsx"
 DIFF_VIEW = REPO_ROOT / "frontend" / "src" / "views" / "DiffView.tsx"
 
 

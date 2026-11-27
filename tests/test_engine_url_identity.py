@@ -51,3 +51,17 @@ def test_strip_www_prefix_removes_leading_only():
     assert s("a.www.example.com") == "a.www.example.com"
     assert s("www.www.example.com") == "www.example.com"
     assert s("example.com") == "example.com"
+
+
+def test_canonical_domain_normalization():
+    cd = provider_base.canonical_domain
+    assert cd("https://docs.stripe.com/api") == "docs.stripe.com"
+    assert cd("http://docs.stripe.com/") == "docs.stripe.com"
+    assert cd("docs.stripe.com/") == "docs.stripe.com"
+    assert cd("www.docs.stripe.com") == "docs.stripe.com"
+    assert cd("DOCS.STRIPE.COM") == "docs.stripe.com"
+    assert cd("localhost:3000") == "localhost:3000"
+    assert cd("http://localhost:80/docs") == "localhost"
+    assert cd("https://example.com:443/docs") == "example.com"
+    assert cd("") == ""
+    assert cd(None) == ""

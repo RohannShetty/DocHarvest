@@ -128,7 +128,7 @@ class TestBareInvocation:
         assert rc == 1
         err = capsys.readouterr().err
         assert "TUI" in err
-        assert "gitbook-dl capture" in err
+        assert "docharvest capture" in err
 
 
 

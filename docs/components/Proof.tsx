@@ -62,7 +62,7 @@ export function Proof() {
                 : `${STATS.testsFailing} currently failing in the root suite.`}
             </Tile>
             <Tile label="Agent surface" value={String(STATS.mcpTools)} unit="MCP tools">
-              Plus {PRODUCT_FACTS.mcpResources} resources and {PRODUCT_FACTS.mcpPrompts} prompts over stdio, with no
+              Plus {PRODUCT_FACTS.mcpResources} resource templates and {PRODUCT_FACTS.mcpPrompts} prompts over stdio, with no
               network hop of its own.
             </Tile>
             <Tile label="Account required" value="None" accent>

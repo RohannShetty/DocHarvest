@@ -26,14 +26,14 @@ export const DOC_FRAMEWORKS: DocFramework[] = [
   {
     id: 'gitbook',
     name: 'GitBook',
-    sampleUrl: 'https://docs.openalgo.in/v/v2.0/api-reference',
+    sampleUrl: 'https://docs.openalgo.in',
     detectionPriority: 100,
     approach: 'Reads the GitBook content API and its version list.',
   },
   {
     id: 'mintlify',
     name: 'Mintlify',
-    sampleUrl: 'https://docs.anthropic.com/en/docs',
+    sampleUrl: 'https://mintlify.com/docs',
     detectionPriority: 90,
     approach: 'Reads the MDX source behind each page.',
   },
@@ -47,7 +47,7 @@ export const DOC_FRAMEWORKS: DocFramework[] = [
   {
     id: 'nextra',
     name: 'Nextra',
-    sampleUrl: 'https://swr.vercel.app/docs/getting-started',
+    sampleUrl: 'https://nextra.site/docs',
     detectionPriority: 75,
     approach: 'Follows the `_meta` navigation to each page.',
   },

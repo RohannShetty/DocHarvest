@@ -596,7 +596,7 @@ wheels = [
 
 [[package]]
 name = "docharvest"
-version = "11.5.1"
+version = "11.6.0"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },

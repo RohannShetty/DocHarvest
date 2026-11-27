@@ -82,15 +82,28 @@ class DocGraph:
 
     def query(self, query_text: str, limit: int = 10) -> Dict[str, Any]:
         """Search nodes matching query and return local subgraph context."""
-        terms = [t.lower() for t in query_text.strip().split() if len(t) > 2]
+        q_raw = query_text.strip()
+        q_lower = q_raw.lower()
+        terms = [t.lower() for t in q_raw.split() if len(t) > 2]
         if not terms:
-            terms = [query_text.lower().strip()]
+            terms = [q_lower]
 
         matched_nodes = []
         for node in self.nodes.values():
             score = 0
+            nid_lower = node.id.lower()
             label_lower = node.label.lower()
             snippet_lower = (node.snippet or "").lower()
+
+            # Direct exact ID match receives highest priority
+            if nid_lower == q_lower:
+                score += 100
+            elif q_lower in nid_lower:
+                score += 50
+
+            # Exact label match
+            if label_lower == q_lower:
+                score += 40
 
             for term in terms:
                 if term in label_lower:
@@ -187,9 +200,13 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
 
         # Extract headings (level 2 and 3)
         heading_matches = re.finditer(r"^(#{2,3})\s+(.+)$", content, re.MULTILINE)
+        heading_counts: Dict[str, int] = {}
         for h_match in heading_matches:
             h_text = h_match.group(2).strip()
-            h_id = f"heading::{rel}::{h_text.lower().replace(' ', '-')}"
+            base_slug = h_text.lower().replace(" ", "-")
+            count = heading_counts.get(base_slug, 0) + 1
+            heading_counts[base_slug] = count
+            h_id = f"heading::{rel}::{base_slug}" if count == 1 else f"heading::{rel}::{base_slug}__{count}"
             graph.add_node(GraphNode(
                 id=h_id,
                 label=h_text,
@@ -208,12 +225,19 @@ def build_graph_from_pages(domain: str, pages_dir: Path) -> DocGraph:
             method, ep_path = ep_match.group(1), ep_match.group(2)
             ep_label = f"{method} {ep_path}"
             ep_id = f"endpoint::{ep_label.replace(' ', '_')}"
-            graph.add_node(GraphNode(
-                id=ep_id,
-                label=ep_label,
-                node_type="endpoint",
-                file_path=f"{rel}.md",
-            ))
+            file_ref = f"{rel}.md"
+            if ep_id not in graph.nodes:
+                graph.add_node(GraphNode(
+                    id=ep_id,
+                    label=ep_label,
+                    node_type="endpoint",
+                    file_path=file_ref,
+                    metadata={"referenced_in": [file_ref]},
+                ))
+            else:
+                refs = graph.nodes[ep_id].metadata.setdefault("referenced_in", [])
+                if file_ref not in refs:
+                    refs.append(file_ref)
             graph.add_edge(GraphEdge(
                 source_id=page_id,
                 target_id=ep_id,

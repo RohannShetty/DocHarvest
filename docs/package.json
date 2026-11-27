@@ -1,6 +1,6 @@
 {
   "name": "docharvest-showcase",
-  "version": "11.5.1",
+  "version": "11.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

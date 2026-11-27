@@ -18,6 +18,7 @@ Usage::
 from .base import (
     Provider,
     ProviderRegistry,
+    canonical_domain,
     is_md_url,
     looks_like_challenge_or_blocked,
     looks_like_html,
@@ -68,6 +69,7 @@ __all__ = [
     # Base
     "Provider",
     "ProviderRegistry",
+    "canonical_domain",
     "normalize_url",
     "is_md_url",
     "same_domain",

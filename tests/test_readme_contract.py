@@ -14,9 +14,12 @@ def test_first_screen_leads_with_install_proof_and_local_first_path() -> None:
     first_screen = text[: text.index("## ⚡ Overview")]
 
     assert "pip install docharvest" in first_screen
-    assert "673 pages" in first_screen
-    assert "18.2 s" in first_screen
-    assert "~83%" in first_screen
+    assert "470 pages" in first_screen
+    assert "76.4 s" in first_screen
+    # The old 673-page / 18.2 s / ~83% reference numbers were re-measured on
+    # 2026-11-13 and the token-reduction multiple is no longer claimed.
+    assert "~83%" not in text
+    assert "18.2 s" not in text
     assert text.index("pip install docharvest") < text.index("## ⚡ Overview")
     assert "python benchmarks/run.py" in first_screen
 

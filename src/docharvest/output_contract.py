@@ -27,7 +27,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse
 
 from .storage.manager import atomic_write_text
 
@@ -141,12 +141,14 @@ def page_relpath(url: str) -> str:
 
     ``https://docs.example.com/api/v2/auth`` → ``api/v2/auth.md``
     ``https://docs.example.com/``            → ``index.md``
+    ``https://docs.example.com/docs?page=2`` → ``docs__q_page_2.md``
 
-    Query strings and fragments are ignored; every path segment is
-    sanitised to a safe filename component; ``..`` segments are dropped so
-    a hostile URL can never escape the output directory.
+    Query strings are deterministically encoded into the filename; every
+    path segment is sanitised to a safe filename component; ``..`` segments
+    are dropped so a hostile URL can never escape the output directory.
     """
-    path = urlparse(url).path
+    parsed = urlparse(url)
+    path = parsed.path
     raw_segments = [s for s in path.split("/") if s]
     segments: list[str] = []
     for seg in raw_segments:
@@ -154,9 +156,22 @@ def page_relpath(url: str) -> str:
             continue  # traversal guard
         seg = _EXT_STRIP_RE.sub("", seg)
         segments.append(_sanitize_segment(seg))
-    if not segments:
-        return "index.md"
-    return "/".join(segments) + ".md"
+
+    base_name = segments[-1] if segments else "index"
+    prefix = segments[:-1]
+
+    if parsed.query:
+        parsed_q = sorted(parse_qsl(parsed.query, keep_blank_values=True))
+        if parsed_q:
+            q_parts = [f"{k}_{v}" if v else k for k, v in parsed_q]
+            q_raw = "_".join(q_parts)
+            q_slug = _sanitize_segment(q_raw)
+            if not q_slug or len(q_slug) > 32:
+                q_slug = hashlib.sha256(urlencode(parsed_q).encode("utf-8")).hexdigest()[:8]
+            base_name = f"{base_name}__q_{q_slug}"
+
+    all_segments = prefix + [base_name]
+    return "/".join(all_segments) + ".md"
 
 
 def sort_pages(pages: list[CapturedPage]) -> list[CapturedPage]:
